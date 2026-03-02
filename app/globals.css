@@ -1,0 +1,123 @@
+﻿@import "./papermod-base.css";
+@import "./papermod-custom.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background-hsl: 41 47% 83%;
+  --foreground-hsl: 33 28% 18%;
+  --border-hsl: 39 35% 62%;
+  --muted-hsl: 39 30% 76%;
+  --muted-foreground-hsl: 34 20% 42%;
+}
+
+.dark {
+  --background-hsl: 33 14% 16%;
+  --foreground-hsl: 35 32% 90%;
+  --border-hsl: 35 10% 28%;
+  --muted-hsl: 33 12% 22%;
+  --muted-foreground-hsl: 35 18% 68%;
+}
+
+#menu li a span.active {
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
+  font-weight: 700;
+}
+
+.copy-code {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: 1px solid var(--border);
+  background: var(--theme);
+  color: var(--secondary);
+  font-size: 12px;
+  border-radius: 6px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.post-footer {
+  margin-top: 1.4rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.post-tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.post-tags li span {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.82rem;
+  color: var(--secondary);
+  background: var(--entry);
+}
+
+.share-icons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.share-icons a {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 9px;
+  font-size: 0.82rem;
+  color: var(--secondary);
+}
+
+.post-nav-links {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.post-nav-links a {
+  max-width: 48%;
+  color: var(--secondary);
+}
+
+.search-form {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0 8px;
+}
+
+.search-input {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--entry);
+  color: var(--primary);
+}
+
+.search-btn {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: var(--entry);
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.search-meta {
+  font-size: 0.9rem;
+  color: var(--secondary);
+  margin-bottom: 12px;
+}
+
+
