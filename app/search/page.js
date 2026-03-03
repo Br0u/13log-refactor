@@ -39,7 +39,7 @@ export default async function SearchPage({ searchParams }) {
     <section>
       <header className="page-header">
         <h1>Search</h1>
-        <div className="post-description">Search posts, coding notes, and link board entries.</div>
+        <div className="post-description">Search posts and link board entries.</div>
       </header>
 
       <form action="/search" method="get" className="search-form">
@@ -64,7 +64,7 @@ export default async function SearchPage({ searchParams }) {
           <article className="post-entry" key={`${doc.section}-${doc.slug}`}>
             <header className="entry-header"><h2>{doc.title}</h2></header>
             {doc.description ? <div className="entry-content"><p>{doc.description}</p></div> : null}
-            <footer className="entry-footer">{doc.section}{doc.date ? ` · ${new Date(doc.date).toLocaleDateString("zh-CN")}` : ""}</footer>
+            <footer className="entry-footer">{doc.section}{doc.date ? ` 路 ${new Date(doc.date).toLocaleDateString("zh-CN")}` : ""}</footer>
             <Link className="entry-link" href={doc.url} aria-label={`search result ${doc.title}`} />
           </article>
         ))}

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -264,9 +264,8 @@ function initTocRail() {
 
     const pathname = window.location.pathname || "";
     const isPostPage = pathname.startsWith("/posts/");
-    const isCodingPage = pathname.startsWith("/coding/");
     const isLinkPage = pathname === "/link" || pathname.startsWith("/link/");
-    const tocEnabled = isPostPage || isCodingPage || isLinkPage;
+    const tocEnabled = isPostPage || isLinkPage;
     if (!tocEnabled) return;
 
     if (isLinkPage) {

@@ -13,7 +13,7 @@ export default function HomePage() {
           width="150"
         />
         <h1>花似伊，柳似伊</h1>
-        <span>Coding · Books · Life</span>
+        <span>Books · Life</span>
         <div className="profile-links">
           <a target="_blank" rel="noopener noreferrer" href="mailto:wusg0315@qq.com">Email<span className="profile-links__arrow" aria-hidden="true">&#8599;</span></a>
           <a target="_blank" rel="noopener noreferrer" href="https://github.com/Br0u">GitHub<span className="profile-links__arrow" aria-hidden="true">&#8599;</span></a>
@@ -23,7 +23,6 @@ export default function HomePage() {
 
         <div className="buttons">
           <Link className="button" href="/posts/"><span className="button-inner">Posts</span></Link>
-          <Link className="button" href="/coding/"><span className="button-inner">Coding</span></Link>
           <Link className="button" href="/about/"><span className="button-inner">About</span></Link>
           <a className="button" href="/photos/" target="_blank" rel="noopener noreferrer"><span className="button-inner">Photos</span></a>
           <Link className="button" href="/link/"><span className="button-inner">Link</span></Link>
