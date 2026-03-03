@@ -419,6 +419,17 @@ body::before {
 .profile h1 { font-size: 2.4rem; letter-spacing: 0.02em; }
 .profile span { color: var(--secondary); }
 
+.profile-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.85rem 1.4rem;
+}
+
+.profile-links a {
+  display: inline-flex;
+  align-items: center;
+}
 .buttons { max-width: 520px; gap: 12px; }
 
 .button {
