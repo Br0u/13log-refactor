@@ -79,9 +79,7 @@ export default function RootLayout({ children }) {
         </footer>
 
         <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" className="top-link" id="top-link" accessKey="g">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
-            <path d="M12 6H0l6-6z" />
-          </svg>
+          <span className="top-link__label">top</span>
         </a>
 
         <ClientEnhancements />
@@ -89,4 +87,3 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-

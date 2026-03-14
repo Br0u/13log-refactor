@@ -278,7 +278,7 @@ body {
     url("/images/backgrounds/bj-bg.jpg") center / cover no-repeat,
     var(--theme);
   scroll-behavior: smooth;
-  overscroll-behavior: none;
+  overscroll-behavior: auto;
 }
 
 body.list {
@@ -404,6 +404,134 @@ body::before {
 .dark .header a,
 .dark .footer a { color: var(--primary); }
 
+.nav {
+  gap: 0.4rem;
+}
+
+#menu {
+  align-items: center;
+  gap: 0.18rem;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  overflow-x: visible;
+  scrollbar-width: none;
+}
+
+.pagination {
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.35rem;
+}
+
+.pagination a,
+.pagination__meta {
+  color: var(--secondary);
+  font-size: 0.86rem;
+  line-height: 1.4;
+  background: transparent;
+  padding: 0;
+}
+
+.pagination a {
+  opacity: 0.82;
+  transition: color 0.18s ease, opacity 0.18s ease;
+}
+
+.pagination a:hover,
+.pagination a:focus-visible {
+  color: var(--primary);
+  opacity: 1;
+}
+
+.pagination__meta {
+  opacity: 0.62;
+}
+
+.pagination__ghost {
+  width: 3.2rem;
+}
+
+.top-link {
+  right: 24px;
+  bottom: 34px;
+  width: auto;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  color: color-mix(in srgb, var(--secondary) 88%, transparent);
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+}
+
+.top-link__label {
+  display: inline-block;
+  font-size: 0.74rem;
+  line-height: 1;
+  padding: 0.22rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+.top-link:hover,
+.top-link:focus-visible {
+  color: var(--primary);
+}
+
+#menu::-webkit-scrollbar {
+  display: none;
+}
+
+#menu li + li {
+  margin-inline-start: 0;
+}
+
+#menu a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.8rem;
+  padding: 0.22rem 0.5rem;
+  border-radius: 0.45rem;
+  color: var(--secondary);
+  transition: color 0.18s ease, transform 0.18s ease, opacity 0.18s ease;
+  opacity: 0.82;
+}
+
+#menu a span {
+  display: inline-block;
+}
+
+#menu a:hover,
+#menu a:focus-visible {
+  color: var(--primary);
+  background: transparent;
+  transform: translateY(-1px);
+  opacity: 1;
+}
+
+#menu a:focus-visible {
+  outline: 1px solid color-mix(in srgb, var(--primary) 28%, transparent);
+  outline-offset: 2px;
+}
+
+#menu a.active,
+#menu a[aria-current="page"] {
+  color: var(--primary);
+  background: transparent;
+  border-bottom: none;
+  box-shadow: none;
+  opacity: 1;
+}
+
+#menu a.active span,
+#menu a[aria-current="page"] span {
+  font-weight: 600;
+}
+
 /* Profile */
 .main .profile {
   min-height: 0;
@@ -454,6 +582,23 @@ body::before {
 }
 
 @media (max-width: 720px) {
+  .nav {
+    gap: 0.45rem;
+  }
+
+  #menu {
+    width: 100%;
+    margin-inline: 0;
+    padding: 0.2rem;
+    justify-content: flex-start;
+  }
+
+  #menu a {
+    min-height: 2.05rem;
+    padding: 0.42rem 0.76rem;
+    font-size: 0.92rem;
+  }
+
   .profile h1 { font-size: 1.7rem; }
 }
 
@@ -1077,109 +1222,48 @@ body::before {
 }
 
 .posts-filter {
-  --filter-paper-top: #f2e7ca;
-  --filter-paper-bottom: #e5d6b2;
-  --filter-ink: #2f261a;
-  --filter-edge: #6a5a43;
-  --filter-seal-top: #eee3c8;
-  --filter-seal-bottom: #dccaa3;
-  --filter-seal-edge: #6a5941;
-  --filter-gloss: rgba(255, 255, 255, 0.16);
   margin-top: 0.9rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
-}
-
-.dark .posts-filter {
-  --filter-paper-top: #3a3227;
-  --filter-paper-bottom: #2e271d;
-  --filter-ink: #e6ddce;
-  --filter-edge: #8f7e67;
-  --filter-seal-top: #4a4031;
-  --filter-seal-bottom: #372f24;
-  --filter-seal-edge: #9a8970;
-  --filter-gloss: rgba(255, 255, 255, 0.06);
+  gap: 0.28rem 0.72rem;
 }
 
 .posts-filter__chip {
-  position: relative;
-  border: 1px solid var(--filter-edge);
-  background:
-    radial-gradient(120% 110% at 20% 15%, var(--filter-gloss), transparent 65%),
-    repeating-linear-gradient(-16deg, rgba(58, 47, 32, 0.035) 0 1px, transparent 1px 4px),
-    linear-gradient(180deg, var(--filter-paper-top), var(--filter-paper-bottom));
-  color: var(--filter-ink);
-  padding: 0.28rem 1.2rem 0.28rem 0.68rem;
-  border-radius: 0.52rem;
-  font-size: 0.84rem;
-  line-height: 1.25;
+  border: none;
+  background: transparent;
+  color: var(--secondary);
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.86rem;
+  line-height: 1.35;
   cursor: pointer;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.32),
-    0 1px 3px rgba(30, 24, 17, 0.1);
-  transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-}
-
-.posts-filter__count {
-  position: absolute;
-  top: -0.44rem;
-  right: -0.34rem;
-  min-width: 1.08rem;
-  height: 1.08rem;
-  padding: 0 0.22rem;
-  border-radius: 0.9rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.6rem;
-  font-weight: 600;
-  line-height: 1;
-  color: color-mix(in srgb, var(--filter-ink) 92%, #19140d);
-  letter-spacing: 0.01em;
-  background:
-    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.24), transparent 46%),
-    repeating-radial-gradient(circle at 48% 54%, rgba(255, 251, 240, 0.07) 0 1px, rgba(0, 0, 0, 0) 1px 3px),
-    linear-gradient(170deg, var(--filter-seal-top), var(--filter-seal-bottom));
-  border: 1px solid var(--filter-seal-edge);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 250, 239, 0.24),
-    inset 0 -1px 0 rgba(57, 46, 32, 0.22),
-    0 2px 6px rgba(38, 29, 21, 0.2);
-  transform: rotate(-8deg);
-  pointer-events: none;
-}
-
-.posts-filter__chip.is-active .posts-filter__count {
-  transform: rotate(-5deg) scale(1.03);
+  transition: color 0.18s ease, opacity 0.18s ease;
+  opacity: 0.78;
 }
 
 .posts-filter__chip:hover {
-  transform: translateY(-1px) rotate(-0.1deg);
-  border-color: color-mix(in srgb, var(--filter-edge) 82%, #2b2217);
-  color: color-mix(in srgb, var(--filter-ink) 92%, #13100b);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.34),
-    0 6px 14px rgba(0, 0, 0, 0.08);
+  color: var(--primary);
+  opacity: 1;
 }
 
 .posts-filter__chip.is-active {
-  border-color: color-mix(in srgb, var(--filter-edge) 88%, #17120c);
-  color: color-mix(in srgb, var(--filter-ink) 96%, #0f0c08);
-  background:
-    radial-gradient(120% 110% at 20% 12%, color-mix(in srgb, var(--filter-gloss) 88%, transparent), transparent 62%),
-    repeating-linear-gradient(-14deg, rgba(38, 30, 20, 0.06) 0 1px, transparent 1px 4px),
-    linear-gradient(180deg, color-mix(in srgb, var(--filter-paper-top) 84%, #d5c199), color-mix(in srgb, var(--filter-paper-bottom) 88%, #c8b086));
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--filter-gloss) 80%, transparent),
-    0 6px 14px rgba(0, 0, 0, 0.11);
+  color: var(--primary);
+  opacity: 1;
+  font-weight: 600;
 }
 
-.dark .posts-filter__chip.is-active {
-  background:
-    radial-gradient(120% 110% at 20% 12%, color-mix(in srgb, var(--filter-gloss) 90%, transparent), transparent 62%),
-    repeating-linear-gradient(-14deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 4px),
-    linear-gradient(180deg, color-mix(in srgb, var(--filter-paper-top) 90%, #32281e), color-mix(in srgb, var(--filter-paper-bottom) 90%, #251d15));
+@media (max-width: 720px) {
+  #menu {
+    overflow-x: auto;
+  }
+
+  .pagination {
+    gap: 0.72rem;
+  }
+
+  .pagination__ghost {
+    display: none;
+  }
 }
 
 .post-single .post-content p {
@@ -1366,22 +1450,23 @@ body::before {
   }
 }
 
-/* Left related posts rail on post detail pages (minimal, TOC-like) */
+/* Left related posts rail on post detail pages */
 .post-related-rail {
-  margin: 0 0 1rem;
-  padding: 0.2rem 0.1rem 0.24rem;
+  margin: 0 0 1.1rem;
+  padding: 0;
   border: none;
   background: transparent;
   box-shadow: none;
 }
 
 .post-related-rail__title {
-  margin: 0 0 0.42rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  margin: 0 0 0.55rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   color: var(--secondary);
-  opacity: 0.78;
+  opacity: 0.68;
+  text-transform: uppercase;
 }
 
 .post-related-rail__list {
@@ -1389,45 +1474,38 @@ body::before {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.28rem;
+  gap: 0.16rem;
 }
 
 .post-related-rail__item {
   margin: 0;
   padding: 0;
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.post-related-rail__item:first-child {
+  border-top: none;
 }
 
 .post-related-rail__link {
   display: block;
-  position: relative;
-  font-size: 0.9rem;
-  line-height: 1.35;
+  font-size: 0.88rem;
+  line-height: 1.45;
   color: var(--secondary);
   text-decoration: none;
-  padding-left: 0.7rem;
+  padding: 0.42rem 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  opacity: 0.84;
-  transition: color 0.18s ease, opacity 0.18s ease;
-}
-
-.post-related-rail__link::before {
-  content: "";
-  position: absolute;
-  left: 0.18rem;
-  top: 0.62rem;
-  width: 4px;
-  height: 4px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--border) 65%, var(--secondary) 35%);
-  opacity: 0.75;
+  opacity: 0.78;
+  transition: color 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
 }
 
 .post-related-rail__link:hover,
 .post-related-rail__link:focus-visible {
   color: var(--primary);
   opacity: 1;
+  transform: translateX(2px);
 }
 
 .post-related-rail__link:focus-visible {
@@ -1438,22 +1516,19 @@ body::before {
   .post-related-rail {
     position: fixed;
     top: calc(var(--header-height) + 1.4rem);
-    left: calc(50% - (var(--main-width) / 2) - 16.1rem);
-    width: 15.2rem;
-    max-height: calc(100vh - var(--header-height) - 2rem);
-    overflow: auto;
+    left: calc(50% - (var(--main-width) / 2) - 13.8rem);
+    width: 12.4rem;
+    max-height: calc(100vh - var(--header-height) - 2.4rem);
+    overflow: hidden;
     margin: 0;
-    z-index: 40;
-    scrollbar-width: thin;
-    scrollbar-color: color-mix(in srgb, var(--border) 70%, var(--primary) 30%) transparent;
+    z-index: 25;
   }
+}
 
-  .post-related-rail::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .post-related-rail::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--border) 70%, var(--primary) 30%);
-    border-radius: 999px;
+@media (max-width: 1199px) {
+  .post-related-rail {
+    margin-top: 1.35rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
   }
 }
