@@ -405,13 +405,14 @@ body::before {
 .dark .footer a { color: var(--primary); }
 
 .nav {
-  gap: 0.4rem;
+  gap: 0.2rem;
 }
 
 #menu {
   align-items: center;
-  gap: 0.18rem;
+  gap: 0.08rem;
   padding: 0;
+  margin: auto 0;
   border-radius: 0;
   background: transparent;
   border: none;
@@ -493,9 +494,9 @@ body::before {
 #menu a {
   display: inline-flex;
   align-items: center;
-  min-height: 1.8rem;
-  padding: 0.22rem 0.5rem;
-  border-radius: 0.45rem;
+  min-height: 1.65rem;
+  padding: 0.18rem 0.34rem;
+  border-radius: 0.3rem;
   color: var(--secondary);
   transition: color 0.18s ease, transform 0.18s ease, opacity 0.18s ease;
   opacity: 0.82;
@@ -582,21 +583,113 @@ body::before {
 }
 
 @media (max-width: 720px) {
+  .header {
+    padding-bottom: 0;
+  }
+
+  .main {
+    padding-top: 0.2rem;
+    padding-right: var(--gap);
+    padding-bottom: var(--gap);
+    padding-left: var(--gap);
+  }
+
+  .page-header,
+  .post-header {
+    margin-top: 0.08rem;
+    margin-bottom: 0.72rem;
+  }
+
+  .page-header h1,
+  .post-title {
+    line-height: 1.08;
+  }
+
   .nav {
-    gap: 0.45rem;
+    gap: 0.22rem;
+    flex-direction: column;
+    align-items: stretch;
+    line-height: 1.2;
+  }
+
+  .logo {
+    width: 100%;
+    margin-inline: 0;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 1.9rem;
+  }
+
+  .logo a {
+    font-size: 1.02rem;
+    line-height: 1;
+    letter-spacing: 0.04em;
+  }
+
+  .logo-switches {
+    margin: 0;
+    position: absolute;
+    right: 0;
+  }
+
+  button#theme-toggle {
+    margin: 0;
+    font-size: 1.15rem;
   }
 
   #menu {
     width: 100%;
     margin-inline: 0;
-    padding: 0.2rem;
-    justify-content: flex-start;
+    padding: 0.42rem 0 0.38rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.26rem 0.9rem;
+    overflow: visible;
+    white-space: normal;
+    border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  }
+
+  #menu li {
+    min-width: 0;
+    display: flex;
   }
 
   #menu a {
-    min-height: 2.05rem;
-    padding: 0.42rem 0.76rem;
-    font-size: 0.92rem;
+    width: auto;
+    min-height: auto;
+    justify-content: flex-start;
+    padding: 0;
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: none;
+    border-radius: 0;
+    line-height: 1.25;
+  }
+
+  #menu a::before {
+    content: "/";
+    margin-right: 0.22rem;
+    color: color-mix(in srgb, var(--secondary) 72%, transparent);
+  }
+
+  #menu a:hover,
+  #menu a:focus-visible {
+    transform: none;
+  }
+
+  #menu a.active,
+  #menu a[aria-current="page"] {
+    border-bottom: none;
+  }
+
+  #menu a.active::before,
+  #menu a[aria-current="page"]::before {
+    color: color-mix(in srgb, var(--primary) 55%, transparent);
   }
 
   .profile h1 { font-size: 1.7rem; }
@@ -1028,7 +1121,7 @@ body::before {
 }
 
 @media (max-width: 720px) {
-  .post-single { padding: 1.4rem 1.2rem; }
+  .post-single { padding: 0.95rem 1rem 1.1rem; }
   .post-single .post-title { font-size: 1.7rem; }
 }
 
@@ -1253,10 +1346,6 @@ body::before {
 }
 
 @media (max-width: 720px) {
-  #menu {
-    overflow-x: auto;
-  }
-
   .pagination {
     gap: 0.72rem;
   }
@@ -1467,6 +1556,7 @@ body::before {
   color: var(--secondary);
   opacity: 0.68;
   text-transform: uppercase;
+  text-align: center;
 }
 
 .post-related-rail__list {
@@ -1530,5 +1620,52 @@ body::before {
     margin-top: 1.35rem;
     padding-top: 0.8rem;
     border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  }
+}
+
+@media (max-width: 720px) {
+  .post-related-rail {
+    margin-top: 1.1rem;
+    padding-top: 0.7rem;
+  }
+
+  .post-related-rail__title {
+    margin-bottom: 0.4rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    opacity: 0.62;
+  }
+
+  .post-related-rail__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.12rem 0.72rem;
+  }
+
+  .post-related-rail__item,
+  .post-related-rail__item:first-child {
+    border-top: none;
+  }
+
+  .post-related-rail__link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    font-size: 0.83rem;
+    line-height: 1.35;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .post-related-rail__link::before {
+    content: "/";
+    margin-right: 0.22rem;
+    color: color-mix(in srgb, var(--secondary) 72%, transparent);
+  }
+
+  .post-related-rail__link:hover,
+  .post-related-rail__link:focus-visible {
+    transform: none;
   }
 }
