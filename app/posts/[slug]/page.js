@@ -62,7 +62,7 @@ export default async function PostDetailPage({ params }) {
     <>
       {relatedPosts.length ? (
         <aside className="post-related-rail" aria-label="Related Posts">
-          <div className="post-related-rail__title">相关文章</div>
+          <div className="post-related-rail__title">看看别的</div>
           <ul className="post-related-rail__list">
             {relatedPosts.map((item) => (
               <li key={item.slug} className="post-related-rail__item">

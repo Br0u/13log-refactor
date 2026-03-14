@@ -21,12 +21,6 @@
   --muted-foreground-hsl: 35 18% 68%;
 }
 
-#menu li a span.active {
-  color: var(--primary);
-  border-bottom: 2px solid var(--primary);
-  font-weight: 700;
-}
-
 .copy-code {
   position: absolute;
   top: 8px;
@@ -89,35 +83,3 @@
   max-width: 48%;
   color: var(--secondary);
 }
-
-.search-form {
-  display: flex;
-  gap: 10px;
-  margin: 10px 0 8px;
-}
-
-.search-input {
-  flex: 1;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 10px;
-  background: var(--entry);
-  color: var(--primary);
-}
-
-.search-btn {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 12px;
-  background: var(--entry);
-  color: var(--primary);
-  cursor: pointer;
-}
-
-.search-meta {
-  font-size: 0.9rem;
-  color: var(--secondary);
-  margin-bottom: 12px;
-}
-
-

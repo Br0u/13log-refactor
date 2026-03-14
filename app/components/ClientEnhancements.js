@@ -196,24 +196,14 @@ function initPostsFilter() {
   if (!root) return () => {};
 
   const chips = Array.from(root.querySelectorAll(".posts-filter__chip"));
-  const cards = Array.from(document.querySelectorAll(".posts-masonry article[data-post-tags]"));
-
-  const applyFilter = (tag) => {
-    cards.forEach((card) => {
-      const raw = card.getAttribute("data-post-tags") || "";
-      const tags = raw ? raw.split("|").filter(Boolean) : [];
-      const matched = tag === "__all" || tags.includes(tag);
-      card.classList.toggle("is-filter-hidden", !matched);
-    });
-
-    chips.forEach((chip) => {
-      chip.classList.toggle("is-active", chip.dataset.filter === tag);
-    });
-  };
 
   const handlers = [];
   chips.forEach((chip) => {
-    const onClick = () => applyFilter(chip.dataset.filter || "__all");
+    const onClick = () => {
+      const tag = chip.dataset.filter || "__all";
+      const target = tag === "__all" ? "/posts" : `/posts?tag=${encodeURIComponent(tag)}`;
+      window.location.assign(target);
+    };
     chip.addEventListener("click", onClick);
     handlers.push({ chip, onClick });
   });
@@ -485,5 +475,3 @@ export default function ClientEnhancements() {
 
   return null;
 }
-
-
