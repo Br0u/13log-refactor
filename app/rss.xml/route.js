@@ -1,4 +1,6 @@
-import { getRssItems } from "../../lib/content";
+import { getPublicRssItems } from "../../lib/public-content";
+
+export const dynamic = "force-dynamic";
 
 function esc(str = "") {
   return String(str)
@@ -11,7 +13,7 @@ function esc(str = "") {
 
 export async function GET() {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.13log.live";
-  const items = getRssItems(80);
+  const items = await getPublicRssItems(80);
   const lastBuildDate =
     items
       .map((item) => item.date)

@@ -1,7 +1,14 @@
-﻿import { notFound } from "next/navigation";
+﻿import React from "react";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import HtmlContent from "../../components/HtmlContent";
-import { buildTocHtml, formatPostMeta, getPostBySlug, getPosts, renderMarkdown, withHeadingAnchors } from "../../../lib/content";
+import HtmlContent from "../../components/HtmlContent.jsx";
+import PostComments from "../../../components/blog/PostComments";
+import PostLikeButton from "../../../components/blog/PostLikeButton";
+import { buildTocHtml, formatPostMeta, renderMarkdown, withHeadingAnchors } from "../../../lib/content";
+import { getPublicPostBySlug, getPublicPosts } from "../../../lib/public-content";
+import { getApprovedCommentsBySlug } from "../../../lib/repositories/comments";
+
+export const dynamic = "force-dynamic";
 
 function resolveSlug(raw) {
   if (!raw) return "";
@@ -33,14 +40,10 @@ function pickRelatedPosts(currentPost, allPosts, limit = 6) {
     .map((entry) => entry.item);
 }
 
-export function generateStaticParams() {
-  return getPosts().map((post) => ({ slug: post.urlSlug || post.slug }));
-}
-
 export async function generateMetadata({ params }) {
   const p = await params;
   const slug = resolveSlug(p?.slug);
-  const post = getPostBySlug(slug);
+  const post = await getPublicPostBySlug(slug);
   if (!post) return { title: "Post Not Found" };
   return {
     title: `${post.title} | 鎴戠殑灏忓皬涓栫晫`,
@@ -51,12 +54,13 @@ export async function generateMetadata({ params }) {
 export default async function PostDetailPage({ params }) {
   const p = await params;
   const slug = resolveSlug(p?.slug);
-  const post = getPostBySlug(slug);
+  const post = await getPublicPostBySlug(slug);
   if (!post) notFound();
 
   const html = withHeadingAnchors(await renderMarkdown(post.content));
   const tocHtml = buildTocHtml(html);
-  const relatedPosts = pickRelatedPosts(post, getPosts());
+  const relatedPosts = pickRelatedPosts(post, await getPublicPosts());
+  const comments = await getApprovedCommentsBySlug(post.slug);
 
   return (
     <>
@@ -91,6 +95,10 @@ export default async function PostDetailPage({ params }) {
             </ul>
           ) : null}
         </footer>
+        <section className="post-interactions">
+          <PostLikeButton slug={post.slug} initialCount={post.likeCount || 0} />
+          <PostComments slug={post.slug} initialComments={comments} />
+        </section>
       </article>
     </>
   );

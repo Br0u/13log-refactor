@@ -1,7 +1,9 @@
-import { getIndexJsonItems } from "../../lib/content";
+import { getPublicIndexJsonItems } from "../../lib/public-content";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const docs = getIndexJsonItems();
+  const docs = await getPublicIndexJsonItems();
 
   return Response.json(docs, {
     headers: {

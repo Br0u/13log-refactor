@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { collectEntryFilters, collectFilterCounts, formatListMeta, getPosts } from "../../lib/content";
+import { collectEntryFilters, collectFilterCounts, formatListMeta } from "../../lib/content";
+import { getPublicPosts } from "../../lib/public-content";
+
+export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 12;
 
@@ -54,7 +57,7 @@ function renderHeader(tags, activeTag) {
 
 export default async function PostsPage({ searchParams }) {
   const sp = await searchParams;
-  const allPosts = getPosts();
+  const allPosts = await getPublicPosts();
   const totalPages = Math.max(1, Math.ceil(allPosts.length / PAGE_SIZE));
   const activeTag = typeof sp?.tag === "string" && sp.tag.trim() ? sp.tag.trim() : null;
   const tags = collectFilterCounts(allPosts);

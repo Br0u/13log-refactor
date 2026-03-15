@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import { useEffect, useRef } from "react";
 
 export default function HtmlContent({ html, className = "post-content", executeScripts = true }) {
