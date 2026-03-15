@@ -1,5 +1,7 @@
 import { getPublicIndexJsonItems } from "../../lib/public-content";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const docs = await getPublicIndexJsonItems();
 

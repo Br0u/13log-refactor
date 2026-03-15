@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ADMIN_SESSION_COOKIE, readAdminSession } from "./lib/auth";
+import { ADMIN_SESSION_COOKIE, readAdminSession } from "./lib/session";
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;

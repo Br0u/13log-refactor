@@ -3,6 +3,8 @@ import { createPostAction } from "../../../../app/admin/actions";
 import AdminPostForm from "../../../../components/admin/AdminPostForm";
 import { listCategories } from "../../../../lib/repositories/categories";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "New Post | 13log",
 };

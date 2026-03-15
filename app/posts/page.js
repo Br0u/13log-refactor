@@ -2,6 +2,8 @@ import Link from "next/link";
 import { collectEntryFilters, collectFilterCounts, formatListMeta } from "../../lib/content";
 import { getPublicPosts } from "../../lib/public-content";
 
+export const dynamic = "force-dynamic";
+
 const PAGE_SIZE = 12;
 
 function renderPagination(currentPage, totalPages, basePath) {

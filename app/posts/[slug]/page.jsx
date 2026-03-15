@@ -8,6 +8,8 @@ import { buildTocHtml, formatPostMeta, renderMarkdown, withHeadingAnchors } from
 import { getPublicPostBySlug, getPublicPosts } from "../../../lib/public-content";
 import { getApprovedCommentsBySlug } from "../../../lib/repositories/comments";
 
+export const dynamic = "force-dynamic";
+
 function resolveSlug(raw) {
   if (!raw) return "";
   if (Array.isArray(raw)) raw = raw[0];
@@ -36,11 +38,6 @@ function pickRelatedPosts(currentPost, allPosts, limit = 6) {
     })
     .slice(0, limit)
     .map((entry) => entry.item);
-}
-
-export async function generateStaticParams() {
-  const posts = await getPublicPosts();
-  return posts.map((post) => ({ slug: post.urlSlug || post.slug }));
 }
 
 export async function generateMetadata({ params }) {

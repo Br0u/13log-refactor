@@ -2,6 +2,8 @@ import React from "react";
 import { createCategoryAction, deleteCategoryAction } from "../actions";
 import { listCategories } from "../../../lib/repositories/categories";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Categories | 13log Admin",
 };
