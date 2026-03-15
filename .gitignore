@@ -140,3 +140,8 @@ vite.config.ts.timestamp-*
 
 # Local git worktrees
 .worktrees/
+
+# Local agent artifacts
+.playwright-cli/
+.claude/
+skills-lock.json
