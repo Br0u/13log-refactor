@@ -65,7 +65,7 @@ export default async function PostDetailPage({ params }) {
   return (
     <>
       {relatedPosts.length ? (
-        <aside className="post-related-rail" aria-label="Related Posts">
+        <aside className="post-related-rail post-related-rail--blended" aria-label="Related Posts">
           <div className="post-related-rail__title">看看别的</div>
           <ul className="post-related-rail__list">
             {relatedPosts.map((item) => (
@@ -79,7 +79,7 @@ export default async function PostDetailPage({ params }) {
         </aside>
       ) : null}
 
-      <article className="post-single">
+      <article className="post-single post-single--blended">
         <header className="post-header">
           <h1 className="post-title">{post.title}</h1>
           <div className="post-meta">{formatPostMeta(post)}</div>

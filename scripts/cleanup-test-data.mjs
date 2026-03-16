@@ -7,6 +7,7 @@ export const TEST_SLUGS = [
   "repository-update-post",
   "duplicate-slug",
   "public-facade-test-post",
+  "public-facade-timeline-post",
   "public-route-test-post",
   "likes-test-post",
   "likes-api-post",
@@ -20,6 +21,7 @@ export const TEST_SLUGS = [
 export const TEST_CATEGORY_SLUGS = [
   "notes",
   "public-test",
+  "public-timeline-test",
   "public-route-test",
   "likes-test",
   "likes-api-test",
@@ -33,6 +35,7 @@ export const TEST_TAG_SLUGS = [
   "backend",
   "database",
   "draft",
+  "mood",
   "published",
   "release",
   "likes",
@@ -40,12 +43,39 @@ export const TEST_TAG_SLUGS = [
   "comments",
   "route",
   "admin",
+  "timeline",
   "unused-tag",
   "validation",
   "browser",
 ];
 
+export const TEST_MICRO_POST_CONTENTS = [
+  "micro draft",
+  "micro published",
+  "micro updated",
+  "timeline micro published",
+  "timeline micro draft",
+];
+
 async function main() {
+  await db.microPostTag.deleteMany({
+    where: {
+      microPost: {
+        content: {
+          in: TEST_MICRO_POST_CONTENTS,
+        },
+      },
+    },
+  });
+
+  await db.microPost.deleteMany({
+    where: {
+      content: {
+        in: TEST_MICRO_POST_CONTENTS,
+      },
+    },
+  });
+
   await db.comment.deleteMany({
     where: {
       post: {
@@ -100,7 +130,7 @@ async function main() {
     },
   });
 
-  console.log("Cleaned test posts, tags, and categories.");
+  console.log("Cleaned test posts, micro posts, tags, and categories.");
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

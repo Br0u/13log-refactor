@@ -6,7 +6,7 @@ export default function AdminPostForm({
   initialValue = {},
 }) {
   return (
-    <form action={action} className="admin-post-form">
+    <form action={action} className="admin-post-form admin-form">
       <label>
         <span>Title</span>
         <input name="title" defaultValue={initialValue.title || ""} required />
@@ -53,7 +53,7 @@ export default function AdminPostForm({
           <option value="PUBLISHED">Published</option>
         </select>
       </label>
-      <button type="submit">Save post</button>
+      <button type="submit" className="admin-primary-button">Save post</button>
     </form>
   );
 }

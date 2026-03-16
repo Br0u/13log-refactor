@@ -1,10 +1,12 @@
 import { buildClearedSessionCookie } from "../../../../lib/auth";
 
-export async function POST() {
-  return new Response(JSON.stringify({ ok: true }), {
-    status: 200,
+export async function POST(request) {
+  const url = new URL(request.url);
+
+  return new Response(null, {
+    status: 303,
     headers: {
-      "content-type": "application/json",
+      location: new URL("/", url).toString(),
       "set-cookie": buildClearedSessionCookie(),
     },
   });

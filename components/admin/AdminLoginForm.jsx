@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -33,13 +34,13 @@ export default function AdminLoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="admin-login-form">
+    <form onSubmit={handleSubmit} className="admin-login-form admin-form">
       <label>
-        <span>Username</span>
+        <span>Username:</span>
         <input value={username} onChange={(event) => setUsername(event.target.value)} name="username" />
       </label>
       <label>
-        <span>Password</span>
+        <span>Password:</span>
         <input
           type="password"
           value={password}
@@ -47,8 +48,8 @@ export default function AdminLoginForm() {
           name="password"
         />
       </label>
-      {error ? <p>{error}</p> : null}
-      <button type="submit" disabled={pending}>
+      {error ? <p className="admin-form__error">{error}</p> : null}
+      <button type="submit" disabled={pending} className="admin-primary-button">
         {pending ? "Signing in..." : "Sign in"}
       </button>
     </form>

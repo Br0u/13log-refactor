@@ -31,6 +31,7 @@ model Tag {
   name      String    @unique
   slug      String    @unique
   posts     PostTag[]
+  microPosts MicroPostTag[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -55,6 +56,16 @@ model Post {
   updatedAt    DateTime    @updatedAt
 }
 
+model MicroPost {
+  id          String         @id @default(cuid())
+  content     String
+  status      PostStatus     @default(DRAFT)
+  publishedAt DateTime?
+  tags        MicroPostTag[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
 model PostTag {
   postId String
   tagId  String
@@ -64,6 +75,15 @@ model PostTag {
   @@id([postId, tagId])
 }
 
+model MicroPostTag {
+  microPostId String
+  tagId       String
+  microPost   MicroPost @relation(fields: [microPostId], references: [id], onDelete: Cascade)
+  tag         Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([microPostId, tagId])
+}
+
 model Comment {
   id        String        @id @default(cuid())
   postId    String
@@ -71,6 +91,15 @@ model Comment {
   content   String
   status    CommentStatus @default(APPROVED)
   post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model GuestbookEntry {
+  id        String        @id @default(cuid())
+  nickname  String
+  content   String
+  status    CommentStatus @default(PENDING)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 }

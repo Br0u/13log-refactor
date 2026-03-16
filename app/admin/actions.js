@@ -1,9 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { createMicroPost, updateMicroPost } from "../../lib/repositories/micro-posts";
 import { createPost, updatePost } from "../../lib/repositories/posts";
 import { db } from "../../lib/db";
-import { removeComment } from "../../lib/repositories/comments";
+import { approveComment, removeComment } from "../../lib/repositories/comments";
+import { approveGuestbookEntry, removeGuestbookEntry } from "../../lib/repositories/guestbook";
 
 function parseTags(value) {
   return String(value || "")
@@ -25,6 +27,14 @@ function parsePostFormData(formData) {
   };
 }
 
+function parseMicroPostFormData(formData) {
+  return {
+    content: String(formData.get("content") || "").trim(),
+    status: String(formData.get("status") || "DRAFT"),
+    tags: parseTags(formData.get("tags")),
+  };
+}
+
 export async function createPostAction(formData) {
   const post = await createPost(parsePostFormData(formData));
   redirect(`/admin/posts/${post.id}`);
@@ -33,6 +43,16 @@ export async function createPostAction(formData) {
 export async function updatePostAction(postId, formData) {
   await updatePost(postId, parsePostFormData(formData));
   redirect(`/admin/posts/${postId}`);
+}
+
+export async function createMicroPostAction(formData) {
+  const microPost = await createMicroPost(parseMicroPostFormData(formData));
+  redirect(`/admin/micro-posts/${microPost.id}`);
+}
+
+export async function updateMicroPostAction(microPostId, formData) {
+  await updateMicroPost(microPostId, parseMicroPostFormData(formData));
+  redirect(`/admin/micro-posts/${microPostId}`);
 }
 
 export async function createCategoryAction(formData) {
@@ -76,8 +96,26 @@ export async function deletePostAction(postId) {
   });
 }
 
+export async function deleteMicroPostAction(microPostId) {
+  await db.microPost.delete({
+    where: { id: microPostId },
+  });
+}
+
 export async function deleteCommentAction(commentId) {
   await removeComment(commentId);
+}
+
+export async function approveCommentAction(commentId) {
+  await approveComment(commentId);
+}
+
+export async function approveGuestbookEntryAction(entryId) {
+  await approveGuestbookEntry(entryId);
+}
+
+export async function deleteGuestbookEntryAction(entryId) {
+  await removeGuestbookEntry(entryId);
 }
 
 export async function deleteCategoryAction(categoryId) {

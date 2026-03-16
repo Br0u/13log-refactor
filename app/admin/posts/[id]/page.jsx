@@ -46,13 +46,15 @@ export default async function AdminEditPostPage({ params }) {
           <p className="admin-page-copy">修改正文、状态、标签和分类，危险操作独立放置。</p>
         </div>
       </header>
-      <div className="admin-card">
+      <div className="admin-page__panel">
         <AdminPostForm action={action} categories={categories} initialValue={initialValue} />
       </div>
-      <form action={deletePostAction.bind(null, post.id)} className="admin-danger-zone">
-        <p>Danger zone</p>
-        <button type="submit" className="admin-shell__logout">Delete post</button>
-      </form>
+      <div className="admin-page__panel">
+        <form action={deletePostAction.bind(null, post.id)} className="admin-danger-zone">
+          <p>Danger zone</p>
+          <button type="submit" className="admin-shell__logout">Delete post</button>
+        </form>
+      </div>
     </section>
   );
 }

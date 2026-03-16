@@ -26,7 +26,8 @@ export default async function AdminPostsPage() {
         </div>
         <Link href="/admin/posts/new" className="admin-primary-link">New post</Link>
       </header>
-      <div className="admin-table">
+      <div className="admin-page__panel">
+        <div className="admin-table admin-panel-table">
         <div className="admin-table__head">
           <span>Title</span>
           <span>Status</span>
@@ -43,6 +44,7 @@ export default async function AdminPostsPage() {
             <span>{new Date(post.updatedAt).toLocaleString("zh-CN")}</span>
           </Link>
         ))}
+        </div>
       </div>
     </section>
   );

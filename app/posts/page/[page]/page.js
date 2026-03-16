@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { collectEntryFilters, collectFilterCounts, formatListMeta, getPosts } from "../../../../lib/content";
+import { collectFilterCounts } from "../../../../lib/content";
+import PostsTimeline from "../../../../components/blog/PostsTimeline";
+import { getPublicTimelineEntries } from "../../../../lib/public-content";
 
 const PAGE_SIZE = 12;
 
@@ -26,8 +28,8 @@ function resolvePage(raw) {
   return Number(raw);
 }
 
-export function generateStaticParams() {
-  const allPosts = getPosts();
+export async function generateStaticParams() {
+  const allPosts = await getPublicTimelineEntries();
   const totalPages = Math.max(1, Math.ceil(allPosts.length / PAGE_SIZE));
   return Array.from({ length: totalPages - 1 }, (_, i) => ({ page: String(i + 2) }));
 }
@@ -72,7 +74,7 @@ export default async function PostsPaged({ params, searchParams }) {
   const activeTag = typeof sp?.tag === "string" && sp.tag.trim() ? sp.tag.trim() : null;
   if (activeTag) redirect(`/posts?tag=${encodeURIComponent(activeTag)}`);
   const pageNum = resolvePage(p?.page);
-  const allPosts = getPosts();
+  const allPosts = await getPublicTimelineEntries();
   const totalPages = Math.max(1, Math.ceil(allPosts.length / PAGE_SIZE));
   if (!Number.isInteger(pageNum) || pageNum < 2 || pageNum > totalPages) notFound();
 
@@ -87,20 +89,7 @@ export default async function PostsPaged({ params, searchParams }) {
         {renderHeader(tags)}
       </header>
 
-      <div className="posts-masonry">
-        {posts.map((post) => {
-          const excerpt = post.description || post.summary || "";
-          const filterTags = collectEntryFilters(post);
-          return (
-            <article className="post-entry" key={post.slug} data-post-tags={filterTags.join("|")}>
-              <header className="entry-header"><h2>{post.title}</h2></header>
-              {excerpt ? <div className="entry-content"><p>{excerpt}</p></div> : null}
-              <footer className="entry-footer">{formatListMeta(post)}</footer>
-              <Link className="entry-link" aria-label={`post link to ${post.title}`} href={`/posts/${encodeURIComponent(post.urlSlug || post.slug)}`} />
-            </article>
-          );
-        })}
-      </div>
+      <PostsTimeline entries={posts} />
 
       {renderPagination(pageNum, totalPages, "/posts")}
     </section>

@@ -1,6 +1,8 @@
+import React from "react";
 import Link from "next/link";
-import { collectEntryFilters, collectFilterCounts, formatListMeta } from "../../lib/content";
-import { getPublicPosts } from "../../lib/public-content";
+import { collectEntryFilters, collectFilterCounts } from "../../lib/content";
+import PostsTimeline from "../../components/blog/PostsTimeline";
+import { getPublicTimelineEntries } from "../../lib/public-content";
 
 export const dynamic = "force-dynamic";
 
@@ -57,14 +59,14 @@ function renderHeader(tags, activeTag) {
 
 export default async function PostsPage({ searchParams }) {
   const sp = await searchParams;
-  const allPosts = await getPublicPosts();
-  const totalPages = Math.max(1, Math.ceil(allPosts.length / PAGE_SIZE));
+  const allEntries = await getPublicTimelineEntries();
+  const totalPages = Math.max(1, Math.ceil(allEntries.length / PAGE_SIZE));
   const activeTag = typeof sp?.tag === "string" && sp.tag.trim() ? sp.tag.trim() : null;
-  const tags = collectFilterCounts(allPosts);
+  const tags = collectFilterCounts(allEntries);
   const filteredPosts = activeTag
-    ? allPosts.filter((post) => collectEntryFilters(post).includes(activeTag))
+    ? allEntries.filter((post) => collectEntryFilters(post).includes(activeTag))
     : null;
-  const posts = filteredPosts || allPosts.slice(0, PAGE_SIZE);
+  const posts = filteredPosts || allEntries.slice(0, PAGE_SIZE);
 
   return (
     <section>
@@ -73,20 +75,7 @@ export default async function PostsPage({ searchParams }) {
         {renderHeader(tags, activeTag)}
       </header>
 
-      <div className="posts-masonry">
-        {posts.map((post) => {
-          const excerpt = post.description || post.summary || "";
-          const filterTags = collectEntryFilters(post);
-          return (
-            <article className="post-entry" key={post.slug} data-post-tags={filterTags.join("|")}>
-              <header className="entry-header"><h2>{post.title}</h2></header>
-              {excerpt ? <div className="entry-content"><p>{excerpt}</p></div> : null}
-              <footer className="entry-footer">{formatListMeta(post)}</footer>
-              <Link className="entry-link" aria-label={`post link to ${post.title}`} href={`/posts/${encodeURIComponent(post.urlSlug || post.slug)}`} />
-            </article>
-          );
-        })}
-      </div>
+      <PostsTimeline entries={posts} />
 
       {!activeTag ? renderPagination(1, totalPages, "/posts") : null}
     </section>

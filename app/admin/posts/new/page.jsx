@@ -21,7 +21,7 @@ export default async function AdminNewPostPage() {
           <p className="admin-page-copy">创建新文章，默认保持 Markdown 写作方式。</p>
         </div>
       </header>
-      <div className="admin-card">
+      <div className="admin-page__panel">
         <AdminPostForm action={createPostAction} categories={categories} />
       </div>
     </section>

@@ -1,0 +1,48 @@
+import { beforeEach, describe, expect, it } from "vitest";
+import { db } from "../../../lib/db";
+import { GET as guestbookGetRoute, POST as guestbookPostRoute } from "../../../app/api/guestbook/route";
+
+describe("guestbook api", () => {
+  beforeEach(async () => {
+    await db.guestbookEntry.deleteMany({
+      where: {
+        nickname: {
+          startsWith: "guestbook-api-",
+        },
+      },
+    });
+  });
+
+  it("submits pending entries and lists only approved ones", async () => {
+    const postRequest = new Request("http://localhost:3000/api/guestbook", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        nickname: "guestbook-api-user",
+        content: "hello guestbook",
+      }),
+    });
+
+    const postResponse = await guestbookPostRoute(postRequest);
+    expect(postResponse.status).toBe(201);
+
+    let getResponse = await guestbookGetRoute(new Request("http://localhost:3000/api/guestbook"));
+    let body = await getResponse.json();
+    expect(body.entries).toHaveLength(0);
+
+    const pending = await db.guestbookEntry.findFirst({
+      where: { nickname: "guestbook-api-user" },
+    });
+    await db.guestbookEntry.update({
+      where: { id: pending.id },
+      data: { status: "APPROVED" },
+    });
+
+    getResponse = await guestbookGetRoute(new Request("http://localhost:3000/api/guestbook"));
+    body = await getResponse.json();
+    expect(body.entries).toHaveLength(1);
+    expect(body.entries[0].nickname).toBe("guestbook-api-user");
+  });
+});

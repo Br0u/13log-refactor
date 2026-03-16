@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { db } from "../../lib/db";
+import { createMicroPost } from "../../lib/repositories/micro-posts";
 import { createPost } from "../../lib/repositories/posts";
-import { getPublicPostBySlug, getPublicPosts } from "../../lib/public-content";
+import { getPublicPostBySlug, getPublicPosts, getPublicTimelineEntries } from "../../lib/public-content";
 
 describe("public content facade", () => {
   it("returns published database content by slug", async () => {
@@ -48,5 +49,74 @@ describe("public content facade", () => {
 
     expect(posts.length).toBeGreaterThan(0);
     expect(posts.every((item) => item.status === "PUBLISHED")).toBe(true);
+  });
+
+  it("merges published posts and micro posts into one timeline", async () => {
+    const slug = "public-facade-timeline-post";
+    const category = await db.category.upsert({
+      where: { slug: "public-timeline-test" },
+      update: {},
+      create: {
+        name: "Public Timeline Test",
+        slug: "public-timeline-test",
+      },
+    });
+
+    await db.postTag.deleteMany({
+      where: {
+        post: { slug },
+      },
+    });
+    await db.post.deleteMany({
+      where: { slug },
+    });
+    await db.microPostTag.deleteMany({
+      where: {
+        microPost: {
+          content: {
+            in: ["timeline micro published", "timeline micro draft"],
+          },
+        },
+      },
+    });
+    await db.microPost.deleteMany({
+      where: {
+        content: {
+          in: ["timeline micro published", "timeline micro draft"],
+        },
+      },
+    });
+
+    await createPost({
+      title: "Timeline Post",
+      slug,
+      markdown: "# timeline",
+      status: "PUBLISHED",
+      publishedAt: new Date("2026-03-14T10:00:00.000Z"),
+      categoryId: category.id,
+      tags: ["timeline"],
+    });
+
+    await createMicroPost({
+      content: "timeline micro published",
+      status: "PUBLISHED",
+      publishedAt: new Date("2026-03-15T10:00:00.000Z"),
+      tags: ["timeline"],
+    });
+
+    await createMicroPost({
+      content: "timeline micro draft",
+      status: "DRAFT",
+      tags: ["timeline"],
+    });
+
+    const entries = await getPublicTimelineEntries();
+    const timelineEntries = entries.filter((item) => (
+      item.slug === slug || item.summary === "timeline micro published" || item.summary === "timeline micro draft"
+    ));
+
+    expect(timelineEntries.map((item) => item.type)).toEqual(["micro", "post"]);
+    expect(timelineEntries[0].summary).toBe("timeline micro published");
+    expect(timelineEntries.every((item) => item.summary !== "timeline micro draft")).toBe(true);
   });
 });

@@ -54,14 +54,15 @@ describe("admin auth", () => {
     expect(response.headers.get("set-cookie")).toContain("admin_session=");
   });
 
-  it("clears the session cookie on logout", async () => {
+  it("clears the session cookie on logout and redirects to the site home page", async () => {
     const request = new Request("http://localhost:3000/api/admin/logout", {
       method: "POST",
     });
 
     const response = await logoutRoute(request);
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(303);
+    expect(response.headers.get("location")).toBe("http://localhost:3000/");
     expect(response.headers.get("set-cookie")).toContain("Max-Age=0");
   });
 });

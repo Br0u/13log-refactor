@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function AdminDashboardPage() {
   return (
-    <section className="admin-dashboard">
+    <section className="admin-page admin-dashboard">
       <header className="admin-page-header">
         <div>
           <p className="admin-eyebrow">Content Ops</p>
@@ -15,12 +15,15 @@ export default function AdminDashboardPage() {
         </div>
         <Link href="/admin/posts/new" className="admin-primary-link">New post</Link>
       </header>
-      <section className="admin-overview-grid">
+      <section className="admin-page__panel admin-dashboard__grid admin-overview-grid">
         <article className="admin-overview-card">
           <p className="admin-overview-card__label">Writing</p>
           <h2>Posts</h2>
-          <p>创建、编辑、发布文章，保持 Markdown 写作流不变。</p>
-          <Link href="/admin/posts">Open post manager</Link>
+          <p>创建、编辑长文，并把短句 micro posts 一起编排进统一时间线。</p>
+          <div className="admin-overview-card__links">
+            <Link href="/admin/posts">Open post manager</Link>
+            <Link href="/admin/micro-posts">Micro posts</Link>
+          </div>
         </article>
         <article className="admin-overview-card">
           <p className="admin-overview-card__label">Structure</p>
