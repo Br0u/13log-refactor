@@ -2,7 +2,7 @@
 
 export default function HomePage() {
   return (
-    <section className="profile">
+    <section className="profile profile--rainy-mask">
       <div className="profile_inner">
         <img
           draggable="false"

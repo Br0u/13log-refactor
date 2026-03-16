@@ -15,6 +15,7 @@ describe("admin dashboard", () => {
     expect(markup).toContain("admin-dashboard__grid");
     expect(markup).toContain("Open post manager");
     expect(markup).toContain("/admin/micro-posts");
+    expect(markup).toContain("/admin/visits");
   });
 
   it("keeps overview cards shrinkable and link groups wrappable to avoid horizontal overflow", () => {

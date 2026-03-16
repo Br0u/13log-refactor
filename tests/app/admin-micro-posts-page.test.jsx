@@ -26,6 +26,9 @@ describe("admin micro posts page", () => {
 
     expect(markup).toContain("Micro posts");
     expect(markup).toContain('name="content"');
+    expect(markup).not.toContain('name="publishedAt"');
+    expect(markup).toContain("Publication time becomes editable after the micro post is published.");
+    expect(markup).toContain(">Preview<");
     expect(markup).toContain("今天很困，但还是想记一句。");
     expect(markup).toContain("/admin/micro-posts/micro-1");
   });

@@ -14,8 +14,9 @@
     "db:cleanup:test-data": "node --env-file=.env scripts/cleanup-test-data.mjs"
   },
   "dependencies": {
-    "@prisma/client": "^6.6.0",
+    "@arayui/rainy-day": "^1.0.6",
     "@iarna/toml": "^2.2.5",
+    "@prisma/client": "^6.6.0",
     "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "autoprefixer": "^10.4.27",

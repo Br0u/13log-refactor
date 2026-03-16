@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const { redirectMock, cookiesMock } = vi.hoisted(() => ({
+  redirectMock: vi.fn(() => {
+    throw new Error("NEXT_REDIRECT");
+  }),
+  cookiesMock: vi.fn(),
+}));
+
 vi.mock("../../lib/auth", async () => {
   const actual = await vi.importActual("../../lib/auth");
   return {
@@ -13,29 +20,31 @@ vi.mock("../../lib/auth", async () => {
   };
 });
 
-import { middleware } from "../../middleware";
+vi.mock("next/navigation", () => ({
+  redirect: redirectMock,
+}));
+
+vi.mock("next/headers", () => ({
+  cookies: cookiesMock,
+}));
+
+import AdminLayout from "../../app/admin/layout";
 import { POST as loginRoute } from "../../app/api/admin/login/route";
 import { POST as logoutRoute } from "../../app/api/admin/logout/route";
 
 describe("admin auth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    cookiesMock.mockResolvedValue({
+      get() {
+        return undefined;
+      },
+    });
   });
 
-  it("redirects unauthenticated admin requests to the login page", async () => {
-    const request = {
-      url: "http://localhost:3000/admin",
-      nextUrl: new URL("http://localhost:3000/admin"),
-      cookies: {
-        get() {
-          return undefined;
-        },
-      },
-    };
-    const response = await middleware(request);
-
-    expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("http://localhost:3000/admin/login");
+  it("redirects unauthenticated admin layout requests to the login page", async () => {
+    await expect(AdminLayout({ children: null })).rejects.toThrow("NEXT_REDIRECT");
+    expect(redirectMock).toHaveBeenCalledWith("/admin/login");
   });
 
   it("sets a session cookie when credentials are valid", async () => {

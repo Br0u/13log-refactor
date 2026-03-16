@@ -83,8 +83,6 @@
   max-width: 48%;
   color: var(--secondary);
 }
-@import "./papermod-base.css";
-@import "./papermod-custom.css";
 
 .main:has(.admin-shell),
 .main:has(.admin-login-shell) {
@@ -215,6 +213,78 @@
 .admin-post-form {
   display: grid;
   gap: 18px;
+}
+
+.admin-markdown-field {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-markdown-field__toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--entry) 90%, var(--theme));
+  width: fit-content;
+}
+
+.admin-markdown-field__tab {
+  min-width: 88px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--secondary);
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.admin-markdown-field__tab.is-active {
+  background: color-mix(in srgb, var(--entry) 96%, var(--theme));
+  color: var(--primary);
+  box-shadow: 0 8px 20px rgba(28, 31, 34, 0.08);
+}
+
+.admin-markdown-field__textarea,
+.admin-markdown-field__preview {
+  min-height: 13rem;
+}
+
+.admin-markdown-field__textarea.is-hidden,
+.admin-markdown-field__preview.is-hidden {
+  display: none;
+}
+
+.admin-markdown-field__preview {
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--entry) 97%, transparent), color-mix(in srgb, var(--theme) 96%, transparent)),
+    var(--entry);
+}
+
+.admin-markdown-field__preview-content {
+  margin: 0;
+}
+
+.admin-markdown-field__hint,
+.admin-markdown-field__error {
+  margin: 0;
+  color: var(--secondary);
+}
+
+.admin-markdown-field__error {
+  color: #b94a48;
+}
+
+.admin-form-hint {
+  margin: -6px 0 0;
+  font-size: 0.84rem;
+  color: var(--secondary);
 }
 
 .admin-page-header {
@@ -389,6 +459,22 @@
   grid-template-columns: minmax(0, 2.4fr) 0.8fr 1fr;
 }
 
+.admin-table__head--comments,
+.admin-table__row--comments {
+  grid-template-columns: minmax(0, 1.4fr) 0.7fr minmax(0, 1fr) minmax(0, 2.4fr) 0.9fr minmax(0, 1.4fr);
+}
+
+.admin-table__head--visits,
+.admin-table__row--visits {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 2.4fr) 0.9fr;
+}
+
+.admin-table__content-cell {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+}
+
 .admin-inline-form {
   display: inline-flex;
   margin-left: 10px;
@@ -531,7 +617,9 @@
   .admin-table__head,
   .admin-table__row,
   .admin-table__head--taxonomy,
-  .admin-table__row--taxonomy {
+  .admin-table__row--taxonomy,
+  .admin-table__head--comments,
+  .admin-table__row--comments {
     grid-template-columns: 1fr;
   }
 

@@ -29,6 +29,7 @@ export default async function AdminCommentsPage() {
       source: comment.post?.title || "-",
       type: "POST",
       nickname: comment.nickname,
+      content: comment.content,
       status: comment.status,
       createdAt: comment.createdAt,
       approveAction: approveCommentAction.bind(null, comment.id),
@@ -39,6 +40,7 @@ export default async function AdminCommentsPage() {
       source: "About 留言板",
       type: "ABOUT",
       nickname: entry.nickname,
+      content: entry.content,
       status: entry.status,
       createdAt: entry.createdAt,
       approveAction: approveGuestbookEntryAction.bind(null, entry.id),
@@ -56,19 +58,21 @@ export default async function AdminCommentsPage() {
         </div>
       </header>
       <div className="admin-page__panel">
-        <div className="admin-table admin-panel-table">
-        <div className="admin-table__head">
+        <div className="admin-table admin-panel-table admin-panel-table--comments">
+        <div className="admin-table__head admin-table__head--comments">
           <span>Source</span>
           <span>Type</span>
           <span>Nickname</span>
+          <span>Content</span>
           <span>Status</span>
           <span>Created</span>
         </div>
         {items.map((item) => (
-          <div key={`${item.type}-${item.id}`} className="admin-table__row">
+          <div key={`${item.type}-${item.id}`} className="admin-table__row admin-table__row--comments">
             <span>{item.source}</span>
             <span>{item.type}</span>
             <span>{item.nickname}</span>
+            <span className="admin-table__content-cell">{item.content}</span>
             <span><span className={`admin-status admin-status--${item.status.toLowerCase()}`}>{item.status}</span></span>
             <span>
               <span>{new Date(item.createdAt).toLocaleString("zh-CN")}</span>

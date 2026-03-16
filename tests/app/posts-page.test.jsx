@@ -20,7 +20,7 @@ vi.mock("../../lib/public-content", () => ({
   )),
 }));
 
-import PostsPage from "../../app/posts/page";
+import PostsPage from "../../app/posts/page.jsx";
 
 describe("posts index page", () => {
   it("renders pagination links when there are multiple pages", async () => {

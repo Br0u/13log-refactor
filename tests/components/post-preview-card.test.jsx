@@ -38,6 +38,7 @@ describe("PostPreviewCard", () => {
           id: "micro-1",
           content: "今天风很大，脑子也很乱。",
           summary: "今天风很大，脑子也很乱。",
+          renderedContentHtml: "<p>第一行<br>\n第二行</p><ul><li><strong>重点</strong></li></ul>",
           date: "2026-03-15T10:48:33.000Z",
           tags: ["碎碎念"],
           categories: [],
@@ -45,7 +46,8 @@ describe("PostPreviewCard", () => {
       />
     );
 
-    expect(markup).toContain("今天风很大，脑子也很乱。");
+    expect(markup).toContain("<br>");
+    expect(markup).toContain("<strong>重点</strong>");
     expect(markup).toContain("碎碎念");
     expect(markup).not.toContain("post-preview-card__title");
     expect(markup).not.toContain("entry-link");
@@ -55,5 +57,6 @@ describe("PostPreviewCard", () => {
     expect(markup).toContain("post-preview-card__micro-day");
     expect(markup).toContain("post-preview-card__micro-year");
     expect(markup).toContain("post-preview-card__micro-time");
+    expect(markup).toContain("post-preview-card__micro-richtext");
   });
 });

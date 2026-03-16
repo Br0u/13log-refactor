@@ -11,6 +11,15 @@ describe("posts timeline styles", () => {
     expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)::before\s*\{[^}]*opacity:\s*[.\d]+;/s);
   });
 
+  it("keeps micro focus transitions lightweight for smoother card scaling", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--interactive\s+\.post-preview-card\s*\{[^}]*will-change:\s*transform,\s*opacity;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card\s*\{[^}]*transform:\s*scale\(0\.98\)\s*translateY\(0\.12rem\);[^}]*opacity:\s*0\.44;/s);
+    expect(stylesheet).not.toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card\s*\{[^}]*filter:/s);
+    expect(stylesheet).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card[\s\S]*transform:\s*none;/s);
+  });
+
   it("adds a decorative quote mark to micro post cards", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 

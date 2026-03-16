@@ -9,6 +9,10 @@ function normalizeSummaryText(value = "") {
     .trim();
 }
 
+function createMicroMarkup(post) {
+  return post.renderedContentHtml || `<p>${normalizeSummaryText(post.summary || post.description || post.content || "")}</p>`;
+}
+
 function collectEntryFilters(entry) {
   return Array.from(new Set([...(entry?.categories || []), ...(entry?.tags || [])]));
 }
@@ -64,6 +68,7 @@ export default function PostPreviewCard({
   const href = post.href || `/posts/${encodeURIComponent(post.urlSlug || post.slug)}`;
   const summary = normalizeSummaryText(post.summary || post.description || post.content || "");
   const microDate = getMicroDateParts(post.date);
+  const microMarkup = isMicro ? createMicroMarkup(post) : "";
   const cardClassName = [
     "post-entry",
     "post-preview-card",
@@ -97,9 +102,12 @@ export default function PostPreviewCard({
 
       {isMicro ? (
         <div className="post-preview-card__micro-surface">
-          {summary ? (
+          {microMarkup ? (
             <div className="post-preview-card__content">
-              <p className="post-preview-card__excerpt-block">{summary}</p>
+              <div
+                className="post-preview-card__micro-richtext post-preview-card__excerpt-block"
+                dangerouslySetInnerHTML={{ __html: microMarkup }}
+              />
             </div>
           ) : null}
 

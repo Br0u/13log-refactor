@@ -67,4 +67,41 @@ describe("micro post repository", () => {
     expect(entries.some((item) => item.id === published.id)).toBe(true);
     expect(entries.some((item) => item.id === draft.id)).toBe(false);
   });
+
+  it("keeps an explicit publishedAt when editing a published micro post", async () => {
+    const created = await createMicroPost({
+      content: "micro draft",
+      status: "PUBLISHED",
+      tags: ["mood"],
+    });
+    ids.push(created.id);
+    const expectedPublishedAt = new Date("2026-03-01T15:45:00.000Z");
+
+    const updated = await updateMicroPost(created.id, {
+      content: "micro updated",
+      status: "PUBLISHED",
+      publishedAt: expectedPublishedAt,
+      tags: ["mood", "timeline"],
+    });
+
+    expect(updated.publishedAt?.toISOString()).toBe(expectedPublishedAt.toISOString());
+  });
+
+  it("drops publishedAt when a micro post is saved as draft", async () => {
+    const created = await createMicroPost({
+      content: "micro published",
+      status: "PUBLISHED",
+      tags: ["mood"],
+    });
+    ids.push(created.id);
+
+    const updated = await updateMicroPost(created.id, {
+      content: "micro updated",
+      status: "DRAFT",
+      publishedAt: new Date("2026-03-01T15:45:00.000Z"),
+      tags: ["draft"],
+    });
+
+    expect(updated.publishedAt).toBeNull();
+  });
 });

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildPlainSummary,
   preprocessShortcodes,
+  renderMicroMarkdownToHtml,
   renderMarkdownToHtml,
   withHeadingAnchors,
 } from "../../lib/markdown";
@@ -28,5 +29,14 @@ describe("markdown helpers", () => {
     expect(summary).toContain("Title");
     expect(summary).toContain("A bold paragraph");
     expect(summary).not.toContain("**");
+  });
+
+  it("renders micro markdown with soft line breaks preserved", async () => {
+    const html = await renderMicroMarkdownToHtml("第一行\n第二行\n\n- 列表");
+
+    expect(html).toContain("第一行<br>");
+    expect(html).toContain("第二行");
+    expect(html).toContain("<ul>");
+    expect(html).toContain("<li>列表</li>");
   });
 });

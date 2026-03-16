@@ -16,6 +16,7 @@ vi.mock("../../lib/db", () => ({
         {
           id: "comment-1",
           nickname: "brou",
+          content: "这里是文章评论正文。",
           status: "PENDING",
           createdAt: new Date("2026-03-15T10:00:00.000Z"),
           post: { title: "A post" },
@@ -27,6 +28,7 @@ vi.mock("../../lib/db", () => ({
         {
           id: "guest-1",
           nickname: "reader@example.com",
+          content: "这里是留言板正文。",
           status: "PENDING",
           createdAt: new Date("2026-03-15T11:00:00.000Z"),
         },
@@ -45,5 +47,8 @@ describe("admin comments page", () => {
     expect(markup).toContain("admin-page__panel");
     expect(markup).toContain("admin-table admin-panel-table");
     expect(markup).toContain("About 留言板");
+    expect(markup).toContain("这里是文章评论正文。");
+    expect(markup).toContain("这里是留言板正文。");
+    expect(markup).toContain("admin-table__content-cell");
   });
 });

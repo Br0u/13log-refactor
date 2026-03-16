@@ -1,5 +1,8 @@
 import React from "react";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { ADMIN_SESSION_COOKIE, readAdminSession } from "../../lib/session";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard" },
@@ -8,9 +11,18 @@ const NAV_ITEMS = [
   { href: "/admin/categories", label: "Categories" },
   { href: "/admin/tags", label: "Tags" },
   { href: "/admin/comments", label: "Comments" },
+  { href: "/admin/visits", label: "Visits" },
 ];
 
 export default async function AdminLayout({ children }) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value || "";
+  const session = await readAdminSession(token);
+
+  if (!session) {
+    redirect("/admin/login");
+  }
+
   return (
     <section className="admin-shell admin-shell--latin admin-shell--flex">
       <aside className="admin-shell__rail">

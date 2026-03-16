@@ -1,9 +1,20 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { revalidatePathMock } = vi.hoisted(() => ({
+  revalidatePathMock: vi.fn(),
+}));
+
+vi.mock("next/cache", () => ({
+  revalidatePath: revalidatePathMock,
+}));
+
 import { db } from "../../lib/db";
 import { deleteCategoryAction, deleteTagAction } from "../../app/admin/actions";
 
 describe("admin taxonomy actions", () => {
   beforeEach(async () => {
+    vi.clearAllMocks();
+
     await db.tag.deleteMany({
       where: {
         slug: {

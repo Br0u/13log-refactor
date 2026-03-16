@@ -104,6 +104,21 @@ model GuestbookEntry {
   updatedAt DateTime      @updatedAt
 }
 
+model VisitLog {
+  id        String   @id @default(cuid())
+  path      String
+  referer   String?
+  ipSummary String
+  country   String?
+  region    String?
+  city      String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path])
+}
+
 model PostLike {
   id         String   @id @default(cuid())
   postId     String

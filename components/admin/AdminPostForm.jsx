@@ -1,4 +1,6 @@
 import React from "react";
+import MarkdownEditorField from "./MarkdownEditorField";
+import { formatDateTimeLocal } from "./publication-utils";
 
 export default function AdminPostForm({
   action,
@@ -19,10 +21,14 @@ export default function AdminPostForm({
         <span>Summary</span>
         <textarea name="summary" defaultValue={initialValue.summary || ""} rows={3} />
       </label>
-      <label>
-        <span>Markdown</span>
-        <textarea name="markdown" defaultValue={initialValue.markdown || ""} rows={18} required />
-      </label>
+      <MarkdownEditorField
+        name="markdown"
+        label="Markdown"
+        initialValue={initialValue.markdown || ""}
+        rows={18}
+        required
+        mode="post"
+      />
       <label>
         <span>Cover Image</span>
         <input name="coverImage" defaultValue={initialValue.coverImage || ""} />
@@ -53,6 +59,20 @@ export default function AdminPostForm({
           <option value="PUBLISHED">Published</option>
         </select>
       </label>
+      {initialValue.status === "PUBLISHED" ? (
+        <label>
+          <span>Published At</span>
+          <input
+            name="publishedAt"
+            type="datetime-local"
+            defaultValue={formatDateTimeLocal(initialValue.publishedAt || "")}
+            step="60"
+          />
+          <small className="admin-form-hint">Edit using your local time.</small>
+        </label>
+      ) : (
+        <p className="admin-form-hint">Publication time becomes editable after the post is published.</p>
+      )}
       <button type="submit" className="admin-primary-button">Save post</button>
     </form>
   );

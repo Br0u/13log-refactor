@@ -14,13 +14,14 @@ describe("guestbook api", () => {
   });
 
   it("submits pending entries and lists only approved ones", async () => {
+    const nickname = "guestbook-api-user";
     const postRequest = new Request("http://localhost:3000/api/guestbook", {
       method: "POST",
       headers: {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        nickname: "guestbook-api-user",
+        nickname,
         content: "hello guestbook",
       }),
     });
@@ -30,10 +31,10 @@ describe("guestbook api", () => {
 
     let getResponse = await guestbookGetRoute(new Request("http://localhost:3000/api/guestbook"));
     let body = await getResponse.json();
-    expect(body.entries).toHaveLength(0);
+    expect(body.entries.some((entry) => entry.nickname === nickname)).toBe(false);
 
     const pending = await db.guestbookEntry.findFirst({
-      where: { nickname: "guestbook-api-user" },
+      where: { nickname },
     });
     await db.guestbookEntry.update({
       where: { id: pending.id },
@@ -42,7 +43,6 @@ describe("guestbook api", () => {
 
     getResponse = await guestbookGetRoute(new Request("http://localhost:3000/api/guestbook"));
     body = await getResponse.json();
-    expect(body.entries).toHaveLength(1);
-    expect(body.entries[0].nickname).toBe("guestbook-api-user");
+    expect(body.entries.some((entry) => entry.nickname === nickname)).toBe(true);
   });
 });

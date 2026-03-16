@@ -593,6 +593,98 @@ body::before {
   padding: 2.5rem 1rem;
 }
 
+.main .profile.profile--rainy-mask {
+  position: relative;
+  isolation: isolate;
+  --ink-wash-a: color-mix(in srgb, var(--secondary) 16%, transparent);
+  --ink-wash-b: color-mix(in srgb, var(--secondary) 10%, transparent);
+}
+
+.main .profile.profile--rainy-mask::before,
+.main .profile.profile--rainy-mask::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.main .profile.profile--rainy-mask::before {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.56;
+  -webkit-mask-image: radial-gradient(
+    ellipse 30rem 20rem at 50% 46%,
+    transparent 0,
+    transparent 34%,
+    #000 52%,
+    #000 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 30rem 20rem at 50% 46%,
+    transparent 0,
+    transparent 34%,
+    #000 52%,
+    #000 100%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  background:
+    radial-gradient(1.65rem 2.1rem at 5% 20%, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.18) 58%, transparent 74%),
+    radial-gradient(0.7rem 1rem at 12% 35%, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.1) 56%, transparent 72%),
+    radial-gradient(1.5rem 1.95rem at 88% 22%, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.18) 55%, transparent 74%),
+    radial-gradient(1rem 1.4rem at 92% 62%, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.1) 54%, transparent 72%),
+    radial-gradient(0.85rem 1.15rem at 18% 78%, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.08) 52%, transparent 70%),
+    radial-gradient(1.3rem 1.65rem at 76% 82%, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.1) 52%, transparent 72%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  filter: blur(0.2px);
+}
+
+.main .profile.profile--rainy-mask::after {
+  opacity: 0.34;
+  -webkit-mask-image: radial-gradient(
+    ellipse 31rem 20.5rem at 50% 46%,
+    transparent 0,
+    transparent 34%,
+    #000 52%,
+    #000 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 31rem 20.5rem at 50% 46%,
+    transparent 0,
+    transparent 34%,
+    #000 52%,
+    #000 100%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  background:
+    radial-gradient(24rem 18rem at 14% 16%, var(--ink-wash-a), transparent 68%),
+    radial-gradient(22rem 16rem at 86% 82%, var(--ink-wash-b), transparent 70%),
+    linear-gradient(103deg, transparent 0 12%, rgba(255, 255, 255, 0.16) 12.8%, transparent 13.6%) 8% 0 / 18% 100% repeat-x,
+    linear-gradient(101deg, transparent 0 18%, rgba(255, 255, 255, 0.12) 18.8%, transparent 19.6%) 34% 0 / 14% 100% repeat-x,
+    linear-gradient(100deg, transparent 0 24%, rgba(255, 255, 255, 0.1) 24.7%, transparent 25.5%) 68% 0 / 16% 100% repeat-x,
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 28%, transparent 100%);
+  animation: rainyMaskSlide 5.6s linear infinite;
+}
+
+.main .profile.profile--rainy-mask .profile_inner {
+  position: relative;
+  z-index: 3;
+}
+
+@keyframes rainyMaskSlide {
+  from {
+    transform: translate3d(0, -2%, 0);
+  }
+  to {
+    transform: translate3d(-1.5%, 4%, 0);
+  }
+}
+
 .profile img {
   border-radius: 999px;
   border: 4px solid var(--primary);
@@ -1942,12 +2034,12 @@ body::before {
   z-index: 3;
   transform-origin: center center;
   transition:
-    transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.34s ease,
-    border-color 0.34s ease,
-    background 0.34s ease,
-    opacity 0.34s ease,
-    filter 0.34s ease;
+    transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.24s ease,
+    border-color 0.24s ease,
+    background 0.24s ease,
+    opacity 0.2s ease;
+  will-change: transform, opacity;
 }
 
 .posts-masonry--interactive[data-micro-focus=""] .post-preview-card:hover,
@@ -1959,19 +2051,17 @@ body::before {
 }
 
 .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card {
-  transform: scale(0.9) translateY(0.28rem);
-  opacity: 0.34;
-  filter: saturate(0.68);
+  transform: scale(0.98) translateY(0.12rem);
+  opacity: 0.44;
 }
 
 .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card.is-micro-active {
-  transform: translateY(-0.28rem);
+  transform: translateY(-0.14rem);
   opacity: 1;
-  filter: none;
   z-index: 6;
   border-color: color-mix(in srgb, var(--primary) 9%, var(--border));
   background: color-mix(in srgb, var(--entry) 62%, transparent);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.045);
 }
 
 .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card.is-micro-background {
@@ -2085,7 +2175,60 @@ body::before {
 .post-preview-card--micro .post-preview-card__excerpt-block {
   font-size: 1.02rem;
   line-height: 1.74;
-  -webkit-line-clamp: 6;
+  display: block;
+  overflow: hidden;
+  max-height: calc(1.74em * 6);
+}
+
+.post-preview-card__micro-richtext > :first-child {
+  margin-top: 0;
+}
+
+.post-preview-card__micro-richtext > :last-child {
+  margin-bottom: 0;
+}
+
+.post-preview-card__micro-richtext p,
+.post-preview-card__micro-richtext ul,
+.post-preview-card__micro-richtext ol,
+.post-preview-card__micro-richtext blockquote,
+.post-preview-card__micro-richtext pre {
+  margin: 0 0 0.62rem;
+}
+
+.post-preview-card__micro-richtext ul,
+.post-preview-card__micro-richtext ol {
+  padding-left: 1.15rem;
+}
+
+.post-preview-card__micro-richtext li + li {
+  margin-top: 0.28rem;
+}
+
+.post-preview-card__micro-richtext a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+
+.post-preview-card__micro-richtext code {
+  padding: 0.08rem 0.28rem;
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--code-bg) 88%, transparent);
+  font-family: var(--latin-font);
+  font-size: 0.88em;
+}
+
+.post-preview-card__micro-richtext pre {
+  padding: 0.72rem 0.82rem;
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--code-bg) 92%, transparent);
+  overflow: auto;
+}
+
+.post-preview-card__micro-richtext pre code {
+  padding: 0;
+  background: transparent;
 }
 
 .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card--micro.is-micro-active .post-preview-card__micro-surface {
@@ -2101,8 +2244,8 @@ body::before {
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--entry) 100%, transparent), color-mix(in srgb, var(--theme) 92%, transparent)),
     var(--entry);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.17);
-  transform: scale(1.045) translateY(-0.46rem);
+  box-shadow: 0 24px 44px rgba(0, 0, 0, 0.14);
+  transform: scale(1.02) translateY(-0.24rem);
   transform-origin: center top;
   max-height: min(30rem, 72vh);
   overflow: auto;
@@ -2116,9 +2259,8 @@ body::before {
 }
 
 .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card--micro.is-micro-active .post-preview-card__excerpt-block {
-  display: block;
   overflow: visible;
-  -webkit-line-clamp: unset;
+  max-height: none;
 }
 
 .post-preview-card__micro-meta {
@@ -2199,7 +2341,7 @@ body::before {
   }
 
   .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card.is-micro-active {
-    transform: translateY(-0.18rem);
+    transform: translateY(-0.12rem);
   }
 
   .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card--micro.is-micro-active .post-preview-card__micro-surface {
@@ -2208,8 +2350,24 @@ body::before {
     top: -0.54rem;
     padding: 1.02rem 0.98rem 0.9rem;
     border-radius: 18px;
-    transform: scale(1.02) translateY(-0.18rem);
+    transform: scale(1.01) translateY(-0.12rem);
     max-height: min(24rem, 68vh);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .posts-masonry--interactive,
+  .posts-masonry--interactive::before,
+  .posts-masonry--interactive .post-preview-card,
+  .post-preview-card--micro .post-preview-card__micro-surface {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+
+  .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card,
+  .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card.is-micro-active,
+  .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card--micro.is-micro-active .post-preview-card__micro-surface {
+    transform: none;
   }
 }
 

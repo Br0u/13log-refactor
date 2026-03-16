@@ -18,6 +18,7 @@ export default async function AdminEditMicroPostPage({ params }) {
   const initialValue = {
     content: microPost.content,
     status: microPost.status,
+    publishedAt: microPost.publishedAt,
     tags: microPost.tags.map((item) => item.tag.name),
   };
 

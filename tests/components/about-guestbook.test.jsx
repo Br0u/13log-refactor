@@ -33,9 +33,9 @@ describe("AboutGuestbook", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "内容" }), {
       target: { value: "hello" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "提交" }));
+    fireEvent.click(screen.getByRole("button", { name: "寄出" }));
 
-    expect(await screen.findByText("已收到，仅你我可见。")).toBeTruthy();
+    expect(await screen.findByText("信至。")).toBeTruthy();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
