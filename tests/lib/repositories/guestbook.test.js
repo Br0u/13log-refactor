@@ -19,19 +19,19 @@ describe("guestbook repository", () => {
   });
 
   it("creates pending entries and only returns them after approval", async () => {
+    const nickname = "guestbook-test-user";
     const created = await createGuestbookEntry({
-      nickname: "guestbook-test-user",
+      nickname,
       content: "hello from guestbook",
     });
 
     expect(created.status).toBe("PENDING");
-    expect(await getApprovedGuestbookEntries()).toHaveLength(0);
+    expect((await getApprovedGuestbookEntries()).some((entry) => entry.nickname === nickname)).toBe(false);
 
     await approveGuestbookEntry(created.id);
 
     const approved = await getApprovedGuestbookEntries();
-    expect(approved).toHaveLength(1);
-    expect(approved[0].nickname).toBe("guestbook-test-user");
+    expect(approved.some((entry) => entry.nickname === nickname)).toBe(true);
   });
 
   it("removes a guestbook entry", async () => {

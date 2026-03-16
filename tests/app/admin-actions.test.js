@@ -1,4 +1,18 @@
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+
+const { redirectMock, revalidatePathMock } = vi.hoisted(() => ({
+  redirectMock: vi.fn(),
+  revalidatePathMock: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  redirect: redirectMock,
+}));
+
+vi.mock("next/cache", () => ({
+  revalidatePath: revalidatePathMock,
+}));
+
 import { db } from "../../lib/db";
 import { createPost } from "../../lib/repositories/posts";
 import { createComment } from "../../lib/repositories/comments";
@@ -20,6 +34,8 @@ describe("admin actions", () => {
   });
 
   beforeEach(async () => {
+    vi.clearAllMocks();
+
     await db.comment.deleteMany({
       where: {
         post: {
@@ -73,6 +89,7 @@ describe("admin actions", () => {
     });
 
     expect(deleted).toBeNull();
+    expect(redirectMock).toHaveBeenCalledWith("/admin/posts");
   });
 
   it("deletes a comment from the admin action", async () => {

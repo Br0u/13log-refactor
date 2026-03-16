@@ -64,8 +64,8 @@ export default function AboutGuestbook() {
             required
           />
         </label>
-        <button type="submit" disabled={pending}>提交</button>
-        {submitted ? <p className="about-guestbook__hint">已收到，仅你我可见。</p> : null}
+        <button type="submit" disabled={pending}>寄出</button>
+        {submitted ? <p className="about-guestbook__hint">信至。</p> : null}
       </form>
     </section>
   );

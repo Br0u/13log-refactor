@@ -107,6 +107,53 @@ describe("post repository", () => {
     expect(updated.status).toBe("PUBLISHED");
   });
 
+  it("keeps an explicit publishedAt when editing a published post", async () => {
+    const original = await createPost({
+      title: "Repository Update Post",
+      slug: "repository-update-post",
+      markdown: "body",
+      status: "PUBLISHED",
+      categoryId,
+      tags: ["release"],
+    });
+    const expectedPublishedAt = new Date("2026-03-01T15:45:00.000Z");
+
+    const updated = await updatePost(original.id, {
+      title: "Repository Update Post",
+      slug: "repository-update-post",
+      markdown: "updated body",
+      status: "PUBLISHED",
+      publishedAt: expectedPublishedAt,
+      categoryId,
+      tags: ["release"],
+    });
+
+    expect(updated.publishedAt?.toISOString()).toBe(expectedPublishedAt.toISOString());
+  });
+
+  it("drops publishedAt when a post is saved as draft", async () => {
+    const original = await createPost({
+      title: "Repository Update Post",
+      slug: "repository-update-post",
+      markdown: "body",
+      status: "PUBLISHED",
+      categoryId,
+      tags: ["release"],
+    });
+
+    const updated = await updatePost(original.id, {
+      title: "Repository Update Post",
+      slug: "repository-update-post",
+      markdown: "updated body",
+      status: "DRAFT",
+      publishedAt: new Date("2026-03-01T15:45:00.000Z"),
+      categoryId,
+      tags: ["draft"],
+    });
+
+    expect(updated.publishedAt).toBeNull();
+  });
+
   it("rejects duplicate slugs", async () => {
     await expect(
       createPost({

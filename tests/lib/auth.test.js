@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   clearAdminSession,
@@ -26,5 +28,11 @@ describe("auth helpers", () => {
   it("clears invalid sessions", async () => {
     await expect(readAdminSession("bad-token")).resolves.toBeNull();
     expect(clearAdminSession()).toBe("");
+  });
+
+  it("keeps session helpers edge-compatible by avoiding Buffer", () => {
+    const source = fs.readFileSync(path.join(process.cwd(), "lib/session.js"), "utf8");
+
+    expect(source).not.toContain("Buffer.");
   });
 });

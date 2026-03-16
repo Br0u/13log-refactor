@@ -40,6 +40,12 @@ export default function AdminDashboardPage() {
           <p>查看评论状态，及时删除不需要保留的内容。</p>
           <Link href="/admin/comments">Review comments</Link>
         </article>
+        <article className="admin-overview-card">
+          <p className="admin-overview-card__label">Traffic</p>
+          <h2>Visits</h2>
+          <p>查看公开页面的最近访问时间、来源和地理位置信息。</p>
+          <Link href="/admin/visits">Open visit log</Link>
+        </article>
       </section>
     </section>
   );

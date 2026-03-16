@@ -33,6 +33,7 @@ export default async function AdminEditPostPage({ params }) {
     markdown: post.markdown,
     coverImage: post.coverImage || "",
     status: post.status,
+    publishedAt: post.publishedAt,
     categoryId: post.categoryId || "",
     tags: post.tags.map((item) => item.tag.name),
   };

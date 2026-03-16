@@ -1,4 +1,6 @@
 import React from "react";
+import MarkdownEditorField from "./MarkdownEditorField";
+import { formatDateTimeLocal } from "./publication-utils";
 
 export default function AdminMicroPostForm({
   action,
@@ -6,10 +8,14 @@ export default function AdminMicroPostForm({
 }) {
   return (
     <form action={action} className="admin-post-form admin-form">
-      <label>
-        <span>Content</span>
-        <textarea name="content" defaultValue={initialValue.content || ""} rows={8} required />
-      </label>
+      <MarkdownEditorField
+        name="content"
+        label="Content"
+        initialValue={initialValue.content || ""}
+        rows={8}
+        required
+        mode="micro"
+      />
       <label>
         <span>Tags</span>
         <input
@@ -25,6 +31,20 @@ export default function AdminMicroPostForm({
           <option value="PUBLISHED">Published</option>
         </select>
       </label>
+      {initialValue.status === "PUBLISHED" ? (
+        <label>
+          <span>Published At</span>
+          <input
+            name="publishedAt"
+            type="datetime-local"
+            defaultValue={formatDateTimeLocal(initialValue.publishedAt || "")}
+            step="60"
+          />
+          <small className="admin-form-hint">Edit using your local time.</small>
+        </label>
+      ) : (
+        <p className="admin-form-hint">Publication time becomes editable after the micro post is published.</p>
+      )}
       <button type="submit" className="admin-primary-button">Save micro post</button>
     </form>
   );
