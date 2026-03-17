@@ -18,7 +18,7 @@ vi.mock("../../lib/db", () => ({
   },
 }));
 
-import AdminPostsPage from "../../app/admin/posts/page.jsx";
+import AdminPostsPage from "../../app/admin/(protected)/posts/page.jsx";
 
 describe("admin posts page", () => {
   it("renders an editorial page header and content panel", async () => {

@@ -30,7 +30,7 @@ vi.mock("../../lib/repositories/visit-logs", async (importOriginal) => {
   };
 });
 
-import AdminVisitsPage from "../../app/admin/visits/page.jsx";
+import AdminVisitsPage from "../../app/admin/(protected)/visits/page.jsx";
 
 describe("admin visits page", () => {
   it("renders visit summaries and recent visit rows", async () => {

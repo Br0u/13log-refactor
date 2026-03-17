@@ -1,7 +1,19 @@
 import React from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import AdminTaxonomyPage from "../../app/admin/categories/page";
+
+vi.mock("../../lib/repositories/categories", () => ({
+  listCategories: vi.fn(async () => [
+    {
+      id: "cat-1",
+      name: "Notes",
+      slug: "notes",
+      description: "Notes category",
+    },
+  ]),
+}));
+
+import AdminTaxonomyPage from "../../app/admin/(protected)/categories/page";
 
 describe("admin taxonomy pages", () => {
   it("renders the category management shell", async () => {

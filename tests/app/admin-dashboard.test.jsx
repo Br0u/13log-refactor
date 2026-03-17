@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import AdminDashboardPage from "../../app/admin/page.jsx";
+import AdminDashboardPage from "../../app/admin/(protected)/page.jsx";
 
 describe("admin dashboard", () => {
   it("renders management overview sections inside the dashboard workspace frame", () => {

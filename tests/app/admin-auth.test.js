@@ -28,7 +28,7 @@ vi.mock("next/headers", () => ({
   cookies: cookiesMock,
 }));
 
-import AdminLayout from "../../app/admin/layout";
+import ProtectedAdminLayout from "../../app/admin/(protected)/layout";
 import { POST as loginRoute } from "../../app/api/admin/login/route";
 import { POST as logoutRoute } from "../../app/api/admin/logout/route";
 
@@ -43,7 +43,7 @@ describe("admin auth", () => {
   });
 
   it("redirects unauthenticated admin layout requests to the login page", async () => {
-    await expect(AdminLayout({ children: null })).rejects.toThrow("NEXT_REDIRECT");
+    await expect(ProtectedAdminLayout({ children: null })).rejects.toThrow("NEXT_REDIRECT");
     expect(redirectMock).toHaveBeenCalledWith("/admin/login");
   });
 
