@@ -39,4 +39,27 @@ describe("markdown helpers", () => {
     expect(html).toContain("<ul>");
     expect(html).toContain("<li>列表</li>");
   });
+
+  it("upgrades a standalone markdown image into a post figure with caption", async () => {
+    const html = await renderMarkdownToHtml("![雨夜电台](/images/example.jpg)");
+
+    expect(html).toContain('<figure class="post-figure">');
+    expect(html).toContain('class="post-figure__image"');
+    expect(html).toContain("<figcaption");
+    expect(html).toContain("雨夜电台");
+  });
+
+  it("does not wrap mixed-content image paragraphs as post figures", async () => {
+    const html = await renderMarkdownToHtml("前文 ![配图](/images/example.jpg) 后文");
+
+    expect(html).not.toContain('<figure class="post-figure">');
+    expect(html).toContain("<p>前文");
+  });
+
+  it("omits the caption for standalone images without meaningful alt text", async () => {
+    const html = await renderMarkdownToHtml("![](/images/example.jpg)");
+
+    expect(html).toContain('<figure class="post-figure">');
+    expect(html).not.toContain("<figcaption");
+  });
 });

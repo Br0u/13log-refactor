@@ -1,7 +1,17 @@
 import React from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import AdminPostForm from "../../components/admin/AdminPostForm";
+
+const { submitButtonMock } = vi.hoisted(() => ({
+  submitButtonMock: vi.fn(({ label, pendingLabel }) => (
+    <button type="submit" data-pending-label={pendingLabel}>{label}</button>
+  )),
+}));
+
+vi.mock("../../components/admin/AdminSubmitButton", () => ({
+  default: submitButtonMock,
+}));
 
 describe("admin post form", () => {
   it("renders the required article fields and status options", () => {
@@ -32,6 +42,7 @@ describe("admin post form", () => {
     expect(markup).toContain('value="DRAFT"');
     expect(markup).toContain('value="PUBLISHED"');
     expect(markup).toContain('<option value="DRAFT" selected="">Draft</option>');
+    expect(markup).toContain("Save post");
   });
 
   it("server-renders the published option as selected for published posts", () => {
@@ -56,5 +67,37 @@ describe("admin post form", () => {
     expect(markup).toContain('type="datetime-local"');
     expect(markup).toContain('value="2026-03-16T05:30"');
     expect(markup).toContain("Edit using your local time.");
+  });
+
+  it("renders a success notice and pending submit label when configured", () => {
+    submitButtonMock.mockClear();
+
+    const markup = renderToStaticMarkup(
+      <AdminPostForm
+        categories={[]}
+        initialValue={{
+          title: "Published post",
+          slug: "published-post",
+          summary: "",
+          markdown: "body",
+          status: "PUBLISHED",
+          publishedAt: "2026-03-16T09:30:00.000Z",
+          categoryId: "",
+          tags: [],
+        }}
+        successMessage="Post saved."
+        submitLabel="Save post"
+        pendingLabel="Saving..."
+      />
+    );
+
+    expect(markup).toContain("Post saved.");
+    expect(submitButtonMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        label: "Save post",
+        pendingLabel: "Saving...",
+      }),
+      undefined
+    );
   });
 });

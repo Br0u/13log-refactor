@@ -6,8 +6,9 @@ import { getMicroPostById } from "../../../../lib/repositories/micro-posts";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminEditMicroPostPage({ params }) {
+export default async function AdminEditMicroPostPage({ params, searchParams }) {
   const { id } = await params;
+  const sp = await searchParams;
   const microPost = await getMicroPostById(id);
 
   if (!microPost) {
@@ -32,7 +33,11 @@ export default async function AdminEditMicroPostPage({ params }) {
         </div>
       </header>
       <div className="admin-page__panel">
-        <AdminMicroPostForm action={action} initialValue={initialValue} />
+        <AdminMicroPostForm
+          action={action}
+          initialValue={initialValue}
+          successMessage={sp?.created === "1" ? "Micro post saved." : ""}
+        />
       </div>
       <div className="admin-page__panel">
         <form action={deleteMicroPostAction.bind(null, microPost.id)} className="admin-danger-zone">

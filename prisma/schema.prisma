@@ -66,6 +66,18 @@ model MicroPost {
   updatedAt   DateTime       @updatedAt
 }
 
+model MediaAsset {
+  id        String   @id @default(cuid())
+  url       String   @unique
+  pathname  String   @unique
+  mimeType  String
+  size      Int
+  width     Int?
+  height    Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model PostTag {
   postId String
   tagId  String

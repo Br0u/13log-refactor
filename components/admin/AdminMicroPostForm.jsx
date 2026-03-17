@@ -1,13 +1,18 @@
 import React from "react";
 import MarkdownEditorField from "./MarkdownEditorField";
+import AdminSubmitButton from "./AdminSubmitButton";
 import { formatDateTimeLocal } from "./publication-utils";
 
 export default function AdminMicroPostForm({
   action,
   initialValue = {},
+  successMessage = "",
+  submitLabel = "Save micro post",
+  pendingLabel = "Saving...",
 }) {
   return (
     <form action={action} className="admin-post-form admin-form">
+      {successMessage ? <p className="admin-form-notice">{successMessage}</p> : null}
       <MarkdownEditorField
         name="content"
         label="Content"
@@ -45,7 +50,7 @@ export default function AdminMicroPostForm({
       ) : (
         <p className="admin-form-hint">Publication time becomes editable after the micro post is published.</p>
       )}
-      <button type="submit" className="admin-primary-button">Save micro post</button>
+      <AdminSubmitButton label={submitLabel} pendingLabel={pendingLabel} />
     </form>
   );
 }

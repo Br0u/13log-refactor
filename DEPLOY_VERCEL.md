@@ -71,6 +71,7 @@ DIRECT_URL=你的 Neon 直连连接串
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=0315
 SESSION_SECRET=一个足够长的随机字符串
+BLOB_READ_WRITE_TOKEN=你的 Vercel Blob 读写 Token
 NEXT_PUBLIC_SITE_URL=https://你的正式域名
 ```
 
@@ -79,6 +80,7 @@ NEXT_PUBLIC_SITE_URL=https://你的正式域名
 - `DATABASE_URL`：应用运行时使用
 - `DIRECT_URL`：Prisma migration 使用
 - `SESSION_SECRET`：用于后台登录 session 签名，必须设置为随机长字符串
+- `BLOB_READ_WRITE_TOKEN`：用于后台粘贴图片时把文件上传到 Vercel Blob
 - `NEXT_PUBLIC_SITE_URL`：用于 RSS、index.json、站点链接输出
 
 ## 6. 首次数据库初始化
@@ -137,9 +139,10 @@ npm run build
 1. 首页和文章页能正常打开
 2. 后台可以登录
 3. 可以创建一篇新文章
-4. 新文章能在前台看到
-5. 点赞功能正常
-6. 评论功能正常
+4. 在文章或 micro post 编辑页粘贴图片可以成功上传并插入 Markdown
+5. 新文章能在前台看到
+6. 点赞功能正常
+7. 评论功能正常
 
 ## 10. 常用命令
 

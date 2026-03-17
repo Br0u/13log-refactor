@@ -25,9 +25,11 @@ DIRECT_URL="postgresql://..."
 ADMIN_USERNAME="admin"
 ADMIN_PASSWORD="your-password"
 SESSION_SECRET="a-long-random-secret"
+BLOB_READ_WRITE_TOKEN="vercel-blob-read-write-token"
 ```
 
 `DATABASE_URL` is used by the app runtime. `DIRECT_URL` is used by Prisma migrations.
+`BLOB_READ_WRITE_TOKEN` is required for admin image paste uploads backed by Vercel Blob.
 
 ### Database
 
@@ -78,6 +80,8 @@ After `npm run dev`, the admin area is available at:
 ```
 
 Use `ADMIN_USERNAME` and `ADMIN_PASSWORD` from `.env`.
+
+When editing posts or micro posts, you can paste an image directly into the markdown field. The image is uploaded to Vercel Blob and inserted as Markdown automatically.
 
 ## Scope (phase 1)
 

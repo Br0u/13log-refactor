@@ -1,6 +1,20 @@
 "use client";
 
-import React, { useEffect, useId, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
+
+function findClipboardImageFile(items = []) {
+  for (const item of Array.from(items || [])) {
+    if (item?.kind === "file" && String(item.type || "").startsWith("image/")) {
+      return item.getAsFile?.() || null;
+    }
+  }
+
+  return null;
+}
+
+function insertTextAtSelection(value, text, start, end) {
+  return `${value.slice(0, start)}${text}${value.slice(end)}`;
+}
 
 export default function MarkdownEditorField({
   name,
@@ -15,8 +29,11 @@ export default function MarkdownEditorField({
   const [previewHtml, setPreviewHtml] = useState("");
   const [previewError, setPreviewError] = useState("");
   const [loadingPreview, setLoadingPreview] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const fieldId = useId();
   const previewId = `${fieldId}-preview`;
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     if (activeTab !== "preview") return undefined;
@@ -64,9 +81,58 @@ export default function MarkdownEditorField({
     return () => controller.abort();
   }, [activeTab, mode, value]);
 
+  async function handlePaste(event) {
+    const file = findClipboardImageFile(event.clipboardData?.items);
+    if (!file || uploadingImage) return;
+
+    event.preventDefault();
+    setUploadError("");
+    setUploadingImage(true);
+
+    const textarea = textareaRef.current;
+    const selectionStart = textarea?.selectionStart ?? value.length;
+    const selectionEnd = textarea?.selectionEnd ?? value.length;
+
+    try {
+      const formData = new FormData();
+      formData.set("file", file);
+
+      const response = await fetch("/api/admin/uploads/image", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Image upload failed.");
+      }
+
+      const body = await response.json();
+      const url = String(body?.url || "");
+      if (!url) {
+        throw new Error("Image upload failed.");
+      }
+
+      const markdown = `![image](${url})`;
+      const nextValue = insertTextAtSelection(value, markdown, selectionStart, selectionEnd);
+      setValue(nextValue);
+
+      requestAnimationFrame(() => {
+        if (!textareaRef.current) return;
+        const nextCaret = selectionStart + markdown.length;
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(nextCaret, nextCaret);
+      });
+    } catch {
+      setUploadError("Image upload failed.");
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
   return (
     <div className="admin-markdown-field">
       <label htmlFor={fieldId}>{label}</label>
+      <p className="admin-form-hint">Paste an image to upload and insert it here.</p>
       <div className="admin-markdown-field__toolbar" role="tablist" aria-label={`${label} mode`}>
         <button
           type="button"
@@ -90,6 +156,7 @@ export default function MarkdownEditorField({
       </div>
 
       <textarea
+        ref={textareaRef}
         id={fieldId}
         name={name}
         value={value}
@@ -98,7 +165,10 @@ export default function MarkdownEditorField({
         className={activeTab === "preview" ? "admin-markdown-field__textarea is-hidden" : "admin-markdown-field__textarea"}
         aria-hidden={activeTab === "preview"}
         onChange={(event) => setValue(event.target.value)}
+        onPaste={handlePaste}
       />
+      {uploadingImage ? <p className="admin-markdown-field__hint">Uploading image...</p> : null}
+      {uploadError ? <p className="admin-markdown-field__error">{uploadError}</p> : null}
 
       <div
         id={previewId}
