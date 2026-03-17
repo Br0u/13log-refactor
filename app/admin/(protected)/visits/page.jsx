@@ -1,5 +1,5 @@
 import React from "react";
-import { formatVisitLocation, getVisitLogSummary, listRecentVisitLogs } from "../../../lib/repositories/visit-logs";
+import { formatVisitLocation, getVisitLogSummary, listRecentVisitLogs } from "../../../../lib/repositories/visit-logs";
 
 export const dynamic = "force-dynamic";
 

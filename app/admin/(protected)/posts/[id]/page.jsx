@@ -1,9 +1,9 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { deletePostAction, updatePostAction } from "../../actions";
-import AdminPostForm from "../../../../components/admin/AdminPostForm";
-import { listCategories } from "../../../../lib/repositories/categories";
-import { db } from "../../../../lib/db";
+import { deletePostAction, updatePostAction } from "../../../actions";
+import AdminPostForm from "../../../../../components/admin/AdminPostForm";
+import { listCategories } from "../../../../../lib/repositories/categories";
+import { db } from "../../../../../lib/db";
 
 export const dynamic = "force-dynamic";
 

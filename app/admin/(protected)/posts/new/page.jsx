@@ -1,7 +1,7 @@
 import React from "react";
-import { createPostAction } from "../../../../app/admin/actions";
-import AdminPostForm from "../../../../components/admin/AdminPostForm";
-import { listCategories } from "../../../../lib/repositories/categories";
+import { createPostAction } from "../../../actions";
+import AdminPostForm from "../../../../../components/admin/AdminPostForm";
+import { listCategories } from "../../../../../lib/repositories/categories";
 
 export const dynamic = "force-dynamic";
 

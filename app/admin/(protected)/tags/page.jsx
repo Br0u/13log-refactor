@@ -1,6 +1,6 @@
 import React from "react";
-import { createTagAction, deleteTagAction } from "../actions";
-import { db } from "../../../lib/db";
+import { createTagAction, deleteTagAction } from "../../actions";
+import { db } from "../../../../lib/db";
 
 export const dynamic = "force-dynamic";
 

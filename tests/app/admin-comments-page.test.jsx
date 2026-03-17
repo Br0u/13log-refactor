@@ -37,7 +37,7 @@ vi.mock("../../lib/db", () => ({
   },
 }));
 
-import AdminCommentsPage from "../../app/admin/comments/page.jsx";
+import AdminCommentsPage from "../../app/admin/(protected)/comments/page.jsx";
 
 describe("admin comments page", () => {
   it("renders the comments workspace inside a content panel", async () => {

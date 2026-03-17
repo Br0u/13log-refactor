@@ -30,7 +30,7 @@ vi.mock("../../lib/db", () => ({
   },
 }));
 
-import AdminEditPostPage from "../../app/admin/posts/[id]/page.jsx";
+import AdminEditPostPage from "../../app/admin/(protected)/posts/[id]/page.jsx";
 
 describe("admin edit post page", () => {
   it("renders a saved notice when redirected from new post creation", async () => {

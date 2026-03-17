@@ -4,8 +4,8 @@ import {
   approveGuestbookEntryAction,
   deleteCommentAction,
   deleteGuestbookEntryAction,
-} from "../actions";
-import { db } from "../../../lib/db";
+} from "../../actions";
+import { db } from "../../../../lib/db";
 
 export const dynamic = "force-dynamic";
 

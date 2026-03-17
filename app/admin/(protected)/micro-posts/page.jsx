@@ -1,8 +1,8 @@
 import React from "react";
 import Link from "next/link";
-import { createMicroPostAction } from "../actions";
-import AdminMicroPostForm from "../../../components/admin/AdminMicroPostForm";
-import { listMicroPosts } from "../../../lib/repositories/micro-posts";
+import { createMicroPostAction } from "../../actions";
+import AdminMicroPostForm from "../../../../components/admin/AdminMicroPostForm";
+import { listMicroPosts } from "../../../../lib/repositories/micro-posts";
 
 export const dynamic = "force-dynamic";
 

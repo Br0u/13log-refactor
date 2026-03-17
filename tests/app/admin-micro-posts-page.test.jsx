@@ -18,7 +18,7 @@ vi.mock("../../lib/repositories/micro-posts", () => ({
   ])),
 }));
 
-import AdminMicroPostsPage from "../../app/admin/micro-posts/page.jsx";
+import AdminMicroPostsPage from "../../app/admin/(protected)/micro-posts/page.jsx";
 
 describe("admin micro posts page", () => {
   it("renders the micro posts workspace with a create form and list", async () => {

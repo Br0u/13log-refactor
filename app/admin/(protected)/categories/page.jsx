@@ -1,6 +1,6 @@
 import React from "react";
-import { createCategoryAction, deleteCategoryAction } from "../actions";
-import { listCategories } from "../../../lib/repositories/categories";
+import { createCategoryAction, deleteCategoryAction } from "../../actions";
+import { listCategories } from "../../../../lib/repositories/categories";
 
 export const dynamic = "force-dynamic";
 
