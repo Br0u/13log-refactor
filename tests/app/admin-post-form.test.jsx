@@ -100,4 +100,24 @@ describe("admin post form", () => {
       undefined
     );
   });
+
+  it("renders a form error when post creation fails validation", () => {
+    const markup = renderToStaticMarkup(
+      <AdminPostForm
+        categories={[]}
+        initialValue={{
+          title: "Duplicate post",
+          slug: "duplicate-post",
+          summary: "",
+          markdown: "body",
+          status: "DRAFT",
+          categoryId: "",
+          tags: [],
+        }}
+        formState={{ error: "Post slug already exists" }}
+      />
+    );
+
+    expect(markup).toContain("Post slug already exists");
+  });
 });

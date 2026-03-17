@@ -75,6 +75,7 @@ vi.mock("../../lib/db", () => ({
 import {
   approveCommentAction,
   createCategoryAction,
+  createPostAction,
   deletePostAction,
   updateMicroPostAction,
   updatePostAction,
@@ -172,5 +173,21 @@ describe("admin action cache behavior", () => {
     expect(revalidatePathMock).toHaveBeenCalledWith("/posts/page/[page]", "page");
     expect(revalidatePathMock).toHaveBeenCalledWith("/index.json");
     expect(revalidatePathMock).toHaveBeenCalledWith("/rss.xml");
+  });
+
+  it("returns a form error instead of throwing when creating a post with a duplicate slug", async () => {
+    createPostMock.mockRejectedValueOnce(new Error("Post slug already exists"));
+
+    const formData = new FormData();
+    formData.set("title", "Duplicate");
+    formData.set("slug", "duplicate-post");
+    formData.set("markdown", "# Duplicate");
+    formData.set("status", "DRAFT");
+
+    const result = await createPostAction({ error: "" }, formData);
+
+    expect(result).toEqual({ error: "Post slug already exists" });
+    expect(redirectMock).not.toHaveBeenCalled();
+    expect(revalidatePathMock).not.toHaveBeenCalled();
   });
 });
