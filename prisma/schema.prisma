@@ -62,6 +62,8 @@ model MicroPost {
   status      PostStatus     @default(DRAFT)
   publishedAt DateTime?
   tags        MicroPostTag[]
+  likes       MicroPostLike[]
+  likeCount   Int            @default(0)
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 }
@@ -139,6 +141,16 @@ model PostLike {
   createdAt  DateTime @default(now())
 
   @@unique([postId, visitorKey])
+}
+
+model MicroPostLike {
+  id          String    @id @default(cuid())
+  microPostId String
+  visitorKey  String
+  microPost   MicroPost @relation(fields: [microPostId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([microPostId, visitorKey])
 }
 
 enum PostStatus {

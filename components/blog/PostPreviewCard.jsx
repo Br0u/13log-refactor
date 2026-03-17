@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import MicroPostLikeButton from "./MicroPostLikeButton";
 
 function normalizeSummaryText(value = "") {
   return String(value)
@@ -10,7 +11,8 @@ function normalizeSummaryText(value = "") {
 }
 
 function createMicroMarkup(post) {
-  return post.renderedContentHtml || `<p>${normalizeSummaryText(post.summary || post.description || post.content || "")}</p>`;
+  const baseMarkup = post.renderedContentHtml || `<p>${normalizeSummaryText(post.summary || post.description || post.content || "")}</p>`;
+  return baseMarkup.replace(/<img\b([^>]*)class="([^"]*)"/gi, '<img$1class="$2 post-preview-card__micro-image"').replace(/<img(?![^>]*class=)\b/gi, '<img class="post-preview-card__micro-image"');
 }
 
 function collectEntryFilters(entry) {
@@ -61,6 +63,7 @@ export default function PostPreviewCard({
   dataTestId,
   focusState = "idle",
   onMicroToggle,
+  microScrollChrome,
 }) {
   const filterTags = collectEntryFilters(post);
   const isMicro = post.type === "micro";
@@ -69,6 +72,7 @@ export default function PostPreviewCard({
   const summary = normalizeSummaryText(post.summary || post.description || post.content || "");
   const microDate = getMicroDateParts(post.date);
   const microMarkup = isMicro ? createMicroMarkup(post) : "";
+  const showMicroScrollRange = isMicro && microScrollChrome;
   const cardClassName = [
     "post-entry",
     "post-preview-card",
@@ -101,7 +105,25 @@ export default function PostPreviewCard({
       </header>
 
       {isMicro ? (
-        <div className="post-preview-card__micro-surface">
+        <div
+          className="post-preview-card__micro-surface"
+          data-testid={dataTestId ? `${dataTestId}-surface` : undefined}
+        >
+          {showMicroScrollRange ? (
+            <div
+              className="post-preview-card__micro-scroll-range"
+              data-testid={dataTestId ? `${dataTestId}-scroll-range` : undefined}
+              data-scrollable={microScrollChrome.isScrollable ? "true" : "false"}
+              data-scroll-hint-active={microScrollChrome.isHintActive ? "true" : "false"}
+              style={{
+                "--micro-scroll-progress": String(microScrollChrome.progress ?? 0),
+                "--micro-scroll-window": String(microScrollChrome.viewportRatio ?? 1),
+              }}
+              aria-hidden="true"
+            >
+              <span className="post-preview-card__micro-scroll-thumb" />
+            </div>
+          ) : null}
           {microMarkup ? (
             <div className="post-preview-card__content">
               <div
@@ -123,6 +145,11 @@ export default function PostPreviewCard({
               <span className="post-preview-card__micro-clock" aria-hidden="true">◷</span>
               <span className="post-preview-card__micro-time">{microDate.time}</span>
             </span>
+            <MicroPostLikeButton
+              id={post.id}
+              initialCount={post.likeCount || 0}
+              dataTestId={dataTestId ? `${dataTestId}-like` : undefined}
+            />
           </footer>
         </div>
       ) : summary ? (

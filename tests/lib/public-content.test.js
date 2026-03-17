@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { db } from "../../lib/db";
 import { createMicroPost } from "../../lib/repositories/micro-posts";
+import { createMicroPostLike } from "../../lib/repositories/likes";
 import { createPost } from "../../lib/repositories/posts";
 import { getPublicPostBySlug, getPublicPosts, getPublicTimelineEntries } from "../../lib/public-content";
 
@@ -110,6 +111,13 @@ describe("public content facade", () => {
       tags: ["timeline"],
     });
 
+    const publishedMicroPost = await db.microPost.findFirst({
+      where: {
+        content: "timeline micro published",
+      },
+    });
+    await createMicroPostLike({ id: publishedMicroPost.id, visitorKey: "timeline-visitor" });
+
     const entries = await getPublicTimelineEntries();
     const timelineEntries = entries.filter((item) => (
       item.slug === slug || item.summary === "timeline micro published" || item.summary === "timeline micro draft"
@@ -117,6 +125,7 @@ describe("public content facade", () => {
 
     expect(timelineEntries.map((item) => item.type)).toEqual(["micro", "post"]);
     expect(timelineEntries[0].summary).toBe("timeline micro published");
+    expect(timelineEntries[0].likeCount).toBe(1);
     expect(timelineEntries.every((item) => item.summary !== "timeline micro draft")).toBe(true);
   });
 });

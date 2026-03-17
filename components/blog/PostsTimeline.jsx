@@ -3,9 +3,28 @@
 import React, { useEffect, useRef, useState } from "react";
 import PostPreviewCard from "./PostPreviewCard";
 
+function isScrollableWithinBounds(element, deltaY) {
+  if (!element || !Number.isFinite(deltaY) || deltaY === 0) return false;
+
+  const maxScrollTop = element.scrollHeight - element.clientHeight;
+  if (maxScrollTop <= 0) return false;
+  if (deltaY > 0) return element.scrollTop < maxScrollTop;
+  return element.scrollTop > 0;
+}
+
 export default function PostsTimeline({ entries = [] }) {
   const [focusedMicroPostId, setFocusedMicroPostId] = useState("");
+  const [microScrollChrome, setMicroScrollChrome] = useState({
+    id: "",
+    isScrollable: false,
+    progress: 0,
+    viewportRatio: 1,
+    isHintActive: false,
+  });
   const timelineRef = useRef(null);
+  const touchStartYRef = useRef(null);
+  const touchStartedInsideActiveCardRef = useRef(false);
+  const scrollHintTimeoutRef = useRef(null);
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -21,29 +40,167 @@ export default function PostsTimeline({ entries = [] }) {
   useEffect(() => {
     if (!focusedMicroPostId) return undefined;
 
-    const onPointerDown = (event) => {
+    const getActiveCard = () => {
       const timeline = timelineRef.current;
-      if (!timeline) return;
+      if (!timeline) return null;
+      return timeline.querySelector(`[data-testid="timeline-card-${focusedMicroPostId}"]`);
+    };
 
-      const activeCard = timeline.querySelector(`[data-testid="timeline-card-${focusedMicroPostId}"]`);
+    const getActiveScrollSurface = () => {
+      const activeCard = getActiveCard();
+      if (!activeCard) return null;
+      return activeCard.querySelector(`[data-testid="timeline-card-${focusedMicroPostId}-surface"]`);
+    };
+
+    const syncActiveScrollChrome = () => {
+      const activeSurface = getActiveScrollSurface();
+      if (!activeSurface) return;
+
+      const scrollHeight = activeSurface.scrollHeight || 0;
+      const clientHeight = activeSurface.clientHeight || 0;
+      const maxScrollTop = Math.max(scrollHeight - clientHeight, 0);
+      const progress = maxScrollTop > 0 ? activeSurface.scrollTop / maxScrollTop : 0;
+      const viewportRatio = scrollHeight > 0 ? Math.min(clientHeight / scrollHeight, 1) : 1;
+
+      setMicroScrollChrome((current) => ({
+        id: focusedMicroPostId,
+        isScrollable: maxScrollTop > 0,
+        progress: Number(progress.toFixed(4)),
+        viewportRatio: Number(viewportRatio.toFixed(4)),
+        isHintActive: maxScrollTop > 0 ? current.id === focusedMicroPostId && current.isHintActive : false,
+      }));
+    };
+
+    const triggerScrollHint = () => {
+      if (scrollHintTimeoutRef.current) {
+        clearTimeout(scrollHintTimeoutRef.current);
+      }
+
+      setMicroScrollChrome((current) => (
+        current.id === focusedMicroPostId
+          ? { ...current, isHintActive: true }
+          : current
+      ));
+
+      scrollHintTimeoutRef.current = window.setTimeout(() => {
+        setMicroScrollChrome((current) => (
+          current.id === focusedMicroPostId
+            ? { ...current, isHintActive: false }
+            : current
+        ));
+      }, 1000);
+    };
+
+    const eventIsInsideActiveCard = (event, activeCard) => {
+      if (!activeCard) return false;
+
+      if (typeof event.composedPath === "function") {
+        return event.composedPath().includes(activeCard);
+      }
+
+      const eventTarget = event.target instanceof Node ? event.target : null;
+      return Boolean(eventTarget && activeCard.contains(eventTarget));
+    };
+
+    const onPointerDown = (event) => {
+      const activeCard = getActiveCard();
       if (activeCard && !activeCard.contains(event.target)) {
         setFocusedMicroPostId("");
       }
     };
 
-    const clearFocus = (event) => {
+    const dismissFocus = (event) => {
       event.preventDefault();
       setFocusedMicroPostId("");
     };
 
+    const onWheel = (event) => {
+      const activeCard = getActiveCard();
+      const activeSurface = getActiveScrollSurface();
+      const isInsideActiveCard = activeCard && eventIsInsideActiveCard(event, activeCard);
+
+      if (activeCard && activeSurface && isInsideActiveCard && isScrollableWithinBounds(activeSurface, event.deltaY)) {
+        triggerScrollHint();
+        return;
+      }
+
+      if (isInsideActiveCard) {
+        event.preventDefault();
+        triggerScrollHint();
+        return;
+      }
+
+      dismissFocus(event);
+    };
+
+    const onTouchStart = (event) => {
+      const activeCard = getActiveCard();
+      touchStartYRef.current = event.touches[0]?.clientY ?? null;
+      touchStartedInsideActiveCardRef.current = eventIsInsideActiveCard(event, activeCard);
+    };
+
+    const onTouchMove = (event) => {
+      const activeCard = getActiveCard();
+      const activeSurface = getActiveScrollSurface();
+      const currentTouchY = event.touches[0]?.clientY ?? null;
+      const previousTouchY = touchStartYRef.current;
+      touchStartYRef.current = currentTouchY;
+      const isInsideActiveCard = activeCard && (
+        touchStartedInsideActiveCardRef.current || eventIsInsideActiveCard(event, activeCard)
+      );
+
+      const deltaY = previousTouchY == null || currentTouchY == null ? 0 : previousTouchY - currentTouchY;
+      if (activeCard && activeSurface && isInsideActiveCard && isScrollableWithinBounds(activeSurface, deltaY)) {
+        triggerScrollHint();
+        return;
+      }
+
+      if (isInsideActiveCard) {
+        event.preventDefault();
+        triggerScrollHint();
+        return;
+      }
+
+      dismissFocus(event);
+    };
+
+    const onActiveSurfaceScroll = () => {
+      syncActiveScrollChrome();
+      triggerScrollHint();
+    };
+
+    const activeSurface = getActiveScrollSurface();
+    syncActiveScrollChrome();
+    activeSurface?.addEventListener("scroll", onActiveSurfaceScroll, { passive: true });
+
     window.addEventListener("mousedown", onPointerDown);
-    window.addEventListener("wheel", clearFocus, { passive: false });
-    window.addEventListener("touchmove", clearFocus, { passive: false });
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("wheel", onWheel, { passive: false, capture: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false, capture: true });
     return () => {
+      if (scrollHintTimeoutRef.current) {
+        clearTimeout(scrollHintTimeoutRef.current);
+        scrollHintTimeoutRef.current = null;
+      }
+      activeSurface?.removeEventListener("scroll", onActiveSurfaceScroll);
       window.removeEventListener("mousedown", onPointerDown);
-      window.removeEventListener("wheel", clearFocus);
-      window.removeEventListener("touchmove", clearFocus);
-      };
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("wheel", onWheel, true);
+      window.removeEventListener("touchmove", onTouchMove, true);
+      touchStartYRef.current = null;
+      touchStartedInsideActiveCardRef.current = false;
+    };
+  }, [focusedMicroPostId]);
+
+  useEffect(() => {
+    if (focusedMicroPostId) return;
+    setMicroScrollChrome({
+      id: "",
+      isScrollable: false,
+      progress: 0,
+      viewportRatio: 1,
+      isHintActive: false,
+    });
   }, [focusedMicroPostId]);
 
   return (
@@ -66,6 +223,7 @@ export default function PostsTimeline({ entries = [] }) {
             post={entry}
             dataTestId={`timeline-card-${key}`}
             focusState={focusState}
+            microScrollChrome={isActive ? microScrollChrome : undefined}
             onMicroToggle={isMicro ? () => {
               setFocusedMicroPostId((current) => {
                 if (!current) return entry.id;

@@ -59,4 +59,72 @@ describe("PostPreviewCard", () => {
     expect(markup).toContain("post-preview-card__micro-time");
     expect(markup).toContain("post-preview-card__micro-richtext");
   });
+
+  it("renders micropost images with the shared framed image class", () => {
+    const markup = renderToStaticMarkup(
+      <PostPreviewCard
+        post={{
+          type: "micro",
+          id: "micro-2",
+          content: "带图的 micro post",
+          summary: "带图的 micro post",
+          renderedContentHtml: "<p><img src=\"/test.jpg\" alt=\"test\"></p>",
+          date: "2026-03-15T10:48:33.000Z",
+          tags: ["碎碎念"],
+          categories: [],
+        }}
+      />
+    );
+
+    expect(markup).toContain("post-preview-card__micro-image");
+  });
+
+  it("renders a micropost scroll range when scroll chrome data is provided", () => {
+    const markup = renderToStaticMarkup(
+      <PostPreviewCard
+        post={{
+          type: "micro",
+          id: "micro-3",
+          content: "可滚动 micro post",
+          summary: "可滚动 micro post",
+          renderedContentHtml: "<p>第一段</p><p>第二段</p>",
+          date: "2026-03-15T10:48:33.000Z",
+          tags: ["碎碎念"],
+          categories: [],
+        }}
+        microScrollChrome={{
+          isScrollable: true,
+          progress: 0.4,
+          viewportRatio: 0.28,
+        }}
+      />
+    );
+
+    expect(markup).toContain("post-preview-card__micro-scroll-range");
+    expect(markup).toContain("post-preview-card__micro-scroll-thumb");
+    expect(markup).toContain("--micro-scroll-progress:0.4");
+    expect(markup).toContain("--micro-scroll-window:0.28");
+  });
+
+  it("renders a micropost heart like button with the current count", () => {
+    const markup = renderToStaticMarkup(
+      <PostPreviewCard
+        post={{
+          type: "micro",
+          id: "micro-4",
+          content: "可点赞 micro post",
+          summary: "可点赞 micro post",
+          renderedContentHtml: "<p>第一段</p>",
+          date: "2026-03-15T10:48:33.000Z",
+          tags: ["碎碎念"],
+          categories: [],
+          likeCount: 3,
+        }}
+      />
+    );
+
+    expect(markup).toContain("micro-post-like-button");
+    expect(markup).toContain("♡");
+    expect(markup).toContain(">3<");
+  });
 });

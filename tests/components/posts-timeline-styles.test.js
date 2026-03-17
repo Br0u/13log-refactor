@@ -34,4 +34,45 @@ describe("posts timeline styles", () => {
     expect(stylesheet).toMatch(/\.post-preview-card--micro\s+\.post-preview-card__micro-surface\s*\{[^}]*display:\s*grid;/s);
     expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*position:\s*absolute;[^}]*max-height:\s*min\(/s);
   });
+
+  it("styles micropost images with framed proportional media treatment", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*display:\s*block;[^}]*width:\s*100%;[^}]*height:\s*auto;/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*border:\s*1px\s+solid\s+[^;]+;/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*object-fit:\s*contain;/s);
+  });
+
+  it("keeps the focused micropost surface mobile-friendly for touch scrolling", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*touch-action:\s*pan-y\s+pinch-zoom;[^}]*-webkit-overflow-scrolling:\s*touch;/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*max-height:\s*min\(22rem,\s*62vh\);/s);
+  });
+
+  it("keeps the native scrollbar hidden when the range frame is shown", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*scrollbar-width:\s*none;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*scrollbar-color:\s*[^;]+;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface::-webkit-scrollbar\s*\{[^}]*width:\s*0;[^}]*height:\s*0;/s);
+  });
+
+  it("renders a proportional scroll range frame for focused microposts", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-scroll-range\s*\{[^}]*position:\s*absolute;[^}]*transform:\s*scaleY\(0\.82\);/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-scroll-range\s*\{[^}]*opacity:\s*0\.[\d]+;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active:hover\s+\.post-preview-card__micro-scroll-range\[data-scrollable="true"\]\s*\{[^}]*opacity:\s*0\.[\d]+;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-scroll-range\[data-scrollable="true"\]\[data-scroll-hint-active="true"\]\s*\{[^}]*opacity:\s*0\.[\d]+;/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-scroll-thumb\s*\{[^}]*height:\s*calc\(var\(--micro-scroll-window,\s*0\.24\)\s*\*\s*100%\);/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-scroll-thumb\s*\{[^}]*top:\s*calc\(var\(--micro-scroll-progress,\s*0\)\s*\*\s*\(100%\s*-\s*\(var\(--micro-scroll-window,\s*0\.24\)\s*\*\s*100%\)\)\);/s);
+  });
+
+  it("styles micropost heart likes as a quiet footer action", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.micro-post-like-button\s*\{[^}]*display:\s*inline-flex;[^}]*background:\s*transparent;/s);
+    expect(stylesheet).toMatch(/\.micro-post-like-button__icon\s*\{[^}]*font-size:\s*0\.[\d]+rem;/s);
+  });
 });
