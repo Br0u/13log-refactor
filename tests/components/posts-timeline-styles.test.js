@@ -32,7 +32,8 @@ describe("posts timeline styles", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toMatch(/\.post-preview-card--micro\s+\.post-preview-card__micro-surface\s*\{[^}]*display:\s*grid;/s);
-    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*position:\s*absolute;[^}]*max-height:\s*min\(/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*position:\s*absolute;[^}]*max-height:\s*var\(--micro-surface-max-height,/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-surface\[data-micro-placement="up"\]\s*\{[^}]*top:\s*auto;[^}]*bottom:\s*-[.\d]+rem;/s);
   });
 
   it("styles micropost images with framed proportional media treatment", () => {

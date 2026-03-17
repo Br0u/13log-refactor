@@ -20,6 +20,8 @@ export default function PostsTimeline({ entries = [] }) {
     progress: 0,
     viewportRatio: 1,
     isHintActive: false,
+    placement: "down",
+    surfaceMaxHeight: null,
   });
   const timelineRef = useRef(null);
   const touchStartYRef = useRef(null);
@@ -52,6 +54,37 @@ export default function PostsTimeline({ entries = [] }) {
       return activeCard.querySelector(`[data-testid="timeline-card-${focusedMicroPostId}-surface"]`);
     };
 
+    const syncActiveSurfacePlacement = () => {
+      const activeCard = getActiveCard();
+      if (!activeCard) return;
+
+      const rect = activeCard.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+      const safeMargin = viewportHeight <= 720 ? 12 : 16;
+      const cardOffset = viewportHeight <= 720 ? 4 : 16;
+      const maxViewportHeight = Math.max(viewportHeight - (safeMargin * 2), 0);
+      const downMaxHeight = Math.max(
+        Math.min(viewportHeight - safeMargin - (rect.top - cardOffset), maxViewportHeight),
+        0
+      );
+      const upMaxHeight = Math.max(
+        Math.min((rect.bottom + cardOffset) - safeMargin, maxViewportHeight),
+        0
+      );
+      const preferredHeight = viewportHeight <= 720 ? 220 : 280;
+      const placement = downMaxHeight < preferredHeight && upMaxHeight > downMaxHeight ? "up" : "down";
+      const surfaceMaxHeight = Math.round(placement === "up" ? upMaxHeight : downMaxHeight);
+
+      setMicroScrollChrome((current) => (
+        {
+          ...current,
+          id: focusedMicroPostId,
+          placement,
+          surfaceMaxHeight,
+        }
+      ));
+    };
+
     const syncActiveScrollChrome = () => {
       const activeSurface = getActiveScrollSurface();
       if (!activeSurface) return;
@@ -68,6 +101,8 @@ export default function PostsTimeline({ entries = [] }) {
         progress: Number(progress.toFixed(4)),
         viewportRatio: Number(viewportRatio.toFixed(4)),
         isHintActive: maxScrollTop > 0 ? current.id === focusedMicroPostId && current.isHintActive : false,
+        placement: current.id === focusedMicroPostId ? current.placement : "down",
+        surfaceMaxHeight: current.id === focusedMicroPostId ? current.surfaceMaxHeight : null,
       }));
     };
 
@@ -170,8 +205,10 @@ export default function PostsTimeline({ entries = [] }) {
     };
 
     const activeSurface = getActiveScrollSurface();
+    syncActiveSurfacePlacement();
     syncActiveScrollChrome();
     activeSurface?.addEventListener("scroll", onActiveSurfaceScroll, { passive: true });
+    window.addEventListener("resize", syncActiveSurfacePlacement);
 
     window.addEventListener("mousedown", onPointerDown);
     window.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -183,6 +220,7 @@ export default function PostsTimeline({ entries = [] }) {
         scrollHintTimeoutRef.current = null;
       }
       activeSurface?.removeEventListener("scroll", onActiveSurfaceScroll);
+      window.removeEventListener("resize", syncActiveSurfacePlacement);
       window.removeEventListener("mousedown", onPointerDown);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("wheel", onWheel, true);
@@ -200,6 +238,8 @@ export default function PostsTimeline({ entries = [] }) {
       progress: 0,
       viewportRatio: 1,
       isHintActive: false,
+      placement: "down",
+      surfaceMaxHeight: null,
     });
   }, [focusedMicroPostId]);
 
