@@ -271,6 +271,38 @@
   margin: 0;
 }
 
+.admin-markdown-field__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-markdown-field__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.admin-markdown-field__upload-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  background: color-mix(in srgb, var(--entry) 96%, transparent);
+  color: var(--secondary);
+  font-size: 0.78rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .admin-markdown-field__hint,
 .admin-markdown-field__error {
   margin: 0;

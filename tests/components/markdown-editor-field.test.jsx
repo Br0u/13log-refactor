@@ -191,4 +191,46 @@ describe("MarkdownEditorField", () => {
     expect(await screen.findByText("Image upload failed.")).toBeTruthy();
     expect(screen.getByRole("textbox", { name: "Content" }).value).toBe("before");
   });
+
+  it("uploads a selected image from the picker and inserts markdown at the caret", async () => {
+    const fetchMock = vi.fn(async (url) => {
+      if (url === "/api/admin/uploads/image") {
+        return {
+          ok: true,
+          json: async () => ({ url: "https://blob.example/mobile.png" }),
+        };
+      }
+
+      return {
+        ok: true,
+        json: async () => ({ html: "<p>unused</p>" }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MarkdownEditorField
+        name="markdown"
+        label="Markdown"
+        initialValue="mobile "
+        mode="post"
+      />
+    );
+
+    const textbox = screen.getByRole("textbox", { name: "Markdown" });
+    textbox.setSelectionRange(7, 7);
+
+    const fileInput = screen.getByLabelText("Upload image");
+    const file = new File(["png"], "mobile.png", { type: "image/png" });
+    fireEvent.change(fileInput, {
+      target: {
+        files: [file],
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("textbox", { name: "Markdown" }).value)
+        .toBe("mobile ![image](https://blob.example/mobile.png)");
+    });
+  });
 });
