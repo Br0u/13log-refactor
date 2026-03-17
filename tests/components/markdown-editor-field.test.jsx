@@ -62,4 +62,133 @@ describe("MarkdownEditorField", () => {
       expect(screen.getByRole("textbox", { name: "Content" }).value).toBe("第一行\n第二行");
     });
   });
+
+  it("uploads a pasted image and inserts markdown at the caret", async () => {
+    const fetchMock = vi.fn(async (url) => {
+      if (url === "/api/admin/uploads/image") {
+        return {
+          ok: true,
+          json: async () => ({ url: "https://blob.example/test.png" }),
+        };
+      }
+
+      return {
+        ok: true,
+        json: async () => ({ html: "<p>unused</p>" }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MarkdownEditorField
+        name="markdown"
+        label="Markdown"
+        initialValue="hello "
+        mode="post"
+      />
+    );
+
+    const textbox = screen.getByRole("textbox", { name: "Markdown" });
+    textbox.setSelectionRange(6, 6);
+
+    const file = new File(["png"], "pasted.png", { type: "image/png" });
+    fireEvent.paste(textbox, {
+      clipboardData: {
+        items: [
+          {
+            kind: "file",
+            type: "image/png",
+            getAsFile: () => file,
+          },
+        ],
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("textbox", { name: "Markdown" }).value)
+        .toBe("hello ![image](https://blob.example/test.png)");
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/admin/uploads/image",
+      expect.objectContaining({
+        method: "POST",
+        body: expect.any(FormData),
+      })
+    );
+  });
+
+  it("does not upload on text-only paste", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MarkdownEditorField
+        name="markdown"
+        label="Markdown"
+        initialValue=""
+        mode="post"
+      />
+    );
+
+    const textbox = screen.getByRole("textbox", { name: "Markdown" });
+    fireEvent.paste(textbox, {
+      clipboardData: {
+        items: [
+          {
+            kind: "string",
+            type: "text/plain",
+            getAsFile: () => null,
+          },
+        ],
+      },
+    });
+
+    expect(fetchMock).not.toHaveBeenCalledWith("/api/admin/uploads/image", expect.anything());
+  });
+
+  it("shows an upload error and preserves content when image upload fails", async () => {
+    const fetchMock = vi.fn(async (url) => {
+      if (url === "/api/admin/uploads/image") {
+        return {
+          ok: false,
+          json: async () => ({ message: "Upload failed" }),
+        };
+      }
+
+      return {
+        ok: true,
+        json: async () => ({ html: "<p>unused</p>" }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <MarkdownEditorField
+        name="content"
+        label="Content"
+        initialValue="before"
+        mode="micro"
+      />
+    );
+
+    const textbox = screen.getByRole("textbox", { name: "Content" });
+    textbox.setSelectionRange(6, 6);
+
+    const file = new File(["png"], "broken.png", { type: "image/png" });
+    fireEvent.paste(textbox, {
+      clipboardData: {
+        items: [
+          {
+            kind: "file",
+            type: "image/png",
+            getAsFile: () => file,
+          },
+        ],
+      },
+    });
+
+    expect(await screen.findByText("Image upload failed.")).toBeTruthy();
+    expect(screen.getByRole("textbox", { name: "Content" }).value).toBe("before");
+  });
 });
