@@ -287,6 +287,14 @@
   color: var(--secondary);
 }
 
+.admin-form-notice {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, #1f1f1f 28%, var(--border));
+  background: color-mix(in srgb, var(--entry) 96%, #f4f1e8 4%);
+  color: var(--primary);
+}
+
 .admin-page-header {
   display: flex;
   justify-content: space-between;
@@ -388,6 +396,7 @@
   justify-self: start;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-height: 40px;
   padding: 0 16px;
   border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);

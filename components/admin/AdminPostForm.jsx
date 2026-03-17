@@ -1,14 +1,19 @@
 import React from "react";
 import MarkdownEditorField from "./MarkdownEditorField";
+import AdminSubmitButton from "./AdminSubmitButton";
 import { formatDateTimeLocal } from "./publication-utils";
 
 export default function AdminPostForm({
   action,
   categories = [],
   initialValue = {},
+  successMessage = "",
+  submitLabel = "Save post",
+  pendingLabel = "Saving...",
 }) {
   return (
     <form action={action} className="admin-post-form admin-form">
+      {successMessage ? <p className="admin-form-notice">{successMessage}</p> : null}
       <label>
         <span>Title</span>
         <input name="title" defaultValue={initialValue.title || ""} required />
@@ -73,7 +78,7 @@ export default function AdminPostForm({
       ) : (
         <p className="admin-form-hint">Publication time becomes editable after the post is published.</p>
       )}
-      <button type="submit" className="admin-primary-button">Save post</button>
+      <AdminSubmitButton label={submitLabel} pendingLabel={pendingLabel} />
     </form>
   );
 }

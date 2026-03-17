@@ -1142,6 +1142,51 @@ body::before {
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
 }
 
+.post-single .post-content .post-figure {
+  margin: 2rem auto 2.3rem;
+  padding: 0;
+  max-width: min(50%, 24rem);
+  border: 1px solid #111;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.post-single .post-content .post-figure__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.post-single .post-content .post-figure__caption {
+  margin: 0.8rem 0 0.1rem;
+  padding: 0 0.2rem;
+  color: var(--secondary);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.dark .post-single .post-content .post-figure {
+  border-color: #111;
+}
+
+@media (max-width: 768px) {
+  .post-single .post-content .post-figure {
+    margin: 1.6rem 0 1.9rem;
+    padding: 0;
+    max-width: min(100%, 18rem);
+  }
+
+  .post-single .post-content .post-figure__caption {
+    font-size: 0.88rem;
+  }
+}
+
 .post-single .post-content hr {
   background: linear-gradient(to right, transparent, var(--border), transparent);
 }

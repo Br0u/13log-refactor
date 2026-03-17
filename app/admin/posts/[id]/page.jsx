@@ -7,8 +7,9 @@ import { db } from "../../../../lib/db";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminEditPostPage({ params }) {
+export default async function AdminEditPostPage({ params, searchParams }) {
   const { id } = await params;
+  const sp = await searchParams;
   const [post, categories] = await Promise.all([
     db.post.findUnique({
       where: { id },
@@ -48,7 +49,12 @@ export default async function AdminEditPostPage({ params }) {
         </div>
       </header>
       <div className="admin-page__panel">
-        <AdminPostForm action={action} categories={categories} initialValue={initialValue} />
+        <AdminPostForm
+          action={action}
+          categories={categories}
+          initialValue={initialValue}
+          successMessage={sp?.created === "1" ? "Post saved." : ""}
+        />
       </div>
       <div className="admin-page__panel">
         <form action={deletePostAction.bind(null, post.id)} className="admin-danger-zone">

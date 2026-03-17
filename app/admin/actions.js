@@ -79,7 +79,7 @@ export async function createPostAction(formData) {
   if (post?.slug) {
     revalidatePath(`/posts/${post.slug}`);
   }
-  redirect(`/admin/posts/${post.id}`);
+  redirect(`/admin/posts/${post.id}?created=1`);
 }
 
 export async function updatePostAction(postId, formData) {
@@ -95,7 +95,7 @@ export async function createMicroPostAction(formData) {
   const microPost = await createMicroPost(parseMicroPostFormData(formData));
   revalidateAdminMicroPostsPaths(microPost.id);
   revalidatePostTimelinePaths();
-  redirect(`/admin/micro-posts/${microPost.id}`);
+  redirect(`/admin/micro-posts/${microPost.id}?created=1`);
 }
 
 export async function updateMicroPostAction(microPostId, formData) {
