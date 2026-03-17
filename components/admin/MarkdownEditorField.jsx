@@ -34,6 +34,7 @@ export default function MarkdownEditorField({
   const fieldId = useId();
   const previewId = `${fieldId}-preview`;
   const textareaRef = useRef(null);
+  const imageInputRef = useRef(null);
 
   useEffect(() => {
     if (activeTab !== "preview") return undefined;
@@ -81,17 +82,14 @@ export default function MarkdownEditorField({
     return () => controller.abort();
   }, [activeTab, mode, value]);
 
-  async function handlePaste(event) {
-    const file = findClipboardImageFile(event.clipboardData?.items);
+  async function uploadImageAndInsert(file) {
     if (!file || uploadingImage) return;
-
-    event.preventDefault();
-    setUploadError("");
-    setUploadingImage(true);
-
     const textarea = textareaRef.current;
     const selectionStart = textarea?.selectionStart ?? value.length;
     const selectionEnd = textarea?.selectionEnd ?? value.length;
+
+    setUploadError("");
+    setUploadingImage(true);
 
     try {
       const formData = new FormData();
@@ -129,10 +127,43 @@ export default function MarkdownEditorField({
     }
   }
 
+  async function handlePaste(event) {
+    const file = findClipboardImageFile(event.clipboardData?.items);
+    if (!file || uploadingImage) return;
+
+    event.preventDefault();
+    await uploadImageAndInsert(file);
+  }
+
+  async function handleImageSelection(event) {
+    const file = event.target.files?.[0] || null;
+    await uploadImageAndInsert(file);
+    if (event.target) {
+      event.target.value = "";
+    }
+  }
+
   return (
     <div className="admin-markdown-field">
       <label htmlFor={fieldId}>{label}</label>
-      <p className="admin-form-hint">Paste an image to upload and insert it here.</p>
+      <div className="admin-markdown-field__actions">
+        <p className="admin-form-hint">Paste an image to upload and insert it here.</p>
+        <button
+          type="button"
+          className="admin-markdown-field__upload-button"
+          onClick={() => imageInputRef.current?.click()}
+        >
+          + Image
+        </button>
+      </div>
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        aria-label="Upload image"
+        className="admin-markdown-field__file-input"
+        onChange={handleImageSelection}
+      />
       <div className="admin-markdown-field__toolbar" role="tablist" aria-label={`${label} mode`}>
         <button
           type="button"
