@@ -398,6 +398,50 @@ describe("PostsTimeline", () => {
     expect(screen.getByTestId("timeline-card-micro-1").getAttribute("data-focus-state")).toBe("active");
   });
 
+  it("repositions a focused micropost upward when the card sits near the viewport bottom", () => {
+    render(
+      <PostsTimeline
+        entries={[
+          {
+            type: "micro",
+            id: "micro-1",
+            content: "一段很长很长的内容",
+            summary: "一段很长很长的内容",
+            renderedContentHtml: "<p>第一段</p><p>第二段</p><p>第三段</p><p>第四段</p>",
+            date: "2026-03-10T01:32:00.000Z",
+            tags: ["碎碎念"],
+            categories: [],
+          },
+        ]}
+      />
+    );
+
+    const card = screen.getByTestId("timeline-card-micro-1");
+    const originalRect = card.getBoundingClientRect.bind(card);
+
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      writable: true,
+      value: 800,
+    });
+
+    card.getBoundingClientRect = () => ({
+      ...originalRect(),
+      top: 680,
+      bottom: 760,
+      left: 0,
+      right: 320,
+      width: 320,
+      height: 80,
+    });
+
+    fireEvent.click(card);
+
+    const scrollSurface = screen.getByTestId("timeline-card-micro-1-surface");
+    expect(scrollSurface.getAttribute("data-micro-placement")).toBe("up");
+    expect(scrollSurface.style.getPropertyValue("--micro-surface-max-height")).toBe("760px");
+  });
+
   it("updates the active micropost range frame as the card scroll position changes", () => {
     render(
       <PostsTimeline
