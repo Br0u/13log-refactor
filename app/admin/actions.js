@@ -108,7 +108,6 @@ function revalidatePhotoAlbumPaths(albumId, photoId) {
   }
   revalidatePhotosPaths();
 }
-
 export async function createPostAction(_previousState, formData) {
   try {
     const post = await createPost(parsePostFormData(formData));

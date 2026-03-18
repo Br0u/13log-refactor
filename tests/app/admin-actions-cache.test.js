@@ -214,14 +214,15 @@ describe("admin action cache behavior", () => {
     const formData = new FormData();
     formData.set("name", "Travel");
     formData.set("slug", "travel");
+    formData.set("status", "PUBLISHED");
     formData.set("sortOrder", "4");
 
     await createPhotoCategoryAction(formData);
 
     expect(db.photoCategory.upsert).toHaveBeenCalledWith({
       where: { slug: "travel" },
-      update: { name: "Travel", description: null, sortOrder: 4 },
-      create: { name: "Travel", slug: "travel", description: null, sortOrder: 4 },
+      update: { name: "Travel", description: null, status: "PUBLISHED", sortOrder: 4 },
+      create: { name: "Travel", slug: "travel", description: null, status: "PUBLISHED", sortOrder: 4 },
     });
     expect(revalidatePathMock).toHaveBeenCalledWith("/admin");
     expect(revalidatePathMock).toHaveBeenCalledWith("/admin/photos");
@@ -237,7 +238,6 @@ describe("admin action cache behavior", () => {
     const formData = new FormData();
     formData.set("title", "Morning Light");
     formData.set("imageUrl", "https://cdn.example.com/morning-light.jpg");
-    formData.set("status", "PUBLISHED");
     formData.set("categoryId", "cat-1");
 
     await createPhotoAction({ error: "" }, formData);
@@ -247,8 +247,6 @@ describe("admin action cache behavior", () => {
       caption: "",
       imageUrl: "https://cdn.example.com/morning-light.jpg",
       altText: "",
-      status: "PUBLISHED",
-      publishedAt: null,
       categoryId: "cat-1",
       sortOrder: 0,
     });
@@ -268,7 +266,6 @@ describe("admin action cache behavior", () => {
     const formData = new FormData();
     formData.set("title", "Morning Light");
     formData.set("caption", "Quiet stone");
-    formData.set("status", "PUBLISHED");
     formData.set("categoryId", "album-1");
     formData.set("sortOrder", "4");
 
@@ -279,8 +276,6 @@ describe("admin action cache behavior", () => {
       caption: "Quiet stone",
       imageUrl: "",
       altText: "",
-      status: "PUBLISHED",
-      publishedAt: null,
       categoryId: "album-1",
       sortOrder: 4,
     });
