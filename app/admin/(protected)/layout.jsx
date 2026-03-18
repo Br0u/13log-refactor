@@ -7,6 +7,7 @@ import { ADMIN_SESSION_COOKIE, readAdminSession } from "../../../lib/session";
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/posts", label: "Posts" },
+  { href: "/admin/photos", label: "Photos" },
   { href: "/admin/micro-posts", label: "Micro posts" },
   { href: "/admin/categories", label: "Categories" },
   { href: "/admin/tags", label: "Tags" },

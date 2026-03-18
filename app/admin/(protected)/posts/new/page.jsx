@@ -1,6 +1,5 @@
 import React from "react";
-import { createPostAction } from "../../../actions";
-import AdminPostForm from "../../../../../components/admin/AdminPostForm";
+import AdminPostCreateForm from "../../../../../components/admin/AdminPostCreateForm";
 import { listCategories } from "../../../../../lib/repositories/categories";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +21,7 @@ export default async function AdminNewPostPage() {
         </div>
       </header>
       <div className="admin-page__panel">
-        <AdminPostForm action={createPostAction} categories={categories} />
+        <AdminPostCreateForm categories={categories} />
       </div>
     </section>
   );

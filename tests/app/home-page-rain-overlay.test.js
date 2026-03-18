@@ -15,6 +15,13 @@ describe("home page rain overlay markup", () => {
     expect(source).toContain("button-inner\">Link");
   });
 
+  it("points the Photos shortcut at the original flip-book page entry", () => {
+    const source = fs.readFileSync(path.join(process.cwd(), "app/page.js"), "utf8");
+
+    expect(source).toContain('<Link className="button" href="/photos/index.html">');
+    expect(source).not.toContain('href="/photos/"');
+  });
+
   it("does not mount a dedicated rainy-day client overlay into the homepage anymore", () => {
     const source = fs.readFileSync(path.join(process.cwd(), "app/page.js"), "utf8");
     const enhancementsSource = fs.readFileSync(path.join(process.cwd(), "app/components/ClientEnhancements.js"), "utf8");

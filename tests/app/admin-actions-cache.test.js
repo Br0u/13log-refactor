@@ -7,6 +7,8 @@ const {
   updatePostMock,
   createMicroPostMock,
   updateMicroPostMock,
+  createPhotoMock,
+  updatePhotoMock,
   approveCommentMock,
   removeCommentMock,
   approveGuestbookEntryMock,
@@ -18,6 +20,8 @@ const {
   updatePostMock: vi.fn(),
   createMicroPostMock: vi.fn(),
   updateMicroPostMock: vi.fn(),
+  createPhotoMock: vi.fn(),
+  updatePhotoMock: vi.fn(),
   approveCommentMock: vi.fn(),
   removeCommentMock: vi.fn(),
   approveGuestbookEntryMock: vi.fn(),
@@ -42,6 +46,11 @@ vi.mock("../../lib/repositories/micro-posts", () => ({
   updateMicroPost: updateMicroPostMock,
 }));
 
+vi.mock("../../lib/repositories/photos", () => ({
+  createPhoto: createPhotoMock,
+  updatePhoto: updatePhotoMock,
+}));
+
 vi.mock("../../lib/repositories/comments", () => ({
   approveComment: approveCommentMock,
   removeComment: removeCommentMock,
@@ -56,6 +65,12 @@ vi.mock("../../lib/db", () => ({
   db: {
     category: {
       upsert: vi.fn(),
+      delete: vi.fn(),
+    },
+    photoCategory: {
+      upsert: vi.fn(),
+    },
+    photo: {
       delete: vi.fn(),
     },
     tag: {
@@ -74,9 +89,14 @@ vi.mock("../../lib/db", () => ({
 
 import {
   approveCommentAction,
+  createPhotoAction,
+  createPhotoCategoryAction,
   createCategoryAction,
+  createPostAction,
+  deletePhotoAction,
   deletePostAction,
   updateMicroPostAction,
+  updatePhotoAction,
   updatePostAction,
 } from "../../app/admin/actions";
 import { db } from "../../lib/db";
@@ -172,5 +192,116 @@ describe("admin action cache behavior", () => {
     expect(revalidatePathMock).toHaveBeenCalledWith("/posts/page/[page]", "page");
     expect(revalidatePathMock).toHaveBeenCalledWith("/index.json");
     expect(revalidatePathMock).toHaveBeenCalledWith("/rss.xml");
+  });
+
+  it("returns a form error instead of throwing when creating a post with a duplicate slug", async () => {
+    createPostMock.mockRejectedValueOnce(new Error("Post slug already exists"));
+
+    const formData = new FormData();
+    formData.set("title", "Duplicate");
+    formData.set("slug", "duplicate-post");
+    formData.set("markdown", "# Duplicate");
+    formData.set("status", "DRAFT");
+
+    const result = await createPostAction({ error: "" }, formData);
+
+    expect(result).toEqual({ error: "Post slug already exists" });
+    expect(redirectMock).not.toHaveBeenCalled();
+    expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+
+  it("creates a photo category and revalidates the photos surfaces", async () => {
+    const formData = new FormData();
+    formData.set("name", "Travel");
+    formData.set("slug", "travel");
+    formData.set("sortOrder", "4");
+
+    await createPhotoCategoryAction(formData);
+
+    expect(db.photoCategory.upsert).toHaveBeenCalledWith({
+      where: { slug: "travel" },
+      update: { name: "Travel", description: null, sortOrder: 4 },
+      create: { name: "Travel", slug: "travel", description: null, sortOrder: 4 },
+    });
+    expect(revalidatePathMock).toHaveBeenCalledWith("/admin");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/admin/photos");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/photos");
+  });
+
+  it("creates a photo and redirects to the photos manager", async () => {
+    createPhotoMock.mockResolvedValueOnce({
+      id: "photo-1",
+      category: { slug: "travel" },
+    });
+
+    const formData = new FormData();
+    formData.set("title", "Morning Light");
+    formData.set("imageUrl", "https://cdn.example.com/morning-light.jpg");
+    formData.set("status", "PUBLISHED");
+    formData.set("categoryId", "cat-1");
+
+    await createPhotoAction({ error: "" }, formData);
+
+    expect(createPhotoMock).toHaveBeenCalledWith({
+      title: "Morning Light",
+      caption: "",
+      imageUrl: "https://cdn.example.com/morning-light.jpg",
+      altText: "",
+      status: "PUBLISHED",
+      publishedAt: null,
+      categoryId: "cat-1",
+      sortOrder: 0,
+    });
+    expect(revalidatePathMock).toHaveBeenCalledWith("/admin");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/admin/photos");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/photos");
+    expect(redirectMock).toHaveBeenCalledWith("/admin/photos?created=1");
+  });
+
+  it("updates a photo and revalidates the album surfaces", async () => {
+    updatePhotoMock.mockResolvedValueOnce({
+      id: "photo-1",
+      categoryId: "album-1",
+      category: { id: "album-1", slug: "editorial" },
+    });
+
+    const formData = new FormData();
+    formData.set("title", "Morning Light");
+    formData.set("caption", "Quiet stone");
+    formData.set("status", "PUBLISHED");
+    formData.set("categoryId", "album-1");
+    formData.set("sortOrder", "4");
+
+    await updatePhotoAction("photo-1", "album-1", formData);
+
+    expect(updatePhotoMock).toHaveBeenCalledWith("photo-1", {
+      title: "Morning Light",
+      caption: "Quiet stone",
+      imageUrl: "",
+      altText: "",
+      status: "PUBLISHED",
+      publishedAt: null,
+      categoryId: "album-1",
+      sortOrder: 4,
+    });
+    expect(revalidatePathMock).toHaveBeenCalledWith("/admin/photos");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/admin/photos/album-1");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/admin/photos/album/album-1/photo-1");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/photos");
+  });
+
+  it("deletes a photo and redirects back to its album", async () => {
+    db.photo.delete.mockResolvedValueOnce({
+      id: "photo-1",
+      categoryId: "album-1",
+    });
+
+    await deletePhotoAction("photo-1", "album-1");
+
+    expect(revalidatePathMock).toHaveBeenCalledWith("/admin/photos");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/admin/photos/album-1");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/admin/photos/album/album-1/photo-1");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/photos");
+    expect(redirectMock).toHaveBeenCalledWith("/admin/photos/album-1");
   });
 });
