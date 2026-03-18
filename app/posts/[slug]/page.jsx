@@ -46,7 +46,7 @@ export async function generateMetadata({ params }) {
   const post = await getPublicPostBySlug(slug);
   if (!post) return { title: "Post Not Found" };
   return {
-    title: `${post.title} | 鎴戠殑灏忓皬涓栫晫`,
+    title: `${post.title} | 我的小小世界`,
     description: post.description || "",
   };
 }

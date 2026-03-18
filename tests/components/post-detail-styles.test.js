@@ -82,8 +82,27 @@ describe("post detail styles", () => {
   it("styles figure captions like subdued annotations", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure__caption\s*\{[^}]*font-size:\s*0\.8[78]rem;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure__caption\s*\{[^}]*margin:\s*0\.08rem\s+0\s+0\.08rem;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure__caption\s*\{[^}]*font-family:\s*"LXGW WenKai",\s*"Noto Serif CJK SC",\s*"Source Han Serif SC",\s*"Songti SC",\s*"STSong",\s*"SimSun",\s*serif\s*!important;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure__caption\s*\{[^}]*font-weight:\s*300;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure__caption\s*\{[^}]*color:\s*color-mix\(in srgb,\s*var\(--secondary\)\s*60%,\s*var\(--bg\)\);/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure__caption\s*\{[^}]*font-size:\s*0\.8rem;/s);
     expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure__caption\s*\{[^}]*letter-spacing:\s*0\.0[56]em;/s);
     expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure__caption\s*\{[^}]*text-align:\s*center;/s);
+  });
+
+  it("keeps figure images centered on mobile screens", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*768px\)\s*\{[\s\S]*\.post-single\s+\.post-content\s+\.post-figure\s*\{[^}]*margin:\s*1\.6rem\s+auto\s+1\.75rem;/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*768px\)\s*\{[\s\S]*\.post-single\s+\.post-content\s+\.post-figure__caption\s*\{[^}]*margin:\s*0\.04rem\s+0\s+0\.06rem;[^}]*color:\s*color-mix\(in srgb,\s*var\(--secondary\)\s*56%,\s*var\(--bg\)\);[^}]*font-size:\s*0\.76rem;/s);
+  });
+
+  it("lays out paired post figures side by side and stacks them on mobile", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure-pair\s*\{[^}]*display:\s*grid;[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure--paired\s*\{[^}]*max-width:\s*none;/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*768px\)\s*\{[\s\S]*\.post-single\s+\.post-content\s+\.post-figure-pair\s*\{[^}]*grid-template-columns:\s*1fr;/s);
   });
 });

@@ -1281,6 +1281,19 @@ body::before {
   box-shadow: none;
 }
 
+.post-single .post-content .post-figure-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+  align-items: start;
+  margin: 2rem 0 2.3rem;
+}
+
+.post-single .post-content .post-figure--paired {
+  margin: 0;
+  max-width: none;
+}
+
 .post-single .post-content .post-figure__image {
   display: block;
   width: 100%;
@@ -1291,11 +1304,12 @@ body::before {
 }
 
 .post-single .post-content .post-figure__caption {
-  margin: 1rem 0 0.1rem;
+  margin: 0.08rem 0 0.08rem;
   padding: 0 0.2rem;
-  font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
-  color: color-mix(in srgb, var(--secondary) 88%, var(--bg));
-  font-size: 0.87rem;
+  font-family: "LXGW WenKai", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif !important;
+  font-weight: 300;
+  color: color-mix(in srgb, var(--secondary) 60%, var(--bg));
+  font-size: 0.8rem;
   line-height: 1.8;
   text-align: center;
   letter-spacing: 0.06em;
@@ -1327,13 +1341,21 @@ body::before {
   }
 
   .post-single .post-content .post-figure {
-    margin: 1.6rem 0 1.9rem;
+    margin: 1.6rem auto 1.75rem;
     padding: 0;
     max-width: min(100%, 18rem);
   }
 
+  .post-single .post-content .post-figure-pair {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+    margin: 1.6rem 0 1.75rem;
+  }
+
   .post-single .post-content .post-figure__caption {
-    font-size: 0.84rem;
+    margin: 0.04rem 0 0.06rem;
+    color: color-mix(in srgb, var(--secondary) 56%, var(--bg));
+    font-size: 0.76rem;
     line-height: 1.75;
     letter-spacing: 0.05em;
   }
