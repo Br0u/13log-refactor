@@ -23,6 +23,17 @@ describe("markdown helpers", () => {
     expect(processed).toContain("<summary>More</summary>");
   });
 
+  it("renders a duo images shortcode into a paired figure layout", () => {
+    const processed = preprocessShortcodes('{{< duo_images left="/images/left.jpg" leftAlt="左图" right="/images/right.jpg" rightAlt="右图" >}}');
+
+    expect(processed).toContain('class="post-figure-pair"');
+    expect(processed).toContain('class="post-figure post-figure--paired"');
+    expect(processed).toContain('src="/images/left.jpg"');
+    expect(processed).toContain('src="/images/right.jpg"');
+    expect(processed).toContain("左图");
+    expect(processed).toContain("右图");
+  });
+
   it("builds a plain-text summary from markdown and html content", () => {
     const summary = buildPlainSummary("## Title\n\nA **bold** paragraph with [link](https://example.com).");
 

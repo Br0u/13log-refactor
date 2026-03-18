@@ -46,7 +46,7 @@ export async function generateMetadata({ params }) {
   const post = await getPublicPostBySlug(slug);
   if (!post) return { title: "Post Not Found" };
   return {
-    title: `${post.title} | 鎴戠殑灏忓皬涓栫晫`,
+    title: `${post.title} | 我的小小世界`,
     description: post.description || "",
   };
 }
@@ -63,23 +63,7 @@ export default async function PostDetailPage({ params }) {
   const comments = await getApprovedCommentsBySlug(post.slug);
 
   return (
-    <>
-      {relatedPosts.length ? (
-        <aside className="post-related-rail post-related-rail--blended" aria-label="Related Posts">
-          <div className="post-related-rail__title">看看别的</div>
-          <ul className="post-related-rail__list">
-            {relatedPosts.map((item) => (
-              <li key={item.slug} className="post-related-rail__item">
-                <Link href={`/posts/${encodeURIComponent(item.urlSlug || item.slug)}`} className="post-related-rail__link">
-                  {item.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </aside>
-      ) : null}
-
-      <article className="post-single post-single--blended">
+    <article className="post-single post-single--blended">
         <header className="post-header">
           <h1 className="post-title">{post.title}</h1>
           <div className="post-meta">{formatPostMeta(post)}</div>
@@ -99,7 +83,20 @@ export default async function PostDetailPage({ params }) {
           <PostLikeButton slug={post.slug} initialCount={post.likeCount || 0} />
           <PostComments slug={post.slug} initialComments={comments} />
         </section>
+        {relatedPosts.length ? (
+          <aside className="post-related-rail post-related-rail--blended" aria-label="Related Posts">
+            <div className="post-related-rail__title">相关文章</div>
+            <ul className="post-related-rail__list">
+              {relatedPosts.map((item) => (
+                <li key={item.slug} className="post-related-rail__item">
+                  <Link href={`/posts/${encodeURIComponent(item.urlSlug || item.slug)}`} className="post-related-rail__link">
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        ) : null}
       </article>
-    </>
   );
 }
