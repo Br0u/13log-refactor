@@ -9,10 +9,10 @@ body,
 .post-entry,
 .post-entry .entry-content,
 .first-entry .entry-content {
-  font-family: "Ma Shan Zheng", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", cursive !important;
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif !important;
 }
 .post-content * {
-  font-family: "Ma Shan Zheng", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", cursive !important;
+  font-family: inherit !important;
 }
 
 html {
@@ -437,6 +437,85 @@ body::before {
   border-top-color: color-mix(in srgb, var(--border) 68%, transparent);
 }
 
+.footer {
+  max-width: calc(var(--main-width) + var(--gap) * 2);
+  margin: auto;
+  padding: 1.75rem var(--gap) calc(var(--gap) * 0.78);
+  display: grid;
+  gap: 0.72rem;
+  justify-items: center;
+  text-align: center;
+  line-height: 1.4;
+  border-top: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+}
+
+.footer__badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.46rem 0.58rem;
+  width: 100%;
+}
+
+.footer-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.22rem;
+  min-width: 6.5rem;
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+}
+
+.footer-badge:hover,
+.footer-badge:focus-visible {
+  color: var(--primary);
+  transform: translateY(-0.06rem);
+}
+
+.footer-badge:focus-visible {
+  outline: none;
+}
+
+.footer-badge__plate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 6rem;
+  min-height: 1.54rem;
+  padding: 0.24rem 0.58rem;
+  border: 1.5px solid var(--primary);
+  border-top-right-radius: 0.58rem;
+  border-bottom-left-radius: 0.58rem;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--entry) 96%, rgba(255, 255, 255, 0.5)), color-mix(in srgb, var(--theme) 90%, transparent)),
+    var(--entry);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.045);
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.footer-badge__label {
+  font-size: 0.56rem;
+  line-height: 1.18;
+  color: color-mix(in srgb, var(--secondary) 88%, transparent);
+  letter-spacing: 0.02em;
+}
+
+.footer__meta {
+  margin: 0;
+  color: color-mix(in srgb, var(--secondary) 92%, transparent);
+  font-size: 0.64rem;
+  letter-spacing: 0.02em;
+}
+
+.footer__meta a {
+  border-bottom-color: color-mix(in srgb, var(--secondary) 72%, transparent);
+}
+
 .dark #menu a,
 .dark .logo a,
 .dark .page-toc-rail__title,
@@ -691,7 +770,11 @@ body::before {
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18), 0 0 0 6px rgba(0, 0, 0, 0.04);
 }
 
-.profile h1 { font-size: 2.4rem; letter-spacing: 0.02em; }
+.profile h1 {
+  font-family: "Ma Shan Zheng", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", cursive;
+  font-size: 2.4rem;
+  letter-spacing: 0.02em;
+}
 .profile span { color: var(--secondary); }
 
 .profile-links {
@@ -729,6 +812,26 @@ body::before {
 }
 
 @media (max-width: 720px) {
+  .footer {
+    gap: 0.64rem;
+    padding-top: 1.45rem;
+    padding-bottom: calc(var(--gap) * 0.72);
+  }
+
+  .footer__badges {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .footer-badge {
+    width: min(100%, 8.6rem);
+  }
+
+  .footer-badge__plate {
+    width: 100%;
+  }
+
   .header {
     padding-bottom: 0;
   }
@@ -839,6 +942,17 @@ body::before {
   }
 
   .profile h1 { font-size: 1.7rem; }
+}
+
+@media (max-width: 640px) {
+  .footer__badges {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-badge {
+    width: min(100%, 12rem);
+  }
 }
 
 /* Link board */
@@ -1089,15 +1203,22 @@ body::before {
     radial-gradient(520px 320px at 90% 15%, var(--bg-spot-3), transparent 60%),
     linear-gradient(var(--single-card-bg), var(--single-card-bg));
   box-shadow: 0 18px 36px rgba(0, 0, 0, 0.1);
-  padding: 2rem 2.2rem;
+  padding: 2.6rem clamp(1.6rem, 4.2vw, 3.4rem) 2.9rem;
+  max-width: min(100%, 48rem);
+  margin: 0 auto;
   backdrop-filter: blur(1.6px);
 }
 
 .post-single .post-title {
-  font-family: "Ma Shan Zheng", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", cursive;
-  font-size: 2.1rem;
-  letter-spacing: 0.02em;
-  color: var(--primary);
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: clamp(2rem, 1.65rem + 1.2vw, 2.65rem);
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0.035em;
+  max-width: 16ch;
+  margin: 0 0 1.6rem;
+  color: color-mix(in srgb, var(--content) 88%, var(--primary));
+  text-wrap: balance;
 }
 
 .post-single .post-meta,
@@ -1109,20 +1230,20 @@ body::before {
 .post-single .post-content li,
 .post-single .post-content blockquote,
 .post-single .post-content table {
-  font-family: "Ma Shan Zheng", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", cursive;
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
   color: var(--content);
 }
 
 .post-single .post-content {
-  font-size: 1.4rem;
-  line-height: 1.95;
-  padding: 0.4rem 0.2rem;
+  font-size: 1.28rem;
+  line-height: 2.08;
+  padding: 0.55rem 0.15rem 0.2rem;
   background: transparent;
   border: none;
   box-shadow: none;
 }
 
-.post-single .post-content p { text-indent: 2em; margin-top: 0.4rem; margin-bottom: 1rem; }
+.post-single .post-content p { text-indent: 2em; margin-top: 0.28rem; margin-bottom: 1.38rem; }
 
 .post-single .post-content h1,
 .post-single .post-content h2,
@@ -1133,8 +1254,16 @@ body::before {
 .post-single .post-content a:hover { border-bottom-color: var(--primary); }
 
 .post-single .post-content blockquote {
-  border-left: 4px solid var(--primary);
-  background: var(--blockquote-bg);
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: 1.12em;
+  line-height: 2;
+  margin: 2.2rem 0;
+  padding: 1.1rem 1.35rem 1.1rem 1.5rem;
+  border-left: 1.5px solid color-mix(in srgb, var(--primary) 32%, var(--border));
+  background: color-mix(in srgb, var(--blockquote-bg) 40%, transparent);
+  color: color-mix(in srgb, var(--content) 82%, var(--secondary));
+  box-shadow: none;
+  font-style: normal;
 }
 
 .post-single .post-content img {
@@ -1162,13 +1291,14 @@ body::before {
 }
 
 .post-single .post-content .post-figure__caption {
-  margin: 0.8rem 0 0.1rem;
+  margin: 1rem 0 0.1rem;
   padding: 0 0.2rem;
-  color: var(--secondary);
-  font-size: 0.92rem;
-  line-height: 1.65;
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  color: color-mix(in srgb, var(--secondary) 88%, var(--bg));
+  font-size: 0.87rem;
+  line-height: 1.8;
   text-align: center;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.06em;
 }
 
 .dark .post-single .post-content .post-figure {
@@ -1176,6 +1306,26 @@ body::before {
 }
 
 @media (max-width: 768px) {
+  .post-single {
+    padding: 2.05rem 1.25rem 2.35rem;
+  }
+
+  .post-single .post-title {
+    max-width: none;
+    margin-bottom: 1.28rem;
+  }
+
+  .post-single .post-content {
+    font-size: 1.16rem;
+    line-height: 1.98;
+    padding-top: 0.42rem;
+  }
+
+  .post-single .post-content p {
+    margin-top: 0.24rem;
+    margin-bottom: 1.14rem;
+  }
+
   .post-single .post-content .post-figure {
     margin: 1.6rem 0 1.9rem;
     padding: 0;
@@ -1183,7 +1333,9 @@ body::before {
   }
 
   .post-single .post-content .post-figure__caption {
-    font-size: 0.88rem;
+    font-size: 0.84rem;
+    line-height: 1.75;
+    letter-spacing: 0.05em;
   }
 }
 
@@ -1206,50 +1358,36 @@ body::before {
 }
 
 .post-single--blended .post-header {
-  margin-bottom: 1.8rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  margin-bottom: 1.45rem;
+  padding-bottom: 0.2rem;
+  border-bottom: none;
 }
 
 .post-single--blended .post-title {
   max-width: 14em;
-  margin-bottom: 0.7rem;
-  font-size: clamp(2.2rem, 4vw, 3rem);
-  line-height: 1.1;
-  letter-spacing: 0.01em;
+  margin-bottom: 0.5rem;
+  font-size: clamp(2rem, 3.3vw, 2.6rem);
+  line-height: 1.28;
+  letter-spacing: 0.02em;
 }
 
 .post-single--blended .post-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem 0.8rem;
+  gap: 0.28rem 0.65rem;
   align-items: center;
-  font-family: var(--latin-font);
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--secondary) 92%, var(--content));
-}
-
-.post-single--blended .post-meta::before {
-  content: "ESSAY NOTE";
-  color: color-mix(in srgb, var(--secondary) 74%, transparent);
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: color-mix(in srgb, var(--secondary) 94%, var(--content));
+  opacity: 0.82;
 }
 
 .post-single--blended .post-content {
-  padding: 0.25rem 0;
-}
-
-.post-single--blended .post-content > p:first-of-type {
-  margin-bottom: 1.35rem;
-  font-size: 1.52rem;
-  line-height: 2;
-  text-indent: 0;
-  color: color-mix(in srgb, var(--content) 92%, var(--primary));
-}
-
-.post-single--blended .post-content > p:first-of-type::first-letter {
-  font-size: 1.18em;
+  font-size: 1.22rem;
+  line-height: 2.02;
+  padding: 0.15rem 0;
 }
 
 .post-single--blended .post-content p + p {
@@ -2305,7 +2443,7 @@ body::before {
   box-shadow: 0 24px 44px rgba(0, 0, 0, 0.14);
   transform: scale(1.02) translateY(-0.24rem);
   transform-origin: center top;
-  max-height: min(30rem, 72vh);
+  max-height: var(--micro-surface-max-height, min(30rem, 72vh));
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
@@ -2313,6 +2451,13 @@ body::before {
   touch-action: pan-y pinch-zoom;
   -webkit-overflow-scrolling: touch;
   z-index: 7;
+}
+
+.posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card--micro.is-micro-active .post-preview-card__micro-surface[data-micro-placement="up"] {
+  top: auto;
+  bottom: -0.96rem;
+  transform: scale(1.02) translateY(0.18rem);
+  transform-origin: center bottom;
 }
 
 .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card--micro.is-micro-active .post-preview-card__micro-surface::-webkit-scrollbar {
@@ -2766,7 +2911,8 @@ body::before {
 
 /* Left related posts rail on post detail pages */
 .post-related-rail {
-  margin: 0 0 1.1rem;
+  display: block;
+  margin: 1.8rem 0 0;
   padding: 0;
   border: none;
   background: transparent;
@@ -2774,14 +2920,14 @@ body::before {
 }
 
 .post-related-rail__title {
-  margin: 0 0 0.55rem;
+  margin: 0 0 0.32rem;
   font-size: 0.76rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   color: var(--secondary);
   opacity: 0.68;
-  text-transform: uppercase;
-  text-align: center;
+  text-transform: none;
+  text-align: left;
 }
 
 .post-related-rail__list {
@@ -2789,7 +2935,9 @@ body::before {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.16rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1.2rem;
+  row-gap: 0.08rem;
 }
 
 .post-related-rail__item {
@@ -2828,28 +2976,29 @@ body::before {
 }
 
 .post-related-rail--blended .post-related-rail__title {
-  margin-bottom: 0.72rem;
-  font-family: var(--latin-font);
-  font-size: 0.72rem;
+  margin-bottom: 0.46rem;
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: 0.9rem;
   font-weight: 500;
-  letter-spacing: 0.2em;
-  opacity: 0.78;
+  letter-spacing: 0.04em;
+  opacity: 0.82;
+  text-transform: none;
 }
 
 .post-related-rail--blended .post-related-rail__list {
-  gap: 0;
+  gap: 0.04rem;
 }
 
 .post-related-rail--blended .post-related-rail__item {
-  border-top-color: color-mix(in srgb, var(--border) 46%, transparent);
+  border-top-color: color-mix(in srgb, var(--border) 58%, transparent);
 }
 
 .post-related-rail--blended .post-related-rail__link {
-  padding: 0.5rem 0;
-  font-size: 0.84rem;
-  line-height: 1.55;
+  padding: 0.34rem 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
   color: color-mix(in srgb, var(--secondary) 94%, var(--content));
-  opacity: 0.82;
+  opacity: 0.9;
 }
 
 .post-related-rail--blended .post-related-rail__link:hover,
@@ -2912,23 +3061,10 @@ body::before {
   border-color: color-mix(in srgb, var(--border) 74%, transparent);
 }
 
-@media (min-width: 1200px) {
-  .post-related-rail {
-    position: fixed;
-    top: calc(var(--header-height) + 1.4rem);
-    left: calc(50% - (var(--main-width) / 2) - 13.8rem);
-    width: 12.4rem;
-    max-height: calc(100vh - var(--header-height) - 2.4rem);
-    overflow: hidden;
-    margin: 0;
-    z-index: 25;
-  }
-}
-
 @media (max-width: 1199px) {
   .post-related-rail {
-    margin-top: 1.35rem;
-    padding-top: 0.8rem;
+    margin-top: 2.3rem;
+    padding-top: 0.9rem;
     border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
   }
 
@@ -2939,43 +3075,40 @@ body::before {
 
 @media (max-width: 720px) {
   .post-related-rail {
-    margin-top: 1.1rem;
+    margin-top: 2rem;
     padding-top: 0.7rem;
   }
 
   .post-related-rail__title {
     margin-bottom: 0.4rem;
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
     opacity: 0.62;
   }
 
   .post-related-rail__list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.12rem 0.72rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 
   .post-related-rail__item,
   .post-related-rail__item:first-child {
-    border-top: none;
+    border-top-width: 1px;
   }
 
   .post-related-rail__link {
-    display: inline-flex;
-    align-items: center;
-    padding: 0;
-    font-size: 0.83rem;
-    line-height: 1.35;
+    display: block;
+    padding: 0.62rem 0;
+    font-size: 0.88rem;
+    line-height: 1.55;
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
   }
 
   .post-related-rail__link::before {
-    content: "/";
-    margin-right: 0.22rem;
-    color: color-mix(in srgb, var(--secondary) 72%, transparent);
+    content: none;
   }
 
   .post-related-rail__link:hover,
@@ -2984,10 +3117,10 @@ body::before {
   }
 
   .post-related-rail--blended .post-related-rail__title {
-    margin-bottom: 0.45rem;
+    margin-bottom: 0.55rem;
   }
 
   .post-related-rail--blended .post-related-rail__link {
-    font-size: 0.8rem;
+    font-size: 0.88rem;
   }
 }
