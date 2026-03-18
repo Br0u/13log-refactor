@@ -309,6 +309,12 @@
   color: var(--secondary);
 }
 
+.admin-markdown-field__count {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--secondary);
+}
+
 .admin-markdown-field__error {
   color: #b94a48;
 }
