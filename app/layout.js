@@ -83,8 +83,31 @@ export default function RootLayout({ children }) {
         </aside>
 
         <footer className="footer">
-          <span>&copy; {new Date().getFullYear()} <Link href="/">13log</Link></span>
-          <span>By Br0u</span>
+          <div className="footer__badges" aria-label="Footer certifications">
+            <a
+              className="footer-badge"
+              href="https://notbyai.fyi/"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Human Written"
+            >
+              <span className="footer-badge__plate">HUMAN WRITTEN</span>
+              <span className="footer-badge__label">/ 非 AI 创作</span>
+            </a>
+            <a
+              className="footer-badge"
+              href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+              target="_blank"
+              rel="license noreferrer"
+              aria-label="CC BY-NC-SA"
+            >
+              <span className="footer-badge__plate">CC BY-NC-SA</span>
+              <span className="footer-badge__label">/ 内容许可协议</span>
+            </a>
+          </div>
+          <p className="footer__meta">
+            13log © {new Date().getFullYear()} <Link href="/">Br0u</Link>.
+          </p>
         </footer>
 
         <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" className="top-link" id="top-link" accessKey="g">

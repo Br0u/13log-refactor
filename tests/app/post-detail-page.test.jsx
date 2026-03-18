@@ -61,5 +61,7 @@ describe("post detail page", () => {
 
     expect(markup).toContain("post-single post-single--blended");
     expect(markup).toContain("post-related-rail post-related-rail--blended");
+    expect(markup).toContain("相关文章");
+    expect(markup.indexOf("post-interactions")).toBeLessThan(markup.indexOf("post-related-rail post-related-rail--blended"));
   });
 });

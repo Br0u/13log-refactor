@@ -72,14 +72,20 @@ function revalidateAdminMicroPostsPaths(microPostId) {
   }
 }
 
-export async function createPostAction(formData) {
-  const post = await createPost(parsePostFormData(formData));
-  revalidateAdminPostsPaths(post.id);
-  revalidatePostTimelinePaths();
-  if (post?.slug) {
-    revalidatePath(`/posts/${post.slug}`);
+export async function createPostAction(_previousState, formData) {
+  try {
+    const post = await createPost(parsePostFormData(formData));
+    revalidateAdminPostsPaths(post.id);
+    revalidatePostTimelinePaths();
+    if (post?.slug) {
+      revalidatePath(`/posts/${post.slug}`);
+    }
+    redirect(`/admin/posts/${post.id}?created=1`);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Unable to save post right now.",
+    };
   }
-  redirect(`/admin/posts/${post.id}?created=1`);
 }
 
 export async function updatePostAction(postId, formData) {

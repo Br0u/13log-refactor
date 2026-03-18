@@ -7,6 +7,7 @@ export default function AdminPostForm({
   action,
   categories = [],
   initialValue = {},
+  formState = null,
   successMessage = "",
   submitLabel = "Save post",
   pendingLabel = "Saving...",
@@ -14,6 +15,7 @@ export default function AdminPostForm({
   return (
     <form action={action} className="admin-post-form admin-form">
       {successMessage ? <p className="admin-form-notice">{successMessage}</p> : null}
+      {formState?.error ? <p className="admin-form-notice">{formState.error}</p> : null}
       <label>
         <span>Title</span>
         <input name="title" defaultValue={initialValue.title || ""} required />

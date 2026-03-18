@@ -108,6 +108,10 @@ export default function PostPreviewCard({
         <div
           className="post-preview-card__micro-surface"
           data-testid={dataTestId ? `${dataTestId}-surface` : undefined}
+          data-micro-placement={showMicroScrollRange ? microScrollChrome.placement || "down" : undefined}
+          style={showMicroScrollRange && microScrollChrome.surfaceMaxHeight
+            ? { "--micro-surface-max-height": `${microScrollChrome.surfaceMaxHeight}px` }
+            : undefined}
         >
           {showMicroScrollRange ? (
             <div
