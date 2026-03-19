@@ -273,15 +273,11 @@
 
     <!-- 鎵规鍒囨崲鍣?- 鍙粦鍔?-->
     <div class="batch-switcher">
-      <div class="batch-switcher-inner">
-        <button class="batch-btn active" data-batch="Random">Random</button>
-        <button class="batch-btn" data-batch="April">April</button>
-        <button class="batch-btn" data-batch="Again">Again</button>
-      </div>
+      <div class="batch-switcher-inner"></div>
     </div>
 
     <!-- 鎵规淇℃伅 -->
-    <div class="batch-info" id="batchInfo">Random (1/22)</div>
+    <div class="batch-info" id="batchInfo">Loading...</div>
 
     <div class="gallery-container">
       <!-- 缈昏浆鐢诲粖 -->
@@ -322,91 +318,59 @@
     </div>
 
     <script>
-      // 鐓х墖鎵规鍒嗙被
-      const photoBatches = {
-        Random: [
-          // 摄影作品
-          {
-            title: "摄影作品 01",
-            url: "/images/gallery/05051dcb0t816a84ff98745e8c52828a.jpg",
-          },
-          {
-            title: "摄影作品 02",
-            url: "/images/gallery/1b0b6ebfekd712a8c9ddb3a919f6e51b.jpg",
-          },
-          {
-            title: "摄影作品 03",
-            url: "/images/gallery/c310c2b15s058b7dad526c25892e071d.jpg",
-          },
-          {
-            title: "摄影作品 04",
-            url: "/images/gallery/e432e79a6nb6db538d9df8e8daf47bcd.jpg",
-          },
-          // 胶片记录
-          { title: "胶片记录 01", url: "/images/gallery/R0001640.jpg" },
-          { title: "胶片记录 02", url: "/images/gallery/R0002247.jpg" },
-          { title: "胶片记录 03", url: "/images/gallery/R0003289.jpg" },
-          // 生活瞬间
-          { title: "生活瞬间 01", url: "/images/gallery/IMG_1947.jpg" },
-          { title: "生活瞬间 02", url: "/images/gallery/IMG_3058.jpg" },
-          { title: "生活瞬间 03", url: "/images/gallery/IMG_3545.jpg" },
-          { title: "生活瞬间 04", url: "/images/gallery/IMG_3658.jpg" },
-          { title: "生活瞬间 05", url: "/images/gallery/IMG_4023.jpg" },
-          { title: "生活瞬间 06", url: "/images/gallery/IMG_4256.jpg" },
-          { title: "生活瞬间 07", url: "/images/gallery/IMG_4290.jpg" },
-          { title: "生活瞬间 08", url: "/images/gallery/IMG_7282.jpg" },
-          { title: "生活瞬间 09", url: "/images/gallery/IMG_7285.jpg" },
-          { title: "生活瞬间 10", url: "/images/gallery/IMG_8441.jpg" },
-          { title: "生活瞬间 11", url: "/images/gallery/IMG_8682.jpg" },
-          { title: "生活瞬间 12", url: "/images/gallery/IMG_8790.jpg" },
-          { title: "生活瞬间 13", url: "/images/gallery/IMG_8812.jpg" },
-          { title: "生活瞬间 14", url: "/images/gallery/IMG_8819.jpg" },
-          { title: "生活瞬间 15", url: "/images/gallery/IMG_9132.jpg" },
-        ],
-        April: [
-          { title: "April 01", url: "/images/gallery/gal01/R0001375.jpg" },
-          { title: "April 02", url: "/images/gallery/gal01/R0001410.jpg" },
-          { title: "April 03", url: "/images/gallery/gal01/R0001504.JPG" },
-          { title: "April 04", url: "/images/gallery/gal01/R0001505.JPG" },
-          { title: "April 05", url: "/images/gallery/gal01/R0001515.JPG" },
-          { title: "April 06", url: "/images/gallery/gal01/R0001601.JPG" },
-          { title: "April 07", url: "/images/gallery/gal01/R0001636.JPG" },
-          { title: "April 08", url: "/images/gallery/gal01/R0001666.jpg" },
-          { title: "April 09", url: "/images/gallery/gal01/R0001732.JPG" },
-          { title: "April 10", url: "/images/gallery/gal01/R0001738.jpg" },
-          { title: "April 11", url: "/images/gallery/gal01/R0001822.jpg" },
-          { title: "April 12", url: "/images/gallery/gal01/R0001829.jpg" },
-          { title: "April 13", url: "/images/gallery/gal01/R0001868.jpg" },
-          { title: "April 14", url: "/images/gallery/gal01/R0001877.jpg" },
-          { title: "April 15", url: "/images/gallery/gal01/R0001939.jpg" },
-          { title: "April 16", url: "/images/gallery/gal01/R0001940.jpg" },
-          { title: "April 17", url: "/images/gallery/gal01/R0001942.JPG" },
-        ],
-        Again: [
-          { title: "Again 01", url: "/images/gallery/gal02/132218.JPG" },
-          { title: "Again 02", url: "/images/gallery/gal02/135776.JPG" },
-          { title: "Again 03", url: "/images/gallery/gal02/196598.JPG" },
-          { title: "Again 04", url: "/images/gallery/gal02/569.JPG" },
-          { title: "Again 05", url: "/images/gallery/gal02/759.JPG" },
-          { title: "Again 06", url: "/images/gallery/gal02/806.JPG" },
-          { title: "Again 07", url: "/images/gallery/gal02/IMG_0943.jpg" },
-          { title: "Again 08", url: "/images/gallery/gal02/IMG_2115.JPG" },
-          { title: "Again 09", url: "/images/gallery/gal02/IMG_5242.jpg" },
-          { title: "Again 10", url: "/images/gallery/gal02/IMG_5761.jpg" },
-          { title: "Again 11", url: "/images/gallery/gal02/IMG_7812.jpg" },
-          { title: "Again 12", url: "/images/gallery/gal02/R0003383.JPG" },
-        ],
-      };
-
-      // 鎵规绠＄悊
-      const batchNames = Object.keys(photoBatches);
+      let photoBatches = {};
+      let batchNames = [];
       let currentBatchIndex = 0;
-      let currentBatch = "Random"; // 榛樿鏄剧ずRandom鎵规
-      let images = photoBatches[currentBatch];
+      let currentBatch = "";
+      let images = [];
 
-      console.log(
-        `📷 照片画廊加载完成 - 当前批次: ${currentBatch} (${images.length}张)`
-      );
+      async function loadPhotoBatches() {
+        const response = await fetch("/api/photos");
+        if (!response.ok) {
+          throw new Error("Failed to load photos");
+        }
+
+        const payload = await response.json();
+        const grouped = {};
+
+        (payload.categories || []).forEach((category) => {
+          grouped[category.name] = [];
+        });
+
+        (payload.photos || []).forEach((photo) => {
+          const batchName = photo.category?.name || "Uncategorized";
+          if (!grouped[batchName]) {
+            grouped[batchName] = [];
+          }
+
+          grouped[batchName].push({
+            title: photo.title,
+            url: photo.imageUrl,
+          });
+        });
+
+        photoBatches = grouped;
+        batchNames = Object.keys(photoBatches).filter((name) => photoBatches[name]?.length);
+        currentBatchIndex = 0;
+        currentBatch = batchNames[0] || "";
+        images = currentBatch ? photoBatches[currentBatch] : [];
+
+        renderBatchButtons();
+      }
+
+      function renderBatchButtons() {
+        const switcherInner = document.querySelector(".batch-switcher-inner");
+        switcherInner.innerHTML = "";
+
+        batchNames.forEach((batchName, index) => {
+          const button = document.createElement("button");
+          button.className = `batch-btn${index === currentBatchIndex ? " active" : ""}`;
+          button.dataset.batch = batchName;
+          button.textContent = batchName;
+          button.addEventListener("click", () => switchBatch(batchName));
+          switcherInner.appendChild(button);
+        });
+      }
 
       // 鍒囨崲鎵规
       function switchBatch(batchName) {
@@ -747,10 +711,6 @@
         document.addEventListener("keydown", (e) => {
           if (e.key === "ArrowLeft") updateIndex(-1);
           if (e.key === "ArrowRight") updateIndex(1);
-          // 鏁板瓧閿垏鎹㈡壒娆?
-          if (e.key === "1") switchBatch("Random");
-          if (e.key === "2") switchBatch("April");
-          if (e.key === "3") switchBatch("Again");
         });
 
         // 瑙︽懜鎵嬪娍鏀寔
@@ -798,21 +758,31 @@
       }
 
       // 椤甸潰鍔犺浇瀹屾垚鍚庡垵濮嬪寲
-      document.addEventListener("DOMContentLoaded", () => {
-        init();
-        setupThemeFollow();
-        setupBatchSwitcherScroll(); // 璁剧疆鎵规鍒囨崲鍣ㄦ粦鍔?
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          await loadPhotoBatches();
+          if (!batchNames.length) {
+            document.getElementById("batchInfo").textContent = "No photos";
+            return;
+          }
 
-        // 鍚姩棰勫姞杞介槦鍒?
-        setTimeout(() => {
-          console.log("🚀 启动图片预加载队列...");
-          startPreloadQueue();
-        }, 500);
+          init();
+          setupThemeFollow();
+          setupBatchSwitcherScroll(); // 璁剧疆鎵规鍒囨崲鍣ㄦ粦鍔?
+
+          // 鍚姩棰勫姞杞介槦鍒?
+          setTimeout(() => {
+            console.log("🚀 启动图片预加载队列...");
+            startPreloadQueue();
+          }, 500);
+        } catch (error) {
+          console.error("Failed to load photo batches", error);
+          document.getElementById("batchInfo").textContent = "Failed to load photos";
+        }
       });
     </script>
   </body>
 </html>
-
 
 
 

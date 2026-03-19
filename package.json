@@ -11,7 +11,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "node --env-file=.env prisma/seed.mjs",
-    "db:cleanup:test-data": "node --env-file=.env scripts/cleanup-test-data.mjs"
+    "db:cleanup:test-data": "node --env-file=.env scripts/cleanup-test-data.mjs",
+    "db:import:legacy-photos": "node --experimental-default-type=module --env-file=.env scripts/import-legacy-photos.mjs"
   },
   "dependencies": {
     "@arayui/rainy-day": "^1.0.6",

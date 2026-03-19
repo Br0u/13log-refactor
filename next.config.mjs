@@ -5,6 +5,11 @@ const nextConfig = {
   reactStrictMode: true,
   distDir: isDev ? ".next-local" : ".next",
   allowedDevOrigins: ["localhost", "127.0.0.1"],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "25mb",
+    },
+  },
   webpack(config, { dev }) {
     if (dev) {
       config.cache = false;

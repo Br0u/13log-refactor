@@ -1,0 +1,2 @@
+ALTER TABLE "PhotoCategory"
+ADD COLUMN "sortOrder" INTEGER NOT NULL DEFAULT 0;
