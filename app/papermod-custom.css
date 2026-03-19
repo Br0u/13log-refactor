@@ -2200,10 +2200,23 @@ body::before {
 
 .posts-masonry--posts-list .post-preview-card {
   border-radius: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.posts-masonry--posts-list .post-preview-card__title a,
+.posts-masonry--posts-list .post-preview-card__excerpt-block,
+.posts-masonry--posts-list .post-preview-card__meta {
+  color: color-mix(in srgb, var(--secondary) 92%, var(--content));
 }
 
 .posts-masonry--posts-list .post-preview-card__micro-image {
   max-height: 12rem;
+}
+
+.posts-masonry--posts-list .post-preview-card--micro {
+  cursor: default;
 }
 
 .posts-masonry--posts-list .post-preview-card--micro-expanded {
@@ -2213,6 +2226,20 @@ body::before {
 .posts-masonry--posts-list .post-preview-card--micro-expanded .post-preview-card__excerpt-block {
   overflow: visible;
   max-height: none;
+}
+
+.posts-masonry--posts-list .post-preview-card--micro-relaxed .post-preview-card__excerpt-block {
+  max-height: calc(1.74em * 10);
+}
+
+.posts-masonry--posts-list .post-preview-card:not(:last-child)::after {
+  content: "...";
+  display: block;
+  margin: 1.15rem 0 0;
+  text-align: center;
+  letter-spacing: 0.18em;
+  color: color-mix(in srgb, var(--secondary) 72%, transparent);
+  pointer-events: none;
 }
 
 .post-preview-card {
@@ -2268,6 +2295,20 @@ body::before {
   border-color: color-mix(in srgb, var(--primary) 12%, var(--border));
   background: color-mix(in srgb, var(--entry) 96%, var(--theme));
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.045);
+}
+
+.posts-masonry--posts-list.posts-masonry--interactive[data-micro-focus=""] .post-preview-card:hover,
+.posts-masonry--posts-list:not(.posts-masonry--interactive) .post-preview-card:hover {
+  transform: none;
+  background: transparent;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+.posts-masonry--posts-list .post-preview-card:hover .post-preview-card__title a,
+.posts-masonry--posts-list .post-preview-card:hover .post-preview-card__excerpt-block,
+.posts-masonry--posts-list .post-preview-card:hover .post-preview-card__meta {
+  color: var(--primary);
 }
 
 .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card {

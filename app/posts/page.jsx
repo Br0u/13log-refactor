@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { collectEntryFilters, collectFilterCounts } from "../../lib/content";
+import { collectFilterCounts } from "../../lib/content";
 import PostsTimeline from "../../components/blog/PostsTimeline";
 import { getPublicTimelineEntries } from "../../lib/public-content";
 
@@ -37,11 +37,16 @@ function renderHeader(tags, activeTag) {
 
 export default async function PostsPage({ searchParams }) {
   const sp = await searchParams;
-  const allEntries = await getPublicTimelineEntries();
   const activeTag = typeof sp?.tag === "string" && sp.tag.trim() ? sp.tag.trim() : null;
+  const [allEntries, filteredEntries] = activeTag
+    ? await Promise.all([
+      getPublicTimelineEntries({ renderMicroHtml: false }),
+      getPublicTimelineEntries({ tag: activeTag }),
+    ])
+    : [await getPublicTimelineEntries(), null];
   const tags = collectFilterCounts(allEntries);
   const posts = activeTag
-    ? allEntries.filter((post) => collectEntryFilters(post).includes(activeTag))
+    ? filteredEntries
     : allEntries;
 
   return (

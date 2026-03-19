@@ -21,7 +21,7 @@ function isScrollableWithinBounds(element, deltaY) {
   return element.scrollTop > 0;
 }
 
-export function useFocusedMicroPost() {
+export function useFocusedMicroPost({ enabled = true } = {}) {
   const [focusedMicroPostId, setFocusedMicroPostId] = useState("");
   const [microScrollChrome, setMicroScrollChrome] = useState(EMPTY_MICRO_SCROLL_CHROME);
   const timelineRef = useRef(null);
@@ -30,6 +30,8 @@ export function useFocusedMicroPost() {
   const scrollHintTimeoutRef = useRef(null);
 
   useEffect(() => {
+    if (!enabled) return undefined;
+
     const onKeyDown = (event) => {
       if (event.key === "Escape") {
         setFocusedMicroPostId("");
@@ -38,10 +40,10 @@ export function useFocusedMicroPost() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
-    if (!focusedMicroPostId) return undefined;
+    if (!enabled || !focusedMicroPostId) return undefined;
 
     const getActiveCard = () => {
       const timeline = timelineRef.current;
@@ -227,18 +229,19 @@ export function useFocusedMicroPost() {
       touchStartYRef.current = null;
       touchStartedInsideActiveCardRef.current = false;
     };
-  }, [focusedMicroPostId]);
+  }, [enabled, focusedMicroPostId]);
 
   useEffect(() => {
-    if (focusedMicroPostId) return;
+    if (!enabled || focusedMicroPostId) return;
     setMicroScrollChrome(EMPTY_MICRO_SCROLL_CHROME);
-  }, [focusedMicroPostId]);
+  }, [enabled, focusedMicroPostId]);
 
   return {
     focusedMicroPostId,
     microScrollChrome,
     timelineRef,
     toggleMicroPost: (entryId) => {
+      if (!enabled) return;
       setFocusedMicroPostId((current) => {
         if (!current) return entryId;
         if (current === entryId) return "";
