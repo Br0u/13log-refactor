@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { db } from "../../lib/db";
+import * as markdown from "../../lib/markdown";
 import { createMicroPost } from "../../lib/repositories/micro-posts";
 import { createMicroPostLike } from "../../lib/repositories/likes";
 import { createPost } from "../../lib/repositories/posts";
@@ -192,5 +193,47 @@ describe("public content facade", () => {
     const richEntry = entries.find((item) => item.type === "micro" && item.summary.includes("列表项"));
 
     expect(richEntry?.renderedContentHtml).toContain("<ul>");
+  });
+
+  it("filters timeline entries before rendering unrelated micro html", async () => {
+    const renderSpy = vi.spyOn(markdown, "renderMicroMarkdownToHtml");
+
+    await db.microPostTag.deleteMany({
+      where: {
+        microPost: {
+          content: {
+            in: ["筛选命中的 rich micro", "筛选外的 rich micro"],
+          },
+        },
+      },
+    });
+    await db.microPost.deleteMany({
+      where: {
+        content: {
+          in: ["筛选命中的 rich micro", "筛选外的 rich micro"],
+        },
+      },
+    });
+
+    await createMicroPost({
+      content: "筛选命中的 rich micro\n\n- 列表项",
+      status: "PUBLISHED",
+      publishedAt: new Date("2026-03-18T10:00:00.000Z"),
+      tags: ["match-tag"],
+    });
+
+    await createMicroPost({
+      content: "筛选外的 rich micro\n\n- 列表项",
+      status: "PUBLISHED",
+      publishedAt: new Date("2026-03-18T09:00:00.000Z"),
+      tags: ["other-tag"],
+    });
+
+    const entries = await getPublicTimelineEntries({ tag: "match-tag" });
+
+    expect(entries.some((item) => item.type === "micro" && item.summary.includes("筛选命中的 rich micro"))).toBe(true);
+    expect(entries.some((item) => item.type === "micro" && item.summary.includes("筛选外的 rich micro"))).toBe(false);
+    expect(renderSpy.mock.calls.some(([source]) => String(source).includes("筛选命中的 rich micro"))).toBe(true);
+    expect(renderSpy.mock.calls.some(([source]) => String(source).includes("筛选外的 rich micro"))).toBe(false);
   });
 });

@@ -15,7 +15,10 @@ describe("posts timeline styles", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s*\{[^}]*column-count:\s*1;/s);
-    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card\s*\{[^}]*border-radius:\s*0;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card\s*\{[^}]*border-radius:\s*0;[^}]*background:\s*transparent;[^}]*border:\s*none;[^}]*box-shadow:\s*none;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card__title\s+a,\s*\.posts-masonry--posts-list\s+\.post-preview-card__excerpt-block,\s*\.posts-masonry--posts-list\s+\.post-preview-card__meta\s*\{[^}]*color:\s*color-mix\(in srgb,\s*var\(--secondary\)\s*92%,\s*var\(--content\)\);/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\.posts-masonry--interactive\[data-micro-focus=""\]\s+\.post-preview-card:hover,\s*\.posts-masonry--posts-list:not\(\.posts-masonry--interactive\)\s+\.post-preview-card:hover\s*\{[^}]*transform:\s*none;[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;[^}]*border-color:\s*transparent;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__title\s+a,\s*\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__excerpt-block,\s*\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__meta\s*\{[^}]*color:\s*var\(--primary\);/s);
   });
 
   it("adds a soft backdrop layer when a micro post is focused", () => {
@@ -67,6 +70,25 @@ describe("posts timeline styles", () => {
 
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro-expanded\s*\{[^}]*cursor:\s*default;/s);
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro-expanded\s+\.post-preview-card__excerpt-block\s*\{[^}]*overflow:\s*visible;[^}]*max-height:\s*none;/s);
+  });
+
+  it("gives long text micros more reading height in the posts list layout", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro-relaxed\s+\.post-preview-card__excerpt-block\s*\{[^}]*max-height:\s*calc\(1\.74em\s*\*\s*10\);/s);
+  });
+
+  it("removes the clickable cursor hint from micro cards in the posts list layout", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro\s*\{[^}]*cursor:\s*default;/s);
+  });
+
+  it("separates posts list cards with a soft ellipsis marker", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card:not\(:last-child\)::after\s*\{[^}]*content:\s*"\.\.\.";[^}]*display:\s*block;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card:not\(:last-child\)::after\s*\{[^}]*text-align:\s*center;[^}]*color:\s*color-mix\(in srgb,\s*var\(--secondary\)\s*72%,\s*transparent\);/s);
   });
 
   it("keeps the focused micropost surface mobile-friendly for touch scrolling", () => {

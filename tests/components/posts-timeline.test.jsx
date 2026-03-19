@@ -49,7 +49,7 @@ describe("PostsTimeline", () => {
     }
   });
 
-  it("keeps image micros expanded and out of focus mode in posts-list layout", () => {
+  it("keeps micro cards static and out of focus mode in posts-list layout", () => {
     render(
       <PostsTimeline
         layout="posts-list"
@@ -85,7 +85,70 @@ describe("PostsTimeline", () => {
     expect(screen.getByTestId("posts-timeline").getAttribute("data-micro-focus")).toBe("");
 
     fireEvent.click(screen.getByTestId("timeline-card-micro-text-1"));
-    expect(screen.getByTestId("posts-timeline").getAttribute("data-micro-focus")).toBe("micro-text-1");
+    expect(screen.getByTestId("posts-timeline").getAttribute("data-micro-focus")).toBe("");
+    expect(screen.getByTestId("timeline-card-micro-text-1").getAttribute("data-focus-state")).toBe("idle");
+  });
+
+  it("gives long text micros a taller reading surface in posts-list layout", () => {
+    render(
+      <PostsTimeline
+        layout="posts-list"
+        entries={[
+          {
+            type: "micro",
+            id: "micro-long-1",
+            content: "这是一条很长很长的纯文字 micro。".repeat(18),
+            summary: "这是一条很长很长的纯文字 micro。".repeat(18),
+            renderedContentHtml: "<p>这是一条很长很长的纯文字 micro。</p><p>第二段也很长。</p>",
+            hasImage: false,
+            date: "2026-03-10T01:32:00.000Z",
+            tags: ["碎碎念"],
+            categories: [],
+          },
+          {
+            type: "micro",
+            id: "micro-short-1",
+            content: "短一点的 micro",
+            summary: "短一点的 micro",
+            renderedContentHtml: "<p>短一点的 micro</p>",
+            hasImage: false,
+            date: "2026-03-09T01:32:00.000Z",
+            tags: ["碎碎念"],
+            categories: [],
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByTestId("timeline-card-micro-long-1").className).toContain("post-preview-card--micro-relaxed");
+    expect(screen.getByTestId("timeline-card-micro-short-1").className).not.toContain("post-preview-card--micro-relaxed");
+  });
+
+  it("does not register micro focus event listeners in posts-list layout", () => {
+    const addEventListenerSpy = vi.spyOn(window, "addEventListener");
+
+    render(
+      <PostsTimeline
+        layout="posts-list"
+        entries={[
+          {
+            type: "micro",
+            id: "micro-text-1",
+            content: "纯文字 micro",
+            summary: "纯文字 micro",
+            hasImage: false,
+            date: "2026-03-09T01:32:00.000Z",
+            tags: ["碎碎念"],
+            categories: [],
+          },
+        ]}
+      />
+    );
+
+    expect(addEventListenerSpy).not.toHaveBeenCalledWith("keydown", expect.any(Function));
+    expect(addEventListenerSpy).not.toHaveBeenCalledWith("mousedown", expect.any(Function));
+    expect(addEventListenerSpy).not.toHaveBeenCalledWith("wheel", expect.any(Function), expect.anything());
+    expect(addEventListenerSpy).not.toHaveBeenCalledWith("touchmove", expect.any(Function), expect.anything());
   });
 
   it("falls back to a load more button when IntersectionObserver is unavailable", async () => {

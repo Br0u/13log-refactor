@@ -88,6 +88,7 @@ export default function PostPreviewCard({
   onMicroToggle,
   microScrollChrome,
   isExpandedMicro = false,
+  isRelaxedMicro = false,
 }) {
   const isMicro = post.type === "micro";
   const primaryLabel = getPrimaryEntryLabel(post);
@@ -101,6 +102,7 @@ export default function PostPreviewCard({
     "post-preview-card",
     isMicro ? "post-preview-card--micro" : "post-preview-card--post",
     isExpandedMicro ? "post-preview-card--micro-expanded" : "",
+    isRelaxedMicro ? "post-preview-card--micro-relaxed" : "",
     focusState === "active" ? "is-micro-active" : "",
     focusState === "background" ? "is-micro-background" : "",
   ].filter(Boolean).join(" ");

@@ -6,10 +6,17 @@ import { useFocusedMicroPost } from "./useFocusedMicroPost";
 import { usePostsListVisibility } from "./usePostsListVisibility";
 
 const DEFAULT_VISIBLE_COUNT = 6;
+const RELAXED_MICRO_TEXT_THRESHOLD = 160;
+
+function getMicroTextLength(entry) {
+  return String(entry?.summary || entry?.content || "").trim().length;
+}
 
 export default function PostsTimeline({ entries = [], layout = "masonry", initialVisibleCount = DEFAULT_VISIBLE_COUNT }) {
   const isPostsListLayout = layout === "posts-list";
-  const { focusedMicroPostId, microScrollChrome, timelineRef, toggleMicroPost } = useFocusedMicroPost();
+  const { focusedMicroPostId, microScrollChrome, timelineRef, toggleMicroPost } = useFocusedMicroPost({
+    enabled: !isPostsListLayout,
+  });
   const { sentinelRef, supportsIntersectionObserver, visibleCount, showMore } = usePostsListVisibility({
     entries,
     isPostsListLayout,
@@ -30,8 +37,10 @@ export default function PostsTimeline({ entries = [], layout = "masonry", initia
         const key = entry.type === "micro" ? entry.id : entry.slug;
         const isMicro = entry.type === "micro";
         const isExpandedImageMicro = isPostsListLayout && Boolean(entry.hasImage);
-        const isActive = isMicro && focusedMicroPostId === entry.id;
-        const hasFocusedMicroPost = focusedMicroPostId !== "";
+        const isRelaxedTextMicro = isPostsListLayout && isMicro && !entry.hasImage && getMicroTextLength(entry) >= RELAXED_MICRO_TEXT_THRESHOLD;
+        const supportsMicroFocus = isMicro && !isPostsListLayout;
+        const hasFocusedMicroPost = !isPostsListLayout && focusedMicroPostId !== "";
+        const isActive = supportsMicroFocus && focusedMicroPostId === entry.id;
         const focusState = isExpandedImageMicro ? "idle" : (isActive ? "active" : (hasFocusedMicroPost ? "background" : "idle"));
 
         return (
@@ -40,9 +49,10 @@ export default function PostsTimeline({ entries = [], layout = "masonry", initia
             post={entry}
             dataTestId={`timeline-card-${key}`}
             isExpandedMicro={isExpandedImageMicro}
+            isRelaxedMicro={isRelaxedTextMicro}
             focusState={focusState}
-            microScrollChrome={isActive && !isExpandedImageMicro ? microScrollChrome : undefined}
-            onMicroToggle={isMicro && !isExpandedImageMicro ? () => toggleMicroPost(entry.id) : undefined}
+            microScrollChrome={supportsMicroFocus && isActive && !isExpandedImageMicro ? microScrollChrome : undefined}
+            onMicroToggle={supportsMicroFocus && !isExpandedImageMicro ? () => toggleMicroPost(entry.id) : undefined}
           />
         );
       })}
