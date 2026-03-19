@@ -3,6 +3,21 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 describe("posts timeline styles", () => {
+  it("caps the posts timeline at two columns on larger screens", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry\s*\{[^}]*column-count:\s*1;/s);
+    expect(stylesheet).toMatch(/@media\s*\(min-width:\s*900px\)\s*\{[\s\S]*\.posts-masonry\s*\{[^}]*column-count:\s*2;/s);
+    expect(stylesheet).not.toMatch(/@media\s*\(min-width:\s*1200px\)\s*\{[\s\S]*\.posts-masonry\s*\{[^}]*column-count:\s*3;/s);
+  });
+
+  it("switches the posts page timeline into a single-column square-corner list mode", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s*\{[^}]*column-count:\s*1;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card\s*\{[^}]*border-radius:\s*0;/s);
+  });
+
   it("adds a soft backdrop layer when a micro post is focused", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
@@ -39,16 +54,28 @@ describe("posts timeline styles", () => {
   it("styles micropost images with framed proportional media treatment", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*display:\s*block;[^}]*width:\s*100%;[^}]*height:\s*auto;/s);
-    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*border:\s*1px\s+solid\s+[^;]+;/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*display:\s*block;[^}]*width:\s*auto;[^}]*max-width:\s*100%;[^}]*height:\s*auto;/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*margin:\s*0\.18rem\s+auto\s+0\.28rem;/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*border:\s*1px\s+solid\s+color-mix\(in srgb,\s*var\(--primary\)\s*22%,\s*var\(--border\)\);/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*border-radius:\s*0;/s);
     expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*object-fit:\s*contain;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card__micro-image\s*\{[^}]*max-height:\s*12rem;/s);
+  });
+
+  it("keeps image micros fully expanded in the posts list layout", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro-expanded\s*\{[^}]*cursor:\s*default;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro-expanded\s+\.post-preview-card__excerpt-block\s*\{[^}]*overflow:\s*visible;[^}]*max-height:\s*none;/s);
   });
 
   it("keeps the focused micropost surface mobile-friendly for touch scrolling", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*touch-action:\s*pan-y\s+pinch-zoom;[^}]*-webkit-overflow-scrolling:\s*touch;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*max-height:\s*min\(24rem,\s*68vh\);/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*max-height:\s*min\(22rem,\s*62vh\);/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*\.posts-masonry--posts-list\s+\.post-preview-card__micro-image\s*\{[^}]*max-height:\s*9rem;/s);
   });
 
   it("keeps the native scrollbar hidden when the range frame is shown", () => {
