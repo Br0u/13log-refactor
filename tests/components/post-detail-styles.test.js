@@ -82,6 +82,8 @@ describe("post detail styles", () => {
   it("styles figure captions like subdued annotations", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure\s*\{[^}]*border:\s*0;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure__image\s*\{[^}]*border:\s*1px\s+solid\s+#111;/s);
     expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure__caption\s*\{[^}]*margin:\s*0\.08rem\s+0\s+0\.08rem;/s);
     expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure__caption\s*\{[^}]*font-family:\s*"LXGW WenKai",\s*"Noto Serif CJK SC",\s*"Source Han Serif SC",\s*"Songti SC",\s*"STSong",\s*"SimSun",\s*serif\s*!important;/s);
     expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.post-figure__caption\s*\{[^}]*font-weight:\s*300;/s);
