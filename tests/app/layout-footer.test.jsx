@@ -6,6 +6,7 @@ describe("root layout footer", () => {
   it("renders the editorial footer badges and copyright", () => {
     const source = fs.readFileSync(path.join(process.cwd(), "app/layout.js"), "utf8");
 
+    expect(source).toMatch(/<html lang="zh-CN" dir="auto">/);
     expect(source).toMatch(/https:\/\/cdn\.jsdelivr\.net\/npm\/@callmebill\/lxgw-wenkai-web@latest\/style\.css/);
     expect(source).toMatch(/<div className="footer__badges"/);
     expect(source).toMatch(/href="https:\/\/notbyai\.fyi\/"/);

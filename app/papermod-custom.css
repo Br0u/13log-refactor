@@ -2170,10 +2170,6 @@ body::before {
   .posts-masonry { column-count: 2; }
 }
 
-@media (min-width: 1200px) {
-  .posts-masonry { column-count: 3; }
-}
-
 .posts-masonry .post-entry,
 .posts-masonry .first-entry {
   display: inline-block;
@@ -2195,6 +2191,28 @@ body::before {
 .posts-masonry .first-entry,
 .posts-masonry .link-board-card {
   margin-bottom: 1rem;
+}
+
+.posts-masonry--posts-list {
+  column-count: 1;
+  column-gap: 0;
+}
+
+.posts-masonry--posts-list .post-preview-card {
+  border-radius: 0;
+}
+
+.posts-masonry--posts-list .post-preview-card__micro-image {
+  max-height: 12rem;
+}
+
+.posts-masonry--posts-list .post-preview-card--micro-expanded {
+  cursor: default;
+}
+
+.posts-masonry--posts-list .post-preview-card--micro-expanded .post-preview-card__excerpt-block {
+  overflow: visible;
+  max-height: none;
 }
 
 .post-preview-card {
@@ -2435,13 +2453,13 @@ body::before {
 
 .post-preview-card__micro-image {
   display: block;
-  width: 100%;
+  width: auto;
   max-width: 100%;
   height: auto;
   object-fit: contain;
-  margin: 0.18rem 0 0.28rem;
-  border: 1px solid var(--primary);
-  border-radius: 0.9rem;
+  margin: 0.18rem auto 0.28rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+  border-radius: 0;
   background: color-mix(in srgb, var(--entry) 94%, var(--theme));
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 }
@@ -2470,6 +2488,10 @@ body::before {
   touch-action: pan-y pinch-zoom;
   -webkit-overflow-scrolling: touch;
   z-index: 7;
+}
+
+.posts-masonry--posts-list.posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card--micro.is-micro-active .post-preview-card__micro-surface {
+  max-height: min(24rem, 68vh);
 }
 
 .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card--micro.is-micro-active .post-preview-card__micro-surface[data-micro-placement="up"] {
@@ -2663,6 +2685,10 @@ body::before {
     transform: scale(1.01) translateY(-0.12rem);
     max-height: min(22rem, 62vh);
     box-shadow: 0 16px 28px rgba(0, 0, 0, 0.16);
+  }
+
+  .posts-masonry--posts-list .post-preview-card__micro-image {
+    max-height: 9rem;
   }
 
   .post-preview-card--micro .post-preview-card__excerpt-block {

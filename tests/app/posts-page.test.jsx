@@ -23,14 +23,29 @@ vi.mock("../../lib/public-content", () => ({
 import PostsPage from "../../app/posts/page.jsx";
 
 describe("posts index page", () => {
-  it("renders pagination links when there are multiple pages", async () => {
+  it("renders the posts page without traditional pagination controls", async () => {
     const element = await PostsPage({
       searchParams: Promise.resolve({}),
     });
 
     const markup = renderToStaticMarkup(element);
 
-    expect(markup).toContain("/下一页");
-    expect(markup).toContain("1 / 2");
+    expect(markup).not.toContain("/下一页");
+    expect(markup).not.toContain("1 / 3");
+    expect(markup).toContain('data-layout="posts-list"');
+    expect(markup).toContain('href="/posts"');
+    expect(markup).toContain('href="/posts?tag=Notes"');
+  });
+
+  it("renders the infinite timeline entrypoint with the first six cards", async () => {
+    const element = await PostsPage({
+      searchParams: Promise.resolve({}),
+    });
+
+    const markup = renderToStaticMarkup(element);
+
+    expect(markup).toContain("Post 6");
+    expect(markup).not.toContain("Post 7");
+    expect(markup).toContain('data-testid="posts-timeline-sentinel"');
   });
 });

@@ -2,30 +2,57 @@ import React from "react";
 import Link from "next/link";
 import MicroPostLikeButton from "./MicroPostLikeButton";
 
+const LIST_DATE_FORMATTER = new Intl.DateTimeFormat("zh-CN", {
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+});
+
+const MICRO_TIME_FORMATTER = new Intl.DateTimeFormat("zh-CN", {
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: false,
+});
+
 function normalizeSummaryText(value = "") {
   return String(value)
-    .replace(/[#>*_`~\-]+/g, " ")
+    .replace(/[#>*_`~]+/g, " ")
     .replace(/\[(.*?)\]\((.*?)\)/g, "$1")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-function createMicroMarkup(post) {
-  const baseMarkup = post.renderedContentHtml || `<p>${normalizeSummaryText(post.summary || post.description || post.content || "")}</p>`;
-  return baseMarkup.replace(/<img\b([^>]*)class="([^"]*)"/gi, '<img$1class="$2 post-preview-card__micro-image"').replace(/<img(?![^>]*class=)\b/gi, '<img class="post-preview-card__micro-image"');
+function injectMicroImageClass(html) {
+  return String(html).replace(/<img\b([^>]*)>/gi, (match, attrs = "") => {
+    const classAttrMatch = attrs.match(/\sclass\s*=\s*(['"])(.*?)\1/i);
+    if (classAttrMatch) {
+      const quote = classAttrMatch[1];
+      const existingClasses = classAttrMatch[2]
+        .split(/\s+/)
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+      if (!existingClasses.includes("post-preview-card__micro-image")) {
+        existingClasses.push("post-preview-card__micro-image");
+      }
+
+      const nextClassAttr = ` class=${quote}${existingClasses.join(" ")}${quote}`;
+      const nextAttrs = attrs.replace(/\sclass\s*=\s*(['"])(.*?)\1/i, nextClassAttr);
+      return `<img${nextAttrs}>`;
+    }
+
+    return `<img${attrs} class="post-preview-card__micro-image">`;
+  });
 }
 
-function collectEntryFilters(entry) {
-  return Array.from(new Set([...(entry?.categories || []), ...(entry?.tags || [])]));
+function createMicroMarkup(post) {
+  const baseMarkup = post.renderedContentHtml || `<p>${normalizeSummaryText(post.summary || post.description || post.content || "")}</p>`;
+  return injectMicroImageClass(baseMarkup);
 }
 
 function formatListDate(dateIso) {
   if (!dateIso) return "";
-  return new Intl.DateTimeFormat("zh-CN", {
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-  }).format(new Date(dateIso));
+  return LIST_DATE_FORMATTER.format(new Date(dateIso));
 }
 
 function getPrimaryEntryLabel(entry) {
@@ -37,11 +64,7 @@ function getPrimaryEntryLabel(entry) {
 
 function formatMicroTime(dateIso) {
   if (!dateIso) return "";
-  return new Intl.DateTimeFormat("zh-CN", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: false,
-  }).format(new Date(dateIso));
+  return MICRO_TIME_FORMATTER.format(new Date(dateIso));
 }
 
 function getMicroDateParts(dateIso) {
@@ -64,8 +87,8 @@ export default function PostPreviewCard({
   focusState = "idle",
   onMicroToggle,
   microScrollChrome,
+  isExpandedMicro = false,
 }) {
-  const filterTags = collectEntryFilters(post);
   const isMicro = post.type === "micro";
   const primaryLabel = getPrimaryEntryLabel(post);
   const href = post.href || `/posts/${encodeURIComponent(post.urlSlug || post.slug)}`;
@@ -77,6 +100,7 @@ export default function PostPreviewCard({
     "post-entry",
     "post-preview-card",
     isMicro ? "post-preview-card--micro" : "post-preview-card--post",
+    isExpandedMicro ? "post-preview-card--micro-expanded" : "",
     focusState === "active" ? "is-micro-active" : "",
     focusState === "background" ? "is-micro-background" : "",
   ].filter(Boolean).join(" ");
@@ -84,10 +108,9 @@ export default function PostPreviewCard({
   return (
     <article
       className={cardClassName}
-      data-post-tags={filterTags.join("|")}
       data-testid={dataTestId}
       data-focus-state={focusState}
-      onClick={isMicro ? onMicroToggle : undefined}
+      onClick={isMicro && !isExpandedMicro ? onMicroToggle : undefined}
     >
       <header className="post-preview-card__header">
         {!isMicro && (post.date || primaryLabel) ? (

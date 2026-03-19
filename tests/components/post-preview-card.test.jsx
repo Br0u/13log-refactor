@@ -28,6 +28,25 @@ describe("PostPreviewCard", () => {
     expect(markup).toContain("post-preview-card__excerpt-block");
     expect(markup).not.toContain("post-preview-card__separator");
     expect(markup).not.toContain("[展开全文]");
+    expect(markup).not.toContain("data-post-tags");
+  });
+
+  it("preserves meaningful hyphens in normalized post summaries", () => {
+    const markup = renderToStaticMarkup(
+      <PostPreviewCard
+        post={{
+          type: "post",
+          slug: "hyphen-note",
+          urlSlug: "hyphen-note",
+          title: "连字符测试",
+          summary: "AI-generated notes about e-mail habits",
+          categories: ["日寄"],
+          tags: ["碎笔记"],
+        }}
+      />
+    );
+
+    expect(markup).toContain("AI-generated notes about e-mail habits");
   });
 
   it("renders micro posts without a detail link or title heading", () => {
@@ -48,7 +67,6 @@ describe("PostPreviewCard", () => {
 
     expect(markup).toContain("<br>");
     expect(markup).toContain("<strong>重点</strong>");
-    expect(markup).toContain("碎碎念");
     expect(markup).not.toContain("post-preview-card__title");
     expect(markup).not.toContain("entry-link");
     expect(markup).toContain("post-preview-card__micro-calendar");
@@ -77,6 +95,45 @@ describe("PostPreviewCard", () => {
     );
 
     expect(markup).toContain("post-preview-card__micro-image");
+  });
+
+  it("appends the shared image class to micropost images with existing classes", () => {
+    const markup = renderToStaticMarkup(
+      <PostPreviewCard
+        post={{
+          type: "micro",
+          id: "micro-2b",
+          content: "带图的 micro post",
+          summary: "带图的 micro post",
+          renderedContentHtml: "<p><img src='/test.jpg' alt='test' class='existing-frame'></p>",
+          date: "2026-03-15T10:48:33.000Z",
+          tags: ["碎碎念"],
+          categories: [],
+        }}
+      />
+    );
+
+    expect(markup).toContain("existing-frame post-preview-card__micro-image");
+  });
+
+  it("does not duplicate the shared image class when micropost markup already has it", () => {
+    const markup = renderToStaticMarkup(
+      <PostPreviewCard
+        post={{
+          type: "micro",
+          id: "micro-2c",
+          content: "带图的 micro post",
+          summary: "带图的 micro post",
+          renderedContentHtml: "<p><img src=\"/test.jpg\" alt=\"test\" class=\"post-preview-card__micro-image existing-frame\"></p>",
+          date: "2026-03-15T10:48:33.000Z",
+          tags: ["碎碎念"],
+          categories: [],
+        }}
+      />
+    );
+
+    expect(markup).toContain("post-preview-card__micro-image existing-frame");
+    expect(markup).not.toContain("post-preview-card__micro-image post-preview-card__micro-image");
   });
 
   it("renders a micropost scroll range when scroll chrome data is provided", () => {
