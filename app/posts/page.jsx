@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { collectFilterCounts } from "../../lib/content";
 import PostsTimeline from "../../components/blog/PostsTimeline";
+import BlogRail from "../../components/blog/BlogRail";
 import { getPublicTimelineEntries } from "../../lib/public-content";
 
 export const dynamic = "force-dynamic";
@@ -50,13 +51,20 @@ export default async function PostsPage({ searchParams }) {
     : allEntries;
 
   return (
-    <section>
-      <header className="page-header">
-        <h1>Posts</h1>
-        {renderHeader(tags, activeTag)}
-      </header>
+    <div className="blog-layout blog-layout--posts-index">
+      <BlogRail
+        variant="posts"
+        introTitle="前言"
+        introBody="写下来的东西会慢一点，先经过自己，再流向别人。这里保留分类和标签，但更希望它们像一条连续的阅读线。"
+      />
+      <section className="blog-layout__main">
+        <header className="page-header">
+          <h1>Posts</h1>
+          {renderHeader(tags, activeTag)}
+        </header>
 
-      <PostsTimeline entries={posts} layout="posts-list" initialVisibleCount={6} />
-    </section>
+        <PostsTimeline entries={posts} layout="posts-list" initialVisibleCount={6} />
+      </section>
+    </div>
   );
 }
