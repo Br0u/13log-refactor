@@ -37,7 +37,16 @@ describe("posts index page", () => {
     expect(markup).not.toContain("/下一页");
     expect(markup).not.toContain("1 / 3");
     expect(markup).toContain('data-layout="posts-list"');
+    expect(markup).toContain("blog-layout blog-layout--posts-index");
+    expect(markup).toContain("blog-rail");
+    expect(markup.indexOf(">/ posts<")).toBeLessThan(markup.indexOf(">/ about<"));
+    expect(markup).toContain('href="/about"');
+    expect(markup).toContain(">/ about<");
     expect(markup).toContain('href="/posts"');
+    expect(markup).toContain(">/ posts<");
+    expect(markup).toContain('href="/link"');
+    expect(markup).not.toContain("/rss.xml");
+    expect(markup).toContain(">前言<");
     expect(markup).toContain('href="/posts?tag=Notes"');
   });
 

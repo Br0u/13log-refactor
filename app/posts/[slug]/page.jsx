@@ -1,9 +1,9 @@
 ﻿import React from "react";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import HtmlContent from "../../components/HtmlContent.jsx";
 import PostComments from "../../../components/blog/PostComments";
 import PostLikeButton from "../../../components/blog/PostLikeButton";
+import BlogRail from "../../../components/blog/BlogRail";
 import { buildTocHtml, formatPostMeta, renderMarkdown, withHeadingAnchors } from "../../../lib/content";
 import { getPublicPostBySlug, getPublicPosts } from "../../../lib/public-content";
 import { getApprovedCommentsBySlug } from "../../../lib/repositories/comments";
@@ -63,7 +63,15 @@ export default async function PostDetailPage({ params }) {
   const comments = await getApprovedCommentsBySlug(post.slug);
 
   return (
-    <article className="post-single post-single--blended">
+    <div className="blog-layout blog-layout--post-detail">
+      <BlogRail
+        variant="detail"
+        introTitle={post.title}
+        meta={formatPostMeta(post)}
+        tocHtml={tocHtml}
+        relatedPosts={relatedPosts}
+      />
+      <article className="post-single post-single--blended blog-layout__main">
         <header className="post-header">
           <h1 className="post-title">{post.title}</h1>
           <div className="post-meta">{formatPostMeta(post)}</div>
@@ -83,20 +91,7 @@ export default async function PostDetailPage({ params }) {
           <PostLikeButton slug={post.slug} initialCount={post.likeCount || 0} />
           <PostComments slug={post.slug} initialComments={comments} />
         </section>
-        {relatedPosts.length ? (
-          <aside className="post-related-rail post-related-rail--blended" aria-label="Related Posts">
-            <div className="post-related-rail__title">相关文章</div>
-            <ul className="post-related-rail__list">
-              {relatedPosts.map((item) => (
-                <li key={item.slug} className="post-related-rail__item">
-                  <Link href={`/posts/${encodeURIComponent(item.urlSlug || item.slug)}`} className="post-related-rail__link">
-                    {item.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </aside>
-        ) : null}
       </article>
+    </div>
   );
 }
