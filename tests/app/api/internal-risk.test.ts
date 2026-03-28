@@ -140,6 +140,42 @@ describe("internal risk api", () => {
     }));
   });
 
+  it("does not apply rate limiting to admin pages", async () => {
+    countRecentAccessLogsMock.mockResolvedValueOnce(999);
+
+    const response = await riskPostRoute(new Request("http://localhost:3000/api/internal/risk", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-risk-internal": "1",
+      },
+      body: JSON.stringify({
+        ipHash: "admin-page",
+        path: "/admin/visits",
+        country: "CA",
+        region: "Ontario",
+        city: "Guelph",
+        userAgent: "Mozilla/5.0",
+        referer: "https://example.com",
+        riskScore: 0,
+        riskLabel: "normal",
+      }),
+    }));
+
+    expect(await response.json()).toEqual({
+      action: "allow",
+      status: 200,
+      reason: "logged",
+    });
+    expect(countRecentAccessLogsMock).not.toHaveBeenCalled();
+    expect(createAccessLogMock).toHaveBeenCalledWith(expect.objectContaining({
+      ipHash: "admin-page",
+      path: "/admin/visits",
+      isBlocked: false,
+      blockReason: null,
+    }));
+  });
+
   it("blocks bot traffic and escalates repeat offenders into the blacklist", async () => {
     countBotAccessLogsMock.mockResolvedValueOnce(3);
 
