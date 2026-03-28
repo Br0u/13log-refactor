@@ -48,9 +48,26 @@ export function isProtectedPath(pathname = "") {
 }
 
 export function shouldSkipRiskEvaluation(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
   const purpose = normalizeValue(request.headers.get("purpose")).toLowerCase();
   const secPurpose = normalizeValue(request.headers.get("sec-purpose")).toLowerCase();
+  const secFetchDest = normalizeValue(request.headers.get("sec-fetch-dest")).toLowerCase();
+  const secFetchMode = normalizeValue(request.headers.get("sec-fetch-mode")).toLowerCase();
   const accept = normalizeValue(request.headers.get("accept")).toLowerCase();
+
+  if (!pathname.startsWith("/api/")) {
+    if (request.method !== "GET") {
+      return true;
+    }
+
+    if (secFetchDest && secFetchDest !== "document") {
+      return true;
+    }
+
+    if (secFetchMode && secFetchMode !== "navigate") {
+      return true;
+    }
+  }
 
   return Boolean(
     request.nextUrl.searchParams.get("_rsc")
