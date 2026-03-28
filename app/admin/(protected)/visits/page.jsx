@@ -15,10 +15,6 @@ function renderInputValue(value) {
   return value || "";
 }
 
-function renderLocation(visit) {
-  return [visit.country, visit.region, visit.city].filter(Boolean).join(" / ") || "-";
-}
-
 function renderBadge(value, tone = "neutral") {
   const text = value || "-";
   return (
@@ -152,9 +148,9 @@ export default async function AdminVisitsPage({ searchParams }) {
               </span>
               <span
                 className="admin-table__content-cell admin-audit-cell--truncate admin-audit-cell--location"
-                title={renderLocation(visit)}
+                title={formatAuditLocation(visit)}
               >
-                {renderLocation(visit)}
+                {formatAuditLocation(visit)}
               </span>
               <span className="admin-table__content-cell">
                 {renderBadge(

@@ -7,6 +7,7 @@ import {
   hashIpAddress,
   isDataCenterRequest,
   isProtectedPath,
+  shouldSkipRiskEvaluation,
 } from "./lib/risk-control";
 
 type RiskApiDecision = {
@@ -59,6 +60,10 @@ async function evaluateRisk(request: NextRequest) {
 
 export async function middleware(request: NextRequest) {
   if (!isProtectedPath(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
+  if (shouldSkipRiskEvaluation(request)) {
     return NextResponse.next();
   }
 

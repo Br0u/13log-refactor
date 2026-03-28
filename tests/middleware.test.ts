@@ -18,6 +18,21 @@ describe("risk middleware", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it("skips Next.js prefetch requests so PV is not inflated", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+
+    const response = await middleware(new NextRequest("http://localhost:3000/admin/visits", {
+      headers: {
+        purpose: "prefetch",
+        "next-router-prefetch": "1",
+      },
+    }));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
   it("allows normal requests after internal evaluation", async () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(JSON.stringify({
       action: "allow",
