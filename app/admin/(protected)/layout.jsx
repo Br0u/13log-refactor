@@ -33,7 +33,7 @@ export default async function ProtectedAdminLayout({ children }) {
         </div>
         <nav className="admin-shell__nav" aria-label="Admin Navigation">
           {NAV_ITEMS.map((item) => (
-            <Link key={item.href} href={item.href} className="admin-shell__link">
+            <Link key={item.href} href={item.href} prefetch={false} className="admin-shell__link">
               {item.label}
             </Link>
           ))}
