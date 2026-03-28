@@ -28,6 +28,7 @@ export default function HeaderNav() {
           <li key={item.href}>
             <Link
               href={item.href}
+              prefetch={false}
               className={active ? "active" : undefined}
               aria-current={active ? "page" : undefined}
             >

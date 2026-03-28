@@ -24,4 +24,10 @@ describe("admin dashboard", () => {
     expect(stylesheet).toMatch(/\.admin-overview-card\s*\{[^}]*min-width:\s*0;/s);
     expect(stylesheet).toMatch(/\.admin-overview-card__links\s*\{[^}]*flex-wrap:\s*wrap;/s);
   });
+
+  it("disables admin navigation prefetching to avoid inflating visit logs", () => {
+    const source = fs.readFileSync(path.join(process.cwd(), "app/admin/(protected)/layout.jsx"), "utf8");
+
+    expect(source).toContain("prefetch={false}");
+  });
 });
