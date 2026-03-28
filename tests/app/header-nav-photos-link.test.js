@@ -9,4 +9,10 @@ describe("header nav photos link", () => {
     expect(source).toContain('{ href: "/photos/index.html", label: "Photos" }');
     expect(source).not.toContain('{ href: "/photos", label: "Photos" }');
   });
+
+  it("disables link prefetching to avoid inflating visit logs", () => {
+    const source = fs.readFileSync(path.join(process.cwd(), "app/components/HeaderNav.js"), "utf8");
+
+    expect(source).toContain("prefetch={false}");
+  });
 });
