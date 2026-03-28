@@ -47,6 +47,19 @@ export function isProtectedPath(pathname = "") {
   return true;
 }
 
+export function shouldSkipRiskEvaluation(request: NextRequest) {
+  const purpose = normalizeValue(request.headers.get("purpose")).toLowerCase();
+  const secPurpose = normalizeValue(request.headers.get("sec-purpose")).toLowerCase();
+
+  return Boolean(
+    request.headers.get("next-router-prefetch")
+      || request.headers.get("x-middleware-prefetch")
+      || request.headers.get("rsc")
+      || purpose === "prefetch"
+      || secPurpose === "prefetch",
+  );
+}
+
 export function computeRiskAssessment(input: RiskAssessmentInput): RiskAssessment {
   let riskScore = 0;
 
