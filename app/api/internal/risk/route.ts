@@ -27,7 +27,7 @@ const RATE_LIMIT_WINDOW_SECONDS = 10;
 const RATE_LIMIT_MAX_REQUESTS = 20;
 
 function shouldApplyRateLimit(pathname: string) {
-  return pathname.startsWith("/api/") || pathname.startsWith("/admin");
+  return pathname.startsWith("/api/");
 }
 
 function json(body: unknown, status = 200) {
