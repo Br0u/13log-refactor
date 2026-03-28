@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { db } from "../../lib/db";
+import * as markdown from "../../lib/markdown";
 import { createMicroPost } from "../../lib/repositories/micro-posts";
 import { createMicroPostLike } from "../../lib/repositories/likes";
 import { createPost } from "../../lib/repositories/posts";
@@ -126,6 +127,113 @@ describe("public content facade", () => {
     expect(timelineEntries.map((item) => item.type)).toEqual(["micro", "post"]);
     expect(timelineEntries[0].summary).toBe("timeline micro published");
     expect(timelineEntries[0].likeCount).toBe(1);
+    expect(timelineEntries[0].hasImage).toBe(false);
+    expect(timelineEntries[0].renderedContentHtml).toBe("");
     expect(timelineEntries.every((item) => item.summary !== "timeline micro draft")).toBe(true);
+  });
+
+  it("marks image micros in the public timeline payload", async () => {
+    await db.microPostTag.deleteMany({
+      where: {
+        microPost: {
+          content: {
+            in: ["timeline image micro"],
+          },
+        },
+      },
+    });
+    await db.microPost.deleteMany({
+      where: {
+        content: {
+          in: ["timeline image micro"],
+        },
+      },
+    });
+
+    await createMicroPost({
+      content: "![alt](/images/test.jpg)\n\ntimeline image micro",
+      status: "PUBLISHED",
+      publishedAt: new Date("2026-03-16T10:00:00.000Z"),
+      tags: ["timeline"],
+    });
+
+    const entries = await getPublicTimelineEntries();
+    const imageEntry = entries.find((item) => item.type === "micro" && item.summary.includes("timeline image micro"));
+
+    expect(imageEntry?.hasImage).toBe(true);
+    expect(imageEntry?.renderedContentHtml).toContain("<img");
+  });
+
+  it("keeps rich html for formatted text micros", async () => {
+    await db.microPostTag.deleteMany({
+      where: {
+        microPost: {
+          content: {
+            in: ["第一行\n第二行\n\n- 列表项"],
+          },
+        },
+      },
+    });
+    await db.microPost.deleteMany({
+      where: {
+        content: {
+          in: ["第一行\n第二行\n\n- 列表项"],
+        },
+      },
+    });
+
+    await createMicroPost({
+      content: "第一行\n第二行\n\n- 列表项",
+      status: "PUBLISHED",
+      publishedAt: new Date("2026-03-17T10:00:00.000Z"),
+      tags: ["timeline"],
+    });
+
+    const entries = await getPublicTimelineEntries();
+    const richEntry = entries.find((item) => item.type === "micro" && item.summary.includes("列表项"));
+
+    expect(richEntry?.renderedContentHtml).toContain("<ul>");
+  });
+
+  it("filters timeline entries before rendering unrelated micro html", async () => {
+    const renderSpy = vi.spyOn(markdown, "renderMicroMarkdownToHtml");
+
+    await db.microPostTag.deleteMany({
+      where: {
+        microPost: {
+          content: {
+            in: ["筛选命中的 rich micro", "筛选外的 rich micro"],
+          },
+        },
+      },
+    });
+    await db.microPost.deleteMany({
+      where: {
+        content: {
+          in: ["筛选命中的 rich micro", "筛选外的 rich micro"],
+        },
+      },
+    });
+
+    await createMicroPost({
+      content: "筛选命中的 rich micro\n\n- 列表项",
+      status: "PUBLISHED",
+      publishedAt: new Date("2026-03-18T10:00:00.000Z"),
+      tags: ["match-tag"],
+    });
+
+    await createMicroPost({
+      content: "筛选外的 rich micro\n\n- 列表项",
+      status: "PUBLISHED",
+      publishedAt: new Date("2026-03-18T09:00:00.000Z"),
+      tags: ["other-tag"],
+    });
+
+    const entries = await getPublicTimelineEntries({ tag: "match-tag" });
+
+    expect(entries.some((item) => item.type === "micro" && item.summary.includes("筛选命中的 rich micro"))).toBe(true);
+    expect(entries.some((item) => item.type === "micro" && item.summary.includes("筛选外的 rich micro"))).toBe(false);
+    expect(renderSpy.mock.calls.some(([source]) => String(source).includes("筛选命中的 rich micro"))).toBe(true);
+    expect(renderSpy.mock.calls.some(([source]) => String(source).includes("筛选外的 rich micro"))).toBe(false);
   });
 });

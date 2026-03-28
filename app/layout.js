@@ -13,7 +13,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" dir="auto">
+    <html lang="zh-CN" dir="auto">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -23,6 +23,10 @@ export default function RootLayout({ children }) {
         />
         <link
           href="https://fonts.googleapis.com/css2?family=Iosevka+Charon+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://cdn.jsdelivr.net/npm/@callmebill/lxgw-wenkai-web@latest/style.css"
           rel="stylesheet"
         />
       </head>
@@ -78,8 +82,31 @@ export default function RootLayout({ children }) {
         </aside>
 
         <footer className="footer">
-          <span>&copy; {new Date().getFullYear()} <Link href="/">13log</Link></span>
-          <span>By Br0u</span>
+          <div className="footer__badges" aria-label="Footer certifications">
+            <a
+              className="footer-badge"
+              href="https://notbyai.fyi/"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Human Written"
+            >
+              <span className="footer-badge__plate">HUMAN WRITTEN</span>
+              <span className="footer-badge__label">/ 非 AI 创作</span>
+            </a>
+            <a
+              className="footer-badge"
+              href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+              target="_blank"
+              rel="license noreferrer"
+              aria-label="CC BY-NC-SA"
+            >
+              <span className="footer-badge__plate">CC BY-NC-SA</span>
+              <span className="footer-badge__label">/ 内容许可协议</span>
+            </a>
+          </div>
+          <p className="footer__meta">
+            13log © {new Date().getFullYear()} <Link href="/">Br0u</Link>.
+          </p>
         </footer>
 
         <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" className="top-link" id="top-link" accessKey="g">

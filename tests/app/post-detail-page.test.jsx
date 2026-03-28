@@ -60,6 +60,11 @@ describe("post detail page", () => {
     const markup = renderToStaticMarkup(element);
 
     expect(markup).toContain("post-single post-single--blended");
-    expect(markup).toContain("post-related-rail post-related-rail--blended");
+    expect(markup).toContain("blog-layout blog-layout--post-detail");
+    expect(markup).toContain("blog-rail blog-rail--detail");
+    expect(markup).toContain("返回 Posts");
+    expect(markup).toContain("Example Post");
+    expect(markup).toContain("相关文章");
+    expect(markup.indexOf("blog-rail blog-rail--detail")).toBeLessThan(markup.indexOf("post-single post-single--blended"));
   });
 });

@@ -43,7 +43,7 @@ describe("public content routes", () => {
       params: Promise.resolve({ slug }),
     });
 
-    expect(metadata.title).toContain("Public Route Test Post");
+    expect(metadata.title).toBe("Public Route Test Post | 我的小小世界");
   });
 
   it("serves index.json from public content", async () => {

@@ -3,7 +3,7 @@ import { ADMIN_SESSION_COOKIE, readAdminSession } from "../../../../../lib/sessi
 import { uploadAdminImage } from "../../../../../lib/media-storage";
 import { createMediaAsset } from "../../../../../lib/repositories/media-assets";
 
-const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_SIZE_BYTES = 15 * 1024 * 1024;
 
 function json(body, status) {
   return new Response(JSON.stringify(body), {

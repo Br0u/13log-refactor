@@ -3,6 +3,24 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 describe("posts timeline styles", () => {
+  it("caps the posts timeline at two columns on larger screens", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry\s*\{[^}]*column-count:\s*1;/s);
+    expect(stylesheet).toMatch(/@media\s*\(min-width:\s*900px\)\s*\{[\s\S]*\.posts-masonry\s*\{[^}]*column-count:\s*2;/s);
+    expect(stylesheet).not.toMatch(/@media\s*\(min-width:\s*1200px\)\s*\{[\s\S]*\.posts-masonry\s*\{[^}]*column-count:\s*3;/s);
+  });
+
+  it("switches the posts page timeline into a single-column square-corner list mode", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s*\{[^}]*column-count:\s*1;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card\s*\{[^}]*border-radius:\s*0;[^}]*background:\s*transparent;[^}]*border:\s*none;[^}]*box-shadow:\s*none;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card__title\s+a,\s*\.posts-masonry--posts-list\s+\.post-preview-card__excerpt-block,\s*\.posts-masonry--posts-list\s+\.post-preview-card__meta\s*\{[^}]*color:\s*color-mix\(in srgb,\s*var\(--secondary\)\s*92%,\s*var\(--content\)\);/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\.posts-masonry--interactive\[data-micro-focus=""\]\s+\.post-preview-card:hover,\s*\.posts-masonry--posts-list:not\(\.posts-masonry--interactive\)\s+\.post-preview-card:hover\s*\{[^}]*transform:\s*none;[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;[^}]*border-color:\s*transparent;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__title\s+a,\s*\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__excerpt-block,\s*\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__meta\s*\{[^}]*color:\s*var\(--primary\);/s);
+  });
+
   it("adds a soft backdrop layer when a micro post is focused", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
@@ -32,22 +50,54 @@ describe("posts timeline styles", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toMatch(/\.post-preview-card--micro\s+\.post-preview-card__micro-surface\s*\{[^}]*display:\s*grid;/s);
-    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*position:\s*absolute;[^}]*max-height:\s*min\(/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*position:\s*absolute;[^}]*max-height:\s*var\(--micro-surface-max-height,/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-surface\[data-micro-placement="up"\]\s*\{[^}]*top:\s*auto;[^}]*bottom:\s*-[.\d]+rem;/s);
   });
 
   it("styles micropost images with framed proportional media treatment", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*display:\s*block;[^}]*width:\s*100%;[^}]*height:\s*auto;/s);
-    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*border:\s*1px\s+solid\s+[^;]+;/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*display:\s*block;[^}]*width:\s*auto;[^}]*max-width:\s*100%;[^}]*height:\s*auto;/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*margin:\s*0\.18rem\s+auto\s+0\.28rem;/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*border:\s*1px\s+solid\s+color-mix\(in srgb,\s*var\(--primary\)\s*22%,\s*var\(--border\)\);/s);
+    expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*border-radius:\s*0;/s);
     expect(stylesheet).toMatch(/\.post-preview-card__micro-image\s*\{[^}]*object-fit:\s*contain;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card__micro-image\s*\{[^}]*max-height:\s*12rem;/s);
+  });
+
+  it("keeps image micros fully expanded in the posts list layout", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro-expanded\s*\{[^}]*cursor:\s*default;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro-expanded\s+\.post-preview-card__excerpt-block\s*\{[^}]*overflow:\s*visible;[^}]*max-height:\s*none;/s);
+  });
+
+  it("gives long text micros more reading height in the posts list layout", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro-relaxed\s+\.post-preview-card__excerpt-block\s*\{[^}]*max-height:\s*calc\(1\.74em\s*\*\s*10\);/s);
+  });
+
+  it("removes the clickable cursor hint from micro cards in the posts list layout", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro\s*\{[^}]*cursor:\s*default;/s);
+  });
+
+  it("separates posts list cards with a soft ellipsis marker", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card:not\(:last-child\)::after\s*\{[^}]*content:\s*"\.\.\.";[^}]*display:\s*block;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card:not\(:last-child\)::after\s*\{[^}]*text-align:\s*center;[^}]*color:\s*color-mix\(in srgb,\s*var\(--secondary\)\s*72%,\s*transparent\);/s);
   });
 
   it("keeps the focused micropost surface mobile-friendly for touch scrolling", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*touch-action:\s*pan-y\s+pinch-zoom;[^}]*-webkit-overflow-scrolling:\s*touch;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*max-height:\s*min\(24rem,\s*68vh\);/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*max-height:\s*min\(22rem,\s*62vh\);/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*\.posts-masonry--posts-list\s+\.post-preview-card__micro-image\s*\{[^}]*max-height:\s*9rem;/s);
   });
 
   it("keeps the native scrollbar hidden when the range frame is shown", () => {

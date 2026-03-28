@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { renderToStaticMarkup } from "react-dom/server";
 
-const { redirectMock, cookiesMock } = vi.hoisted(() => ({
+const { redirectMock, cookiesMock, readAdminSessionMock } = vi.hoisted(() => ({
   redirectMock: vi.fn(() => {
     throw new Error("NEXT_REDIRECT");
   }),
   cookiesMock: vi.fn(),
+  readAdminSessionMock: vi.fn(),
 }));
 
 vi.mock("../../lib/auth", async () => {
@@ -28,6 +30,14 @@ vi.mock("next/headers", () => ({
   cookies: cookiesMock,
 }));
 
+vi.mock("../../lib/session", async () => {
+  const actual = await vi.importActual("../../lib/session");
+  return {
+    ...actual,
+    readAdminSession: readAdminSessionMock,
+  };
+});
+
 import ProtectedAdminLayout from "../../app/admin/(protected)/layout";
 import { POST as loginRoute } from "../../app/api/admin/login/route";
 import { POST as logoutRoute } from "../../app/api/admin/logout/route";
@@ -45,6 +55,24 @@ describe("admin auth", () => {
   it("redirects unauthenticated admin layout requests to the login page", async () => {
     await expect(ProtectedAdminLayout({ children: null })).rejects.toThrow("NEXT_REDIRECT");
     expect(redirectMock).toHaveBeenCalledWith("/admin/login");
+  });
+
+  it("includes a Photos navigation item in the protected admin shell", async () => {
+    cookiesMock.mockResolvedValue({
+      get() {
+        return { value: "admin-session-token" };
+      },
+    });
+    readAdminSessionMock.mockResolvedValue({
+      username: "admin",
+    });
+
+    const markup = renderToStaticMarkup(await ProtectedAdminLayout({
+      children: "<div>content</div>",
+    }));
+
+    expect(markup).toContain('href="/admin/photos"');
+    expect(markup).toContain(">Photos<");
   });
 
   it("sets a session cookie when credentials are valid", async () => {

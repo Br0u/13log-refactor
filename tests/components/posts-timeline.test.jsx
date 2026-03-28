@@ -11,6 +11,181 @@ afterEach(() => {
 });
 
 describe("PostsTimeline", () => {
+  it("renders posts-list mode as a single-column infinite-scroll surface", () => {
+    const originalIntersectionObserver = window.IntersectionObserver;
+    window.IntersectionObserver = class IntersectionObserver {
+      observe() {}
+      disconnect() {}
+    };
+
+    render(
+      <PostsTimeline
+        layout="posts-list"
+        initialVisibleCount={6}
+        entries={Array.from({ length: 8 }, (_, index) => ({
+          type: "post",
+          slug: `post-${index + 1}`,
+          urlSlug: `post-${index + 1}`,
+          title: `Post ${index + 1}`,
+          summary: "summary",
+          date: "2026-03-09T10:00:00.000Z",
+          tags: ["Notes"],
+          categories: ["Notes"],
+          href: `/posts/post-${index + 1}`,
+        }))}
+      />
+    );
+
+    expect(screen.getByTestId("posts-timeline").getAttribute("data-layout")).toBe("posts-list");
+    expect(screen.getByTestId("posts-timeline").className).toContain("posts-masonry--posts-list");
+    expect(screen.getByTestId("timeline-card-post-6")).toBeTruthy();
+    expect(screen.queryByTestId("timeline-card-post-7")).toBeNull();
+    expect(screen.getByTestId("posts-timeline-sentinel")).toBeTruthy();
+
+    if (originalIntersectionObserver) {
+      window.IntersectionObserver = originalIntersectionObserver;
+    } else {
+      delete window.IntersectionObserver;
+    }
+  });
+
+  it("keeps micro cards static and out of focus mode in posts-list layout", () => {
+    render(
+      <PostsTimeline
+        layout="posts-list"
+        entries={[
+          {
+            type: "micro",
+            id: "micro-image-1",
+            content: "带图 micro",
+            summary: "带图 micro",
+            renderedContentHtml: "<p>第一段</p><p><img src=\"/test.jpg\" alt=\"test\"></p><p>第二段</p>",
+            hasImage: true,
+            date: "2026-03-10T01:32:00.000Z",
+            tags: ["碎碎念"],
+            categories: [],
+          },
+          {
+            type: "micro",
+            id: "micro-text-1",
+            content: "纯文字 micro",
+            summary: "纯文字 micro",
+            renderedContentHtml: "<p>第一段</p><p>第二段</p>",
+            hasImage: false,
+            date: "2026-03-09T01:32:00.000Z",
+            tags: ["碎碎念"],
+            categories: [],
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByTestId("timeline-card-micro-image-1").className).toContain("post-preview-card--micro-expanded");
+    fireEvent.click(screen.getByTestId("timeline-card-micro-image-1"));
+    expect(screen.getByTestId("posts-timeline").getAttribute("data-micro-focus")).toBe("");
+
+    fireEvent.click(screen.getByTestId("timeline-card-micro-text-1"));
+    expect(screen.getByTestId("posts-timeline").getAttribute("data-micro-focus")).toBe("");
+    expect(screen.getByTestId("timeline-card-micro-text-1").getAttribute("data-focus-state")).toBe("idle");
+  });
+
+  it("gives long text micros a taller reading surface in posts-list layout", () => {
+    render(
+      <PostsTimeline
+        layout="posts-list"
+        entries={[
+          {
+            type: "micro",
+            id: "micro-long-1",
+            content: "这是一条很长很长的纯文字 micro。".repeat(18),
+            summary: "这是一条很长很长的纯文字 micro。".repeat(18),
+            renderedContentHtml: "<p>这是一条很长很长的纯文字 micro。</p><p>第二段也很长。</p>",
+            hasImage: false,
+            date: "2026-03-10T01:32:00.000Z",
+            tags: ["碎碎念"],
+            categories: [],
+          },
+          {
+            type: "micro",
+            id: "micro-short-1",
+            content: "短一点的 micro",
+            summary: "短一点的 micro",
+            renderedContentHtml: "<p>短一点的 micro</p>",
+            hasImage: false,
+            date: "2026-03-09T01:32:00.000Z",
+            tags: ["碎碎念"],
+            categories: [],
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByTestId("timeline-card-micro-long-1").className).toContain("post-preview-card--micro-relaxed");
+    expect(screen.getByTestId("timeline-card-micro-short-1").className).not.toContain("post-preview-card--micro-relaxed");
+  });
+
+  it("does not register micro focus event listeners in posts-list layout", () => {
+    const addEventListenerSpy = vi.spyOn(window, "addEventListener");
+
+    render(
+      <PostsTimeline
+        layout="posts-list"
+        entries={[
+          {
+            type: "micro",
+            id: "micro-text-1",
+            content: "纯文字 micro",
+            summary: "纯文字 micro",
+            hasImage: false,
+            date: "2026-03-09T01:32:00.000Z",
+            tags: ["碎碎念"],
+            categories: [],
+          },
+        ]}
+      />
+    );
+
+    expect(addEventListenerSpy).not.toHaveBeenCalledWith("keydown", expect.any(Function));
+    expect(addEventListenerSpy).not.toHaveBeenCalledWith("mousedown", expect.any(Function));
+    expect(addEventListenerSpy).not.toHaveBeenCalledWith("wheel", expect.any(Function), expect.anything());
+    expect(addEventListenerSpy).not.toHaveBeenCalledWith("touchmove", expect.any(Function), expect.anything());
+  });
+
+  it("falls back to a load more button when IntersectionObserver is unavailable", async () => {
+    const originalIntersectionObserver = window.IntersectionObserver;
+    // Simulate older browsers and constrained webviews that cannot observe the sentinel.
+    delete window.IntersectionObserver;
+
+    render(
+      <PostsTimeline
+        layout="posts-list"
+        initialVisibleCount={6}
+        entries={Array.from({ length: 8 }, (_, index) => ({
+          type: "post",
+          slug: `post-${index + 1}`,
+          urlSlug: `post-${index + 1}`,
+          title: `Post ${index + 1}`,
+          summary: "summary",
+          date: "2026-03-09T10:00:00.000Z",
+          tags: ["Notes"],
+          categories: ["Notes"],
+          href: `/posts/post-${index + 1}`,
+        }))}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("posts-timeline-sentinel")).toBeNull();
+    });
+    expect(screen.getByRole("button", { name: "Load more" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Load more" }));
+    expect(screen.getByTestId("timeline-card-post-8")).toBeTruthy();
+
+    if (originalIntersectionObserver) {
+      window.IntersectionObserver = originalIntersectionObserver;
+    }
+  });
+
   it("focuses a micro post in place and shrinks the rest of the timeline", () => {
     render(
       <PostsTimeline
@@ -396,6 +571,50 @@ describe("PostsTimeline", () => {
     expect(touchMoveEvent.defaultPrevented).toBe(true);
     expect(screen.getByTestId("posts-timeline").getAttribute("data-micro-focus")).toBe("micro-1");
     expect(screen.getByTestId("timeline-card-micro-1").getAttribute("data-focus-state")).toBe("active");
+  });
+
+  it("repositions a focused micropost upward when the card sits near the viewport bottom", () => {
+    render(
+      <PostsTimeline
+        entries={[
+          {
+            type: "micro",
+            id: "micro-1",
+            content: "一段很长很长的内容",
+            summary: "一段很长很长的内容",
+            renderedContentHtml: "<p>第一段</p><p>第二段</p><p>第三段</p><p>第四段</p>",
+            date: "2026-03-10T01:32:00.000Z",
+            tags: ["碎碎念"],
+            categories: [],
+          },
+        ]}
+      />
+    );
+
+    const card = screen.getByTestId("timeline-card-micro-1");
+    const originalRect = card.getBoundingClientRect.bind(card);
+
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      writable: true,
+      value: 800,
+    });
+
+    card.getBoundingClientRect = () => ({
+      ...originalRect(),
+      top: 680,
+      bottom: 760,
+      left: 0,
+      right: 320,
+      width: 320,
+      height: 80,
+    });
+
+    fireEvent.click(card);
+
+    const scrollSurface = screen.getByTestId("timeline-card-micro-1-surface");
+    expect(scrollSurface.getAttribute("data-micro-placement")).toBe("up");
+    expect(scrollSurface.style.getPropertyValue("--micro-surface-max-height")).toBe("760px");
   });
 
   it("updates the active micropost range frame as the card scroll position changes", () => {

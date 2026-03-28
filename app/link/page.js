@@ -1,4 +1,5 @@
 import HtmlContent from "../components/HtmlContent";
+import BlogRail from "../../components/blog/BlogRail";
 import { getLinkEntries, getLinkPageIntro, renderMarkdown } from "../../lib/content";
 
 export const metadata = {
@@ -14,10 +15,19 @@ const CATEGORY_TITLE = {
 
 export default async function LinkPage() {
   const intro = getLinkPageIntro();
-  const introHtml = await renderMarkdown(intro.content || "");
   const entries = getLinkEntries();
+  const [introHtml, renderedEntries] = await Promise.all([
+    renderMarkdown(intro.content || ""),
+    Promise.all(entries.map(async (entry) => {
+      const descriptionSource = entry.content || entry.description || "";
+      return {
+        ...entry,
+        descriptionHtml: descriptionSource ? await renderMarkdown(descriptionSource) : "",
+      };
+    })),
+  ]);
 
-  const groups = entries.reduce((acc, item) => {
+  const groups = renderedEntries.reduce((acc, item) => {
     const key = item.category || "other";
     if (!acc[key]) acc[key] = [];
     acc[key].push(item);
@@ -25,54 +35,83 @@ export default async function LinkPage() {
   }, {});
 
   return (
-    <section>
-      <header className="page-header">
-        <h1>{intro.title}</h1>
-        {intro.description ? <div className="post-description">{intro.description}</div> : null}
-      </header>
+    <div className="blog-layout blog-layout--link-index">
+      <BlogRail
+        variant="link"
+        introTitle="前言"
+        introBody="这里收着一些会反复回看的站点、播客和入口。它们不急着更新，却会在某些时刻重新发亮。"
+      />
+      <section className="blog-layout__main">
+        <header className="page-header">
+          <h1>{intro.title}</h1>
+          {intro.description ? <div className="post-description">{intro.description}</div> : null}
+        </header>
 
-      {intro.content ? <HtmlContent html={introHtml} className="post-content" /> : null}
+        {intro.content ? <HtmlContent html={introHtml} className="post-content" /> : null}
 
-      {Object.keys(groups).map((category, idx, arr) => (
-        <div key={category}>
-          <h2 className="link-section-title">{CATEGORY_TITLE[category] || category}</h2>
-          <div className="posts-masonry">
-            {groups[category].map((entry) => {
-              const hasAsyncPreview = !entry.image || !entry.description;
-              return (
-                <article
-                  key={entry.slug}
-                  className={`link-board-card ${hasAsyncPreview ? "link-board-card--preview-pending" : ""}`}
-                  data-link-card
-                  data-preview-enabled="true"
-                  data-preview-url={entry.link}
-                >
-                  <a className="link-board-card__main" href={entry.link} target="_blank" rel="noopener noreferrer">
-                    <div className={`link-board-card__preview ${entry.image ? "" : "is-empty"}`} data-preview-container>
-                      {entry.image ? <img src={entry.image} alt="" loading="lazy" decoding="async" data-preview-image /> : null}
+        {Object.keys(groups).map((category, idx, arr) => (
+          <section className="link-essay-group" key={category}>
+            <h2 className="link-section-title">{CATEGORY_TITLE[category] || category}</h2>
+            <div className="link-essay-list">
+              {groups[category].map((entry) => {
+                const hasAsyncPreview = !entry.image || !entry.description;
+                return (
+                  <article
+                    key={entry.slug}
+                    className={`link-essay-entry ${hasAsyncPreview ? "link-board-card--preview-pending" : ""}`}
+                    data-link-card
+                    data-preview-enabled="true"
+                    data-preview-url={entry.link}
+                  >
+                    <div className="link-essay-entry__layout">
+                      <div className="link-essay-entry__main">
+                        <div className="link-essay-entry__eyebrow">
+                          {entry.site ? <span className="link-essay-entry__site">{entry.site}</span> : null}
+                        </div>
+
+                        <h3 className="link-essay-entry__title">
+                          <span data-preview-title>{entry.title}</span>
+                        </h3>
+
+                        <HtmlContent
+                          html={entry.descriptionHtml || `<p class="is-empty" data-preview-desc>${entry.description || ""}</p>`}
+                          className="link-essay-entry__body"
+                          executeScripts={false}
+                        />
+
+                        {!entry.descriptionHtml ? <p className="link-essay-entry__desc-fallback is-empty" data-preview-desc /> : null}
+
+                        {entry.children?.length ? (
+                          <div className="link-essay-entry__related">
+                            {entry.children.map((child) => (
+                              <a className="link-essay-entry__related-link" href={child.link} key={child.link} target="_blank" rel="noopener noreferrer">
+                                <span className="link-essay-entry__related-title">{child.title}</span>
+                                {child.description ? <span className="link-essay-entry__related-desc">{child.description}</span> : null}
+                              </a>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+
+                      <div className={`link-essay-entry__preview ${entry.image ? "" : "is-empty"}`} data-preview-container>
+                        {entry.image ? <img src={entry.image} alt="" loading="lazy" decoding="async" data-preview-image /> : null}
+                      </div>
                     </div>
-                    <div className="link-board-card__title" data-preview-title>{entry.title}</div>
-                    <div className={`link-board-card__desc ${entry.description ? "" : "is-empty"}`} data-preview-desc>{entry.description}</div>
-                    {entry.site ? <div className="link-board-card__meta">{entry.site}</div> : null}
-                  </a>
-
-                  {entry.children?.length ? (
-                    <div className="link-board-children">
-                      {entry.children.map((child) => (
-                        <a className="link-board-child" href={child.link} key={child.link} target="_blank" rel="noopener noreferrer">
-                          <div className="link-board-child__title">{child.title}</div>
-                          {child.description ? <div className="link-board-child__desc">{child.description}</div> : null}
-                        </a>
-                      ))}
-                    </div>
-                  ) : null}
-                </article>
-              );
-            })}
-          </div>
-          {idx < arr.length - 1 ? <div className="ink-divider" aria-hidden="true" /> : null}
-        </div>
-      ))}
-    </section>
+                    <a
+                      className="entry-link"
+                      href={entry.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`link to ${entry.title}`}
+                    />
+                  </article>
+                );
+              })}
+            </div>
+            {idx < arr.length - 1 ? <div className="ink-divider" aria-hidden="true" /> : null}
+          </section>
+        ))}
+      </section>
+    </div>
   );
 }

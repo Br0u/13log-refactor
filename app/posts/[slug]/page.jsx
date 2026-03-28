@@ -1,9 +1,9 @@
 ﻿import React from "react";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import HtmlContent from "../../components/HtmlContent.jsx";
 import PostComments from "../../../components/blog/PostComments";
 import PostLikeButton from "../../../components/blog/PostLikeButton";
+import BlogRail from "../../../components/blog/BlogRail";
 import { buildTocHtml, formatPostMeta, renderMarkdown, withHeadingAnchors } from "../../../lib/content";
 import { getPublicPostBySlug, getPublicPosts } from "../../../lib/public-content";
 import { getApprovedCommentsBySlug } from "../../../lib/repositories/comments";
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }) {
   const post = await getPublicPostBySlug(slug);
   if (!post) return { title: "Post Not Found" };
   return {
-    title: `${post.title} | 鎴戠殑灏忓皬涓栫晫`,
+    title: `${post.title} | 我的小小世界`,
     description: post.description || "",
   };
 }
@@ -63,23 +63,15 @@ export default async function PostDetailPage({ params }) {
   const comments = await getApprovedCommentsBySlug(post.slug);
 
   return (
-    <>
-      {relatedPosts.length ? (
-        <aside className="post-related-rail post-related-rail--blended" aria-label="Related Posts">
-          <div className="post-related-rail__title">看看别的</div>
-          <ul className="post-related-rail__list">
-            {relatedPosts.map((item) => (
-              <li key={item.slug} className="post-related-rail__item">
-                <Link href={`/posts/${encodeURIComponent(item.urlSlug || item.slug)}`} className="post-related-rail__link">
-                  {item.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </aside>
-      ) : null}
-
-      <article className="post-single post-single--blended">
+    <div className="blog-layout blog-layout--post-detail">
+      <BlogRail
+        variant="detail"
+        introTitle={post.title}
+        meta={formatPostMeta(post)}
+        tocHtml={tocHtml}
+        relatedPosts={relatedPosts}
+      />
+      <article className="post-single post-single--blended blog-layout__main">
         <header className="post-header">
           <h1 className="post-title">{post.title}</h1>
           <div className="post-meta">{formatPostMeta(post)}</div>
@@ -100,6 +92,6 @@ export default async function PostDetailPage({ params }) {
           <PostComments slug={post.slug} initialComments={comments} />
         </section>
       </article>
-    </>
+    </div>
   );
 }

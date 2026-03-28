@@ -1,0 +1,70 @@
+import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { ADMIN_SESSION_COOKIE, readAdminSession } from "../../../../lib/session";
+import { createPhoto } from "../../../../lib/repositories/photos";
+
+function json(body, status) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+function parseSortOrder(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function fallbackTitle(fileName = "Photo") {
+  return String(fileName || "Photo").replace(/\.[^.]+$/, "").trim() || "Photo";
+}
+
+export async function POST(request) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value || "";
+  const session = await readAdminSession(token);
+
+  if (!session) {
+    return json({ message: "Unauthorized" }, 401);
+  }
+
+  const body = await request.json();
+  const categoryId = String(body?.categoryId || "").trim();
+  const title = String(body?.title || "").trim();
+  const caption = String(body?.caption || "").trim();
+  const sortOrder = parseSortOrder(body?.sortOrder);
+  const uploads = Array.isArray(body?.uploads) ? body.uploads : [];
+
+  if (!categoryId || !uploads.length) {
+    return json({ message: "Album and uploaded images are required." }, 400);
+  }
+
+  for (let index = 0; index < uploads.length; index += 1) {
+    const upload = uploads[index];
+    const imageUrl = String(upload?.url || "").trim();
+    const pathname = String(upload?.pathname || "").trim();
+    const fileName = String(upload?.fileName || "").trim();
+
+    if (!imageUrl || !pathname) {
+      return json({ message: "Uploaded image metadata is incomplete." }, 400);
+    }
+
+    await createPhoto({
+      title: title || fallbackTitle(fileName),
+      caption,
+      imageUrl,
+      pathname,
+      sortOrder: sortOrder == null ? null : sortOrder + index,
+      categoryId,
+    });
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/photos");
+  revalidatePath(`/admin/photos/${categoryId}`);
+  revalidatePath("/photos");
+
+  return json({ created: uploads.length }, 200);
+}

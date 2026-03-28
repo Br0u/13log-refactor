@@ -64,6 +64,29 @@ describe("admin image upload api", () => {
     expect(uploadAdminImageMock).not.toHaveBeenCalled();
   });
 
+  it("rejects images larger than the upload api limit", async () => {
+    const token = await createAdminSession({ username: "admin" });
+    cookiesMock.mockResolvedValue({
+      get() {
+        return { value: token };
+      },
+    });
+
+    const oversizedImage = new File([new Uint8Array(16 * 1024 * 1024)], "huge.jpg", { type: "image/jpeg" });
+    const formData = new FormData();
+    formData.set("file", oversizedImage);
+
+    const response = await imageUploadRoute(new Request("http://localhost:3000/api/admin/uploads/image", {
+      method: "POST",
+      body: formData,
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body).toEqual({ message: "Image is too large" });
+    expect(uploadAdminImageMock).not.toHaveBeenCalled();
+  });
+
   it("returns uploaded image metadata for authenticated image uploads", async () => {
     const token = await createAdminSession({ username: "admin" });
     cookiesMock.mockResolvedValue({
