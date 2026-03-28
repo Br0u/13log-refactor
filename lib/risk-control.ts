@@ -50,13 +50,17 @@ export function isProtectedPath(pathname = "") {
 export function shouldSkipRiskEvaluation(request: NextRequest) {
   const purpose = normalizeValue(request.headers.get("purpose")).toLowerCase();
   const secPurpose = normalizeValue(request.headers.get("sec-purpose")).toLowerCase();
+  const accept = normalizeValue(request.headers.get("accept")).toLowerCase();
 
   return Boolean(
-    request.headers.get("next-router-prefetch")
+    request.nextUrl.searchParams.get("_rsc")
+      || request.headers.get("next-router-prefetch")
       || request.headers.get("x-middleware-prefetch")
       || request.headers.get("rsc")
+      || request.headers.get("x-nextjs-data")
       || purpose === "prefetch"
-      || secPurpose === "prefetch",
+      || secPurpose === "prefetch"
+      || accept.includes("text/x-component"),
   );
 }
 
