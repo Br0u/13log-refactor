@@ -23,6 +23,13 @@ const riskPayloadSchema = z.object({
   method: z.string().optional(),
 });
 
+const RATE_LIMIT_WINDOW_SECONDS = 10;
+const RATE_LIMIT_MAX_REQUESTS = 20;
+
+function shouldApplyRateLimit(pathname: string) {
+  return pathname.startsWith("/api/") || pathname.startsWith("/admin");
+}
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -66,19 +73,21 @@ export async function POST(request: Request) {
     });
   }
 
-  const recentCount = await countRecentAccessLogs(payload.ipHash, 10);
-  if (recentCount >= 5) {
-    await createAccessLog({
-      ...baseLog,
-      isBlocked: true,
-      blockReason: "rate_limit",
-    });
+  if (shouldApplyRateLimit(payload.path)) {
+    const recentCount = await countRecentAccessLogs(payload.ipHash, RATE_LIMIT_WINDOW_SECONDS);
+    if (recentCount >= RATE_LIMIT_MAX_REQUESTS) {
+      await createAccessLog({
+        ...baseLog,
+        isBlocked: true,
+        blockReason: "rate_limit",
+      });
 
-    return json({
-      action: "block",
-      status: 429,
-      reason: "rate_limit",
-    });
+      return json({
+        action: "block",
+        status: 429,
+        reason: "rate_limit",
+      });
+    }
   }
 
   if (payload.riskScore >= 70 || payload.riskLabel === "bot") {
