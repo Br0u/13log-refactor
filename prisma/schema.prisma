@@ -133,6 +133,38 @@ model VisitLog {
   @@index([path])
 }
 
+model AccessLog {
+  id          String   @id @default(cuid())
+  ipHash      String
+  path        String
+  country     String?
+  region      String?
+  city        String?
+  userAgent   String?
+  referer     String?
+  riskScore   Int
+  riskLabel   String
+  isBlocked   Boolean  @default(false)
+  blockReason String?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([ipHash, createdAt])
+  @@index([riskLabel, createdAt])
+  @@map("access_logs")
+}
+
+model Blacklist {
+  id        String   @id @default(cuid())
+  ipHash    String   @unique
+  reason    String
+  source    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("blacklist")
+}
+
 model PostLike {
   id         String   @id @default(cuid())
   postId     String

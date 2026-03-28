@@ -2,7 +2,6 @@
 import Link from "next/link";
 import ClientEnhancements from "./components/ClientEnhancements";
 import HeaderNav from "./components/HeaderNav";
-import VisitTracker from "./components/VisitTracker";
 
 export const metadata = {
   title: {
@@ -88,7 +87,6 @@ export default function RootLayout({ children }) {
         </a>
 
         <ClientEnhancements />
-        <VisitTracker />
       </body>
     </html>
   );
