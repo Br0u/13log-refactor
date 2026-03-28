@@ -49,6 +49,8 @@ describe("risk control", () => {
     expect(isProtectedPath("/posts")).toBe(true);
     expect(isProtectedPath("/api/comments")).toBe(true);
     expect(isProtectedPath("/admin")).toBe(true);
+    expect(isProtectedPath("/admin/login")).toBe(false);
+    expect(isProtectedPath("/api/admin/login")).toBe(false);
     expect(isProtectedPath("/_next/static/chunk.js")).toBe(false);
     expect(isProtectedPath("/favicon.ico")).toBe(false);
     expect(isProtectedPath("/images/avatar.jpg")).toBe(false);

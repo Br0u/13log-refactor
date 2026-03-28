@@ -40,6 +40,8 @@ export function isProtectedPath(pathname = "") {
   if (!pathname.startsWith("/")) return false;
   if (pathname.startsWith("/_next")) return false;
   if (pathname === "/api/internal/risk") return false;
+  if (pathname === "/admin/login") return false;
+  if (pathname === "/api/admin/login") return false;
   if (STATIC_PATHS.has(pathname)) return false;
   if (STATIC_FILE_RE.test(pathname)) return false;
   return true;

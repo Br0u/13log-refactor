@@ -516,10 +516,94 @@
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 2.4fr) 0.9fr;
 }
 
+.admin-table__head--audit,
+.admin-table__row--audit {
+  grid-template-columns:
+    minmax(136px, 0.95fr)
+    minmax(180px, 0.95fr)
+    minmax(180px, 1fr)
+    minmax(104px, 0.62fr)
+    minmax(78px, 0.42fr)
+    minmax(118px, 0.68fr)
+    minmax(240px, 1.2fr)
+    minmax(300px, 1.45fr)
+    minmax(118px, 0.68fr);
+}
+
 .admin-table__content-cell {
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.6;
+}
+
+.admin-audit-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.admin-panel-table--audit {
+  min-width: 1520px;
+}
+
+.admin-audit-cell--truncate {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+.admin-audit-cell--path {
+  max-width: 240px;
+}
+
+.admin-audit-cell--location {
+  max-width: 220px;
+}
+
+.admin-audit-cell--referer {
+  max-width: 260px;
+}
+
+.admin-audit-cell--user-agent {
+  max-width: 300px;
+}
+
+.admin-audit-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  max-width: 100%;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  background: color-mix(in srgb, var(--entry) 92%, var(--theme));
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-audit-badge--neutral {
+  color: color-mix(in srgb, var(--secondary) 90%, var(--content));
+  border-color: color-mix(in srgb, var(--border) 84%, transparent);
+}
+
+.admin-audit-badge--warn {
+  background: rgba(145, 104, 41, 0.14);
+  border-color: rgba(145, 104, 41, 0.32);
+  color: #7b561d;
+}
+
+.admin-audit-badge--danger {
+  background: rgba(163, 58, 42, 0.16);
+  border-color: rgba(163, 58, 42, 0.34);
+  color: #942f21;
 }
 
 .admin-inline-form {
@@ -665,6 +749,35 @@
   gap: 12px;
 }
 
+.admin-audit-filters {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-items: end;
+}
+
+.admin-audit-filters label {
+  min-width: 0;
+}
+
+.admin-audit-filters__toggle {
+  align-self: stretch;
+}
+
+.admin-audit-filters__toggle input {
+  width: 18px;
+  height: 18px;
+  justify-self: start;
+}
+
+.admin-audit-filters__actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
 .admin-login-shell {
   min-height: calc(100vh - var(--header-height) - 2rem);
   display: grid;
@@ -715,12 +828,25 @@
   .admin-table__head--taxonomy,
   .admin-table__row--taxonomy,
   .admin-table__head--comments,
-  .admin-table__row--comments {
+  .admin-table__row--comments,
+  .admin-table__head--audit,
+  .admin-table__row--audit {
     grid-template-columns: 1fr;
   }
 
   .admin-table__head {
     display: none;
+  }
+
+  .admin-panel-table--audit {
+    min-width: 100%;
+  }
+
+  .admin-audit-cell--path,
+  .admin-audit-cell--location,
+  .admin-audit-cell--referer,
+  .admin-audit-cell--user-agent {
+    max-width: none;
   }
 
   .admin-inline-form {
