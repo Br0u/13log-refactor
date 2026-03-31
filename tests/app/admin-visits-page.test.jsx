@@ -33,7 +33,7 @@ vi.mock("../../lib/repositories/access-audit", async (importOriginal) => {
       rows: [
         {
           id: "log-1",
-          path: "/posts/this-path-is-long-enough-to-overflow-the-table-cell",
+          path: "/posts/%E6%A0%91",
           country: "CA",
           region: "Ontario",
           city: "Guelph",
@@ -71,8 +71,10 @@ describe("admin visits page", () => {
     expect(markup).toContain("Risk Label");
     expect(markup).toContain("Block Reason");
     expect(markup).toContain("admin-audit-table-scroll");
-    expect(markup).toContain("admin-audit-cell--truncate");
-    expect(markup).toContain('title="/posts/this-path-is-long-enough-to-overflow-the-table-cell"');
+    expect(markup).not.toContain("admin-audit-cell--truncate admin-audit-cell--path");
+    expect(markup).not.toContain("admin-audit-cell--truncate admin-audit-cell--referer");
+    expect(markup).toContain('title="/posts/树"');
+    expect(markup).toContain("/posts/树");
     expect(markup).toContain('title="https://google.com/very/long/referer/for/admin/audit/testing"');
     expect(markup).toContain("admin-audit-badge");
     expect(markup).toContain("admin-audit-badge--warn");
@@ -81,8 +83,15 @@ describe("admin visits page", () => {
     expect(markup).toContain("bot_threshold");
     expect(markup).toContain("Risk Score");
     expect(markup).toContain("Location");
-    expect(markup).toContain("CA / Ontario / Guelph");
-    expect(markup).toContain('title="CA / Ontario / Guelph"');
+    expect(markup).toContain("admin-local-time");
+    expect(markup).toContain("加拿大 / 安大略省 / 圭尔夫");
+    expect(markup).toContain('title="加拿大 / 安大略省 / 圭尔夫"');
+    expect(markup).toContain("Chrome 142");
+    expect(markup).toContain("macOS 14");
+    expect(markup).toContain("桌面端");
+    expect(markup).toContain("admin-audit-agent");
+    expect(markup).toContain("admin-audit-agent__raw");
     expect(markup).toContain("Chrome/142.0.0.0");
+    expect(markup).toContain("admin-audit-table-scroll");
   });
 });
