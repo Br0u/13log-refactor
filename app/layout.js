@@ -90,7 +90,11 @@ export default function RootLayout({ children }) {
               rel="noreferrer"
               aria-label="Human Written"
             >
-              <span className="footer-badge__plate">HUMAN WRITTEN</span>
+              <img
+                className="footer-badge__image"
+                src="/badges/written-by-human-not-by-ai-black.svg"
+                alt="Written By Human, Not By AI"
+              />
               <span className="footer-badge__label">/ 非 AI 创作</span>
             </a>
             <a
@@ -100,7 +104,11 @@ export default function RootLayout({ children }) {
               rel="license noreferrer"
               aria-label="CC BY-NC-SA"
             >
-              <span className="footer-badge__plate">CC BY-NC-SA</span>
+              <img
+                className="footer-badge__image"
+                src="/badges/cc-by-nc-sa.svg"
+                alt="Creative Commons BY-NC-SA"
+              />
               <span className="footer-badge__label">/ 内容许可协议</span>
             </a>
           </div>

@@ -478,24 +478,18 @@ body::before {
   outline: none;
 }
 
-.footer-badge__plate {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 6rem;
-  min-height: 1.54rem;
-  padding: 0.24rem 0.58rem;
-  border: 1.5px solid var(--primary);
-  border-top-right-radius: 0.58rem;
-  border-bottom-left-radius: 0.58rem;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--entry) 96%, rgba(255, 255, 255, 0.5)), color-mix(in srgb, var(--theme) 90%, transparent)),
-    var(--entry);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.045);
-  font-size: 0.56rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+.footer-badge__image {
+  display: block;
+  width: 100px;
+  height: 35px;
+  object-fit: cover;
+  border: 2px solid color-mix(in srgb, var(--primary) 78%, var(--border));
+  border-top-right-radius: 15px;
+  border-bottom-left-radius: 15px;
+  background: var(--entry);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  filter: grayscale(1) brightness(0.98) contrast(0.72);
+  opacity: 0.76;
 }
 
 .footer-badge__label {
@@ -828,8 +822,9 @@ body::before {
     width: min(100%, 8.6rem);
   }
 
-  .footer-badge__plate {
+  .footer-badge__image {
     width: 100%;
+    height: auto;
   }
 
   .header {
