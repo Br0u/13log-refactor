@@ -10,7 +10,7 @@ describe("footer styles", () => {
     expect(stylesheet).toMatch(/\.footer\s*\{[^}]*border-top:\s*1px\s+solid\s+[^;]+;/s);
     expect(stylesheet).toMatch(/\.footer__badges\s*\{[^}]*display:\s*flex;[^}]*justify-content:\s*center;/s);
     expect(stylesheet).toMatch(/\.footer-badge\s*\{[^}]*display:\s*inline-flex;[^}]*flex-direction:\s*column;/s);
-    expect(stylesheet).toMatch(/\.footer-badge__plate\s*\{[^}]*border:\s*1(?:\.\d+)?px\s+solid\s+[^;]+;/s);
+    expect(stylesheet).toMatch(/\.footer-badge__image\s*\{[^}]*width:\s*100px;[^}]*height:\s*35px;[^}]*border:\s*2px\s+solid\s+[^;]+;[^}]*border-top-right-radius:\s*15px;[^}]*border-bottom-left-radius:\s*15px;/s);
     expect(stylesheet).toMatch(/\.footer__meta\s*\{[^}]*color:\s*[^;]+;/s);
   });
 
