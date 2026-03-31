@@ -1,5 +1,11 @@
 import React from "react";
-import { formatAuditLocation, getAccessAuditPageData } from "../../../../lib/repositories/access-audit";
+import AdminLocalTime from "../../../../components/admin/AdminLocalTime";
+import {
+  formatAuditLocation,
+  formatAuditPath,
+  getAccessAuditPageData,
+  summarizeAuditUserAgent,
+} from "../../../../lib/repositories/access-audit";
 
 export const dynamic = "force-dynamic";
 
@@ -137,17 +143,23 @@ export default async function AdminVisitsPage({ searchParams }) {
             <span>User Agent</span>
             <span>Blacklist</span>
           </div>
-          {rows.map((visit) => (
+          {rows.map((visit) => {
+            const userAgent = summarizeAuditUserAgent(visit.userAgent);
+            const displayPath = formatAuditPath(visit.path);
+
+            return (
             <div key={visit.id} className="admin-table__row admin-table__row--audit">
-              <span>{new Date(visit.createdAt).toLocaleString("zh-CN")}</span>
-              <span
-                className="admin-table__content-cell admin-audit-cell--truncate admin-audit-cell--path"
-                title={visit.path}
-              >
-                {visit.path}
+              <span>
+                <AdminLocalTime value={visit.createdAt} />
               </span>
               <span
-                className="admin-table__content-cell admin-audit-cell--truncate admin-audit-cell--location"
+                className="admin-table__content-cell admin-audit-cell--path"
+                title={displayPath}
+              >
+                {displayPath}
+              </span>
+              <span
+                className="admin-table__content-cell admin-audit-cell--location"
                 title={formatAuditLocation(visit)}
               >
                 {formatAuditLocation(visit)}
@@ -167,22 +179,25 @@ export default async function AdminVisitsPage({ searchParams }) {
                 {renderBadge(visit.blockReason || "-", visit.blockReason ? "danger" : "neutral")}
               </span>
               <span
-                className="admin-table__content-cell admin-audit-cell--truncate admin-audit-cell--referer"
+                className="admin-table__content-cell admin-audit-cell--referer"
                 title={visit.referer || "-"}
               >
                 {visit.referer || "-"}
               </span>
-              <span
-                className="admin-table__content-cell admin-audit-cell--truncate admin-audit-cell--user-agent"
-                title={visit.userAgent || "-"}
-              >
-                {visit.userAgent || "-"}
+              <span className="admin-table__content-cell admin-audit-agent" title={visit.userAgent || "-"}>
+                <span className="admin-audit-agent__summary">
+                  <span className="admin-audit-badge admin-audit-badge--neutral">{userAgent.browser}</span>
+                  <span className="admin-audit-badge admin-audit-badge--neutral">{userAgent.os}</span>
+                  <span className="admin-audit-badge admin-audit-badge--neutral">{userAgent.device}</span>
+                </span>
+                <span className="admin-audit-agent__raw">{visit.userAgent || "-"}</span>
               </span>
               <span className="admin-table__content-cell">
                 {renderBadge(visit.blacklistReason || "-", visit.blacklistReason ? "danger" : "neutral")}
               </span>
             </div>
-          ))}
+            );
+          })}
         </div>
         </div>
       </div>

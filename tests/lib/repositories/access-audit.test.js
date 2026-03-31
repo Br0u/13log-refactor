@@ -27,7 +27,11 @@ vi.mock("../../../lib/db", () => ({
 
 import {
   buildAccessAuditFilters,
+  formatAuditLocation,
+  formatAuditPath,
+  formatAuditTimestamp,
   getAccessAuditPageData,
+  summarizeAuditUserAgent,
 } from "../../../lib/repositories/access-audit";
 
 describe("access audit repository", () => {
@@ -119,5 +123,35 @@ describe("access audit repository", () => {
       }),
       take: 100,
     }));
+  });
+
+  it("formats audit location in Chinese and repairs encoded city values", () => {
+    expect(formatAuditLocation({
+      country: "CA",
+      region: "Ontario",
+      city: "Guelph",
+    })).toBe("加拿大 / 安大略省 / 圭尔夫");
+
+    expect(formatAuditLocation({
+      country: "BR",
+      region: "S%C3%A3o%20Paulo",
+      city: "S%C3%A3o%20Paulo",
+    })).toBe("巴西 / Sao Paulo / Sao Paulo");
+  });
+
+  it("summarizes user agent into browser, os, and device labels", () => {
+    expect(summarizeAuditUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 Chrome/142.0.0.0 Safari/537.36")).toEqual({
+      browser: "Chrome 142",
+      os: "macOS 14",
+      device: "桌面端",
+    });
+  });
+
+  it("formats timestamps for a supplied admin timezone", () => {
+    expect(formatAuditTimestamp(new Date("2026-03-16T16:00:00.000Z"), "America/Toronto")).toContain("2026/3/16 12:00:00");
+  });
+
+  it("decodes encoded audit paths for display", () => {
+    expect(formatAuditPath("/posts/%E6%A0%91")).toBe("/posts/树");
   });
 });
