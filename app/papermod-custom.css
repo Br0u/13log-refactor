@@ -3268,6 +3268,23 @@ body:has(.blog-layout) .page-toc-rail {
   color: color-mix(in srgb, var(--content) 92%, #d8c8ac);
 }
 
+/* Playzone */
+.playzone-layout {
+  --blog-shell-width: min(1180px, 100%);
+}
+
+.playzone-layout .link-essay-list {
+  gap: 1rem;
+}
+
+.playzone-layout .link-essay-entry__preview {
+  min-height: 12rem;
+}
+
+.playzone-layout .link-essay-entry__title {
+  font-size: 1.25rem;
+}
+
 @media (max-width: 560px) {
   .post-single .post-content .weekly-bookmark {
     padding-right: 0.9rem;

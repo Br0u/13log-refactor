@@ -90,6 +90,11 @@
   padding-inline: 0;
 }
 
+.main:has(.playzone-layout) {
+  max-width: none;
+  padding-inline: 20px;
+}
+
 .admin-shell {
   display: flex;
   align-items: flex-start;
