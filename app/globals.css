@@ -819,6 +819,7 @@
 
 .admin-login-shell {
   min-height: calc(100vh - var(--header-height) - 2rem);
+  min-height: calc(100dvh - var(--header-height) - 2rem);
   display: grid;
   place-items: center;
   padding: 28px 16px;

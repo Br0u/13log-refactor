@@ -376,9 +376,11 @@ body:not(.dark) #sun {
 
 .main {
     position: relative;
-    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    flex: 1 0 auto;
+    width: 100%;
+    min-height: 0;
     max-width: calc(var(--main-width) + var(--gap) * 2);
-    margin: auto;
+    margin: 0 auto;
     padding: var(--gap);
 }
 
@@ -971,7 +973,6 @@ img.in-text {
 
 .main .profile {
     align-items: center;
-    min-height: calc(100vh - var(--header-height) - var(--footer-height) - (var(--gap) * 2));
     text-align: center;
 }
 
@@ -1309,5 +1310,3 @@ img.in-text {
         transform: none;
     }
 }
-
-
