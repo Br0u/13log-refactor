@@ -107,6 +107,7 @@ export default function ClientEnhancements() {
     const cleanups = [];
     const isPostPage = pathname.startsWith("/posts/");
     const isLinkPage = pathname === "/link" || pathname.startsWith("/link/");
+    const isPlayzonePage = pathname === "/playzone" || pathname.startsWith("/playzone/");
 
     initTheme();
     cleanups.push(initThemeToggle());
@@ -119,7 +120,7 @@ export default function ClientEnhancements() {
     }
 
     initCodeCopyButtons();
-    if (isLinkPage) {
+    if (isLinkPage || isPlayzonePage) {
       initLinkPreview();
     }
 

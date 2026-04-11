@@ -90,6 +90,11 @@
   padding-inline: 0;
 }
 
+.main:has(.playzone-layout) {
+  max-width: none;
+  padding-inline: 20px;
+}
+
 .admin-shell {
   display: flex;
   align-items: flex-start;
@@ -540,6 +545,7 @@
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
+  padding-bottom: 8px;
 }
 
 .admin-panel-table--audit {
@@ -555,19 +561,52 @@
 }
 
 .admin-audit-cell--path {
-  max-width: 240px;
+  max-width: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .admin-audit-cell--location {
-  max-width: 220px;
+  max-width: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .admin-audit-cell--referer {
-  max-width: 260px;
+  max-width: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .admin-audit-cell--user-agent {
   max-width: 300px;
+}
+
+.admin-local-time {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-audit-agent {
+  display: grid;
+  gap: 8px;
+  align-items: flex-start;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.admin-audit-agent__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-audit-agent__raw {
+  color: var(--secondary);
+  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
 .admin-audit-badge {
@@ -780,6 +819,7 @@
 
 .admin-login-shell {
   min-height: calc(100vh - var(--header-height) - 2rem);
+  min-height: calc(100dvh - var(--header-height) - 2rem);
   display: grid;
   place-items: center;
   padding: 28px 16px;
