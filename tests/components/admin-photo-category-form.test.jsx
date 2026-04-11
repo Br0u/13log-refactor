@@ -20,6 +20,10 @@ describe("admin photo category form", () => {
 
     expect(markup).toContain('name="name"');
     expect(markup).toContain('name="slug"');
+    expect(markup).toContain('name="displayTitle"');
+    expect(markup).toContain('name="coverTitle"');
+    expect(markup).toContain('name="indexDescription"');
+    expect(markup).toContain('name="detailDescription"');
     expect(markup).toContain('name="status"');
     expect(markup).toContain('name="sortOrder"');
     expect(markup).toContain("Save category");

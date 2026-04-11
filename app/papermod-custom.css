@@ -332,7 +332,10 @@ body,
 
 body {
   background-color: var(--theme);
-  min-height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
 }
 
 a { color: var(--link-color); }
@@ -458,11 +461,12 @@ body::before {
 }
 
 .footer-badge {
+  --footer-badge-scale: 1;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.22rem;
-  min-width: 6.5rem;
+  gap: calc(0.22rem * var(--footer-badge-scale));
+  min-width: calc(6.5rem * var(--footer-badge-scale));
   color: inherit;
   text-decoration: none;
   transition: transform 0.18s ease, color 0.18s ease, opacity 0.18s ease;
@@ -478,28 +482,22 @@ body::before {
   outline: none;
 }
 
-.footer-badge__plate {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 6rem;
-  min-height: 1.54rem;
-  padding: 0.24rem 0.58rem;
-  border: 1.5px solid var(--primary);
-  border-top-right-radius: 0.58rem;
-  border-bottom-left-radius: 0.58rem;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--entry) 96%, rgba(255, 255, 255, 0.5)), color-mix(in srgb, var(--theme) 90%, transparent)),
-    var(--entry);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.045);
-  font-size: 0.56rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+.footer-badge__image {
+  display: block;
+  width: calc(100px * var(--footer-badge-scale));
+  height: calc(35px * var(--footer-badge-scale));
+  object-fit: cover;
+  border: calc(2px * var(--footer-badge-scale)) solid color-mix(in srgb, var(--primary) 78%, var(--border));
+  border-top-right-radius: calc(15px * var(--footer-badge-scale));
+  border-bottom-left-radius: calc(15px * var(--footer-badge-scale));
+  background: var(--entry);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  filter: grayscale(1) brightness(0.98) contrast(0.72);
+  opacity: 0.76;
 }
 
 .footer-badge__label {
-  font-size: 0.56rem;
+  font-size: calc(0.56rem * var(--footer-badge-scale));
   line-height: 1.18;
   color: color-mix(in srgb, var(--secondary) 88%, transparent);
   letter-spacing: 0.02em;
@@ -808,7 +806,9 @@ body::before {
 .button-inner { padding: 2px 10px; font-weight: 600; }
 
 @media (min-height: 740px) {
-  .main .profile { min-height: calc(100vh - var(--header-height) - var(--footer-height)); }
+  .main .profile {
+    min-height: 100%;
+  }
 }
 
 @media (max-width: 720px) {
@@ -819,17 +819,11 @@ body::before {
   }
 
   .footer__badges {
-    flex-direction: column;
-    align-items: center;
     gap: 0.4rem;
   }
 
   .footer-badge {
     width: min(100%, 8.6rem);
-  }
-
-  .footer-badge__plate {
-    width: 100%;
   }
 
   .header {
@@ -946,12 +940,13 @@ body::before {
 
 @media (max-width: 640px) {
   .footer__badges {
-    flex-direction: column;
-    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0.32rem;
   }
 
   .footer-badge {
-    width: min(100%, 12rem);
+    --footer-badge-scale: 0.8;
+    width: auto;
   }
 }
 
@@ -1090,6 +1085,56 @@ body:has(.blog-layout) {
   padding-top: 0;
 }
 
+.blog-rail__intro-card {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 24rem;
+  padding: 2.2rem 1.6rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, rgba(255, 255, 255, 0.18));
+  border-radius: 0 2.4rem 0 2.4rem;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--theme) 42%, transparent) 0%,
+      color-mix(in srgb, var(--entry) 26%, transparent) 100%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(24, 20, 16, 0.24) 0%,
+      rgba(24, 20, 16, 0.12) 45%,
+      rgba(231, 216, 179, 0.26) 100%
+    ),
+    url("/images/backgrounds/posts-intro-bg.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow:
+    0 20px 44px rgba(42, 31, 18, 0.1),
+    inset 0 0 0 1px rgba(255, 248, 232, 0.18);
+}
+
+.blog-rail__intro-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255, 248, 232, 0.16) 0%, transparent 44%),
+    linear-gradient(180deg, rgba(245, 238, 224, 0.12) 0%, rgba(28, 22, 16, 0.18) 100%);
+  pointer-events: none;
+}
+
+.blog-rail__intro-card::before {
+  content: "";
+  position: absolute;
+  inset: -0.6rem;
+  border: 1px solid rgba(255, 251, 244, 0.9);
+  border-radius: 0 2.9rem 0 2.9rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .blog-rail__section-title,
 .blog-rail__meta {
   font-size: 0.76rem;
@@ -1114,6 +1159,26 @@ body:has(.blog-layout) {
   font-size: 0.92rem;
   line-height: 1.86;
   color: color-mix(in srgb, var(--secondary) 92%, var(--content));
+}
+
+.blog-rail__intro-text {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  display: grid;
+  gap: 0.18rem;
+  text-align: center;
+  font-family: "Songti SC", "STSong", "SimSun", "Noto Serif CJK SC", "Source Han Serif SC", serif;
+  font-size: 0.98rem;
+  line-height: 1.9;
+  letter-spacing: 0.08em;
+  font-style: italic;
+  color: rgba(30, 22, 14, 0.72);
+  text-shadow: 0 1px 8px rgba(240, 225, 190, 0.1);
+}
+
+.blog-rail__intro-text span {
+  display: block;
 }
 
 .blog-rail__back-link,
@@ -1382,6 +1447,243 @@ body:has(.blog-layout) {
   background: rgba(198, 128, 148, 0.16);
 }
 
+.photo-album-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.55rem;
+}
+
+.photo-album-card {
+  display: grid;
+  grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+  gap: 1.85rem;
+  align-items: start;
+  position: relative;
+  padding: 0 0 2.45rem;
+}
+
+.photo-album-card::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0;
+  border-bottom: 1px solid rgba(67, 67, 67, 0.92);
+  overflow: hidden;
+}
+
+.photo-album-card:last-child {
+  padding-bottom: 0;
+}
+
+.photo-album-card:last-child::after {
+  display: none;
+}
+
+.photo-album-card__cover {
+  display: block;
+  overflow: hidden;
+  text-decoration: none;
+  background: color-mix(in srgb, var(--entry) 92%, var(--theme));
+  border-radius: 0 1.6rem 0 1.6rem;
+  box-shadow: 0 10px 24px rgba(25, 20, 15, 0.06);
+}
+
+.photo-album-card__cover img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 1px solid rgba(48, 40, 32, 0.9);
+  border-radius: 0 1.6rem 0 1.6rem;
+  transition: transform 0.32s ease, opacity 0.32s ease, filter 0.32s ease;
+  filter: saturate(0.9) contrast(0.98);
+}
+
+.photo-album-card:hover .photo-album-card__cover img,
+.photo-album-card:focus-within .photo-album-card__cover img {
+  transform: translateY(-2px);
+  opacity: 0.98;
+  filter: saturate(0.98) contrast(1);
+}
+
+.photo-album-card__body {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  padding-top: 0.3rem;
+}
+
+.photo-album-card__title {
+  margin: 24px 0 0;
+  font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: 24px;
+  line-height: 36px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  color: rgb(67, 67, 67);
+  text-align: justify;
+  text-shadow: rgba(130, 130, 130, 0.72) 0 0 0.75px;
+  border-left: 1px solid rgba(67, 67, 67, 0.9);
+  padding-left: 32px;
+  width: 200.148px;
+  max-width: 100%;
+  min-height: 72px;
+  height: auto;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.photo-album-card__title a {
+  display: block;
+  color: rgb(67, 67, 67);
+  text-decoration: none;
+  line-height: 1.5;
+}
+
+.photo-album-card__title span {
+  display: block;
+}
+
+.photo-album-card__description {
+  margin: 0;
+  max-width: 28rem;
+  padding-left: 32px;
+  font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: 16.4px;
+  line-height: 32px;
+  letter-spacing: 0.52px;
+  color: rgba(67, 67, 67, 0.88);
+  text-align: justify;
+  text-shadow: rgba(130, 130, 130, 0.55) 0 0 0.65px;
+}
+
+.photo-album-card__description span {
+  display: block;
+}
+
+.photo-album-stream {
+  display: grid;
+  gap: 3.45rem;
+  max-width: min(100%, 40rem);
+}
+
+.photo-page-note {
+  margin-top: 3.6rem;
+  max-width: min(100%, 40rem);
+  padding-top: 1.6rem;
+  border-top: 1px solid rgba(67, 67, 67, 0.26);
+  color: rgba(67, 67, 67, 0.86);
+  font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: 16.2px;
+  line-height: 31px;
+  letter-spacing: 0.32px;
+  text-align: justify;
+  text-shadow: rgba(130, 130, 130, 0.46) 0 0 0.6px;
+}
+
+.photo-page-note p {
+  margin: 0 0 1.1rem;
+}
+
+.photo-page-note p:last-child {
+  margin-bottom: 0;
+}
+
+.photo-album-frame {
+  margin: 0;
+  display: grid;
+  gap: 1.05rem;
+  position: relative;
+}
+
+.photo-album-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(48, 40, 32, 0.9);
+  background: color-mix(in srgb, var(--entry) 90%, var(--theme));
+  box-shadow: 0 14px 30px rgba(25, 20, 15, 0.07);
+}
+
+.photo-album-caption {
+  display: grid;
+  gap: 0.32rem;
+  max-width: 32rem;
+  color: rgba(67, 67, 67, 0.82);
+  font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: 15.2px;
+  line-height: 29px;
+  letter-spacing: 0.32px;
+  justify-items: center;
+  text-align: center;
+  margin-inline: auto;
+}
+
+.photo-album-caption__title {
+  display: block;
+  color: rgba(52, 46, 40, 0.95);
+  font-size: 13.4px;
+  line-height: 23px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.photo-album-caption__body {
+  display: block;
+}
+
+.photo-album-frame::after {
+  content: "...";
+  display: block;
+  width: auto;
+  height: auto;
+  color: rgba(67, 67, 67, 0.56);
+  letter-spacing: 0.18em;
+  line-height: 1;
+  margin: 0 auto;
+}
+
+.page-header--photos .post-description {
+  color: color-mix(in srgb, var(--secondary) 78%, var(--content));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.photo-album-page__description {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0.7rem 0 0.3rem;
+  max-width: 900px;
+  width: 645.688px;
+  max-width: 100%;
+  padding-left: 36.8px;
+  padding-right: 0;
+  padding-bottom: 0;
+  border-left: 1px dashed rgba(67, 67, 67, 0.9);
+  color: rgba(67, 67, 67, 0.92);
+  font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: 18.4px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 36.8px;
+  letter-spacing: 0.92px;
+  text-align: justify;
+  text-shadow: rgba(130, 130, 130, 0.72) 0 0 0.75px;
+  box-sizing: border-box;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  min-height: 73.5938px;
+}
+
+.photo-album-page__description span {
+  display: block;
+}
+
 @media (max-width: 720px) {
   .link-essay-entry__layout {
     grid-template-columns: 1fr;
@@ -1393,6 +1695,52 @@ body:has(.blog-layout) {
 
   .link-essay-entry__related {
     padding-left: 0.72rem;
+  }
+
+  .photo-album-card {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding-bottom: 1.8rem;
+  }
+
+  .photo-album-card__cover {
+    max-width: min(100%, 18rem);
+  }
+
+  .photo-album-card__description {
+    padding-left: 0;
+  }
+
+  .photo-album-card__title {
+    width: min(100%, 18rem);
+  }
+
+  .photo-album-stream {
+    gap: 2.4rem;
+  }
+
+  .photo-page-note {
+    margin-top: 2.8rem;
+    padding-top: 1.25rem;
+    font-size: 15.2px;
+    line-height: 29px;
+  }
+
+  .photo-album-page__description {
+    margin: 0.6rem 0 0.15rem;
+    width: 100%;
+    padding-left: 24px;
+    font-size: 16px;
+    line-height: 31px;
+    letter-spacing: 0.6px;
+  }
+
+  .photo-album-caption {
+    padding-left: 0;
+  }
+
+  .photo-album-frame::after {
+    margin: 0 auto;
   }
 }
 
@@ -1839,6 +2187,7 @@ body:has(.blog-layout) {
   left: calc(50% + (var(--main-width) / 2) + 0.35rem);
   width: min(16rem, calc(100vw - 1rem));
   max-height: calc(100vh - var(--header-height) - 2rem);
+  max-height: calc(100dvh - var(--header-height) - 2rem);
   z-index: 40;
   overflow: hidden;
 }
@@ -3271,6 +3620,23 @@ body:has(.blog-layout) .page-toc-rail {
 
 .dark .post-single .post-content .weekly-bookmark p {
   color: color-mix(in srgb, var(--content) 92%, #d8c8ac);
+}
+
+/* Playzone */
+.playzone-layout {
+  --blog-shell-width: min(1180px, 100%);
+}
+
+.playzone-layout .link-essay-list {
+  gap: 1rem;
+}
+
+.playzone-layout .link-essay-entry__preview {
+  min-height: 12rem;
+}
+
+.playzone-layout .link-essay-entry__title {
+  font-size: 1.25rem;
 }
 
 @media (max-width: 560px) {

@@ -214,6 +214,10 @@ describe("admin action cache behavior", () => {
     const formData = new FormData();
     formData.set("name", "Travel");
     formData.set("slug", "travel");
+    formData.set("displayTitle", "「世界は　ただ通り過ぎていく」");
+    formData.set("coverTitle", "「世界は　ただ通り過ぎていく」");
+    formData.set("indexDescription", "車窗之外，世界剛好經過。");
+    formData.set("detailDescription", "沒有停留，也沒有帶走什麼。");
     formData.set("status", "PUBLISHED");
     formData.set("sortOrder", "4");
 
@@ -221,8 +225,27 @@ describe("admin action cache behavior", () => {
 
     expect(db.photoCategory.upsert).toHaveBeenCalledWith({
       where: { slug: "travel" },
-      update: { name: "Travel", description: null, status: "PUBLISHED", sortOrder: 4 },
-      create: { name: "Travel", slug: "travel", description: null, status: "PUBLISHED", sortOrder: 4 },
+      update: {
+        name: "Travel",
+        description: null,
+        displayTitle: "「世界は　ただ通り過ぎていく」",
+        coverTitle: "「世界は　ただ通り過ぎていく」",
+        indexDescription: "車窗之外，世界剛好經過。",
+        detailDescription: "沒有停留，也沒有帶走什麼。",
+        status: "PUBLISHED",
+        sortOrder: 4,
+      },
+      create: {
+        name: "Travel",
+        slug: "travel",
+        description: null,
+        displayTitle: "「世界は　ただ通り過ぎていく」",
+        coverTitle: "「世界は　ただ通り過ぎていく」",
+        indexDescription: "車窗之外，世界剛好經過。",
+        detailDescription: "沒有停留，也沒有帶走什麼。",
+        status: "PUBLISHED",
+        sortOrder: 4,
+      },
     });
     expect(revalidatePathMock).toHaveBeenCalledWith("/admin");
     expect(revalidatePathMock).toHaveBeenCalledWith("/admin/photos");

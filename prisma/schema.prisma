@@ -85,6 +85,10 @@ model PhotoCategory {
   name        String   @unique
   slug        String   @unique
   description String?
+  displayTitle String?
+  coverTitle   String?
+  indexDescription String?
+  detailDescription String?
   status      PostStatus @default(DRAFT)
   sortOrder   Int      @default(0)
   photos      Photo[]

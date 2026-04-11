@@ -5,7 +5,7 @@ const DEFAULT_NAV_ITEMS = [
   { href: "/posts/", label: "/ posts" },
   { href: "/about/", label: "/ about" },
   { href: "/link/", label: "/ Link" },
-  { href: "/photos/index.html", label: "/ Photos" },
+  { href: "/photos/", label: "/ Photos" },
 ];
 
 function RailLink({ item }) {
@@ -31,6 +31,8 @@ export default function BlogRail({
   meta = "",
   tocHtml = "",
   relatedPosts = [],
+  backHref = "/posts",
+  backLabel = "返回 Posts",
 }) {
   return (
     <aside className={`blog-rail blog-rail--${variant}`}>
@@ -41,8 +43,8 @@ export default function BlogRail({
       {variant === "detail" ? (
         <>
           <section className="blog-rail__section blog-rail__section--context">
-            <Link className="blog-rail__back-link" href="/posts">
-              返回 Posts
+            <Link className="blog-rail__back-link" href={backHref}>
+              {backLabel}
             </Link>
             <h2 className="blog-rail__heading">{introTitle}</h2>
             {meta ? <p className="blog-rail__meta">{meta}</p> : null}
@@ -68,12 +70,19 @@ export default function BlogRail({
             </section>
           ) : null}
         </>
-      ) : (
+      ) : introTitle || introBody ? (
         <section className="blog-rail__section blog-rail__section--intro">
-          {introTitle ? <h2 className="blog-rail__heading">{introTitle}</h2> : null}
-          {introBody ? <p className="blog-rail__copy">{introBody}</p> : null}
+          <div className="blog-rail__intro-card">
+            {introTitle ? <h2 className="blog-rail__heading">{introTitle}</h2> : null}
+            {introBody ? (
+              <p className="blog-rail__intro-text">
+                <span>你看我时很远，</span>
+                <span>你看云时很近。</span>
+              </p>
+            ) : null}
+          </div>
         </section>
-      )}
+      ) : null}
     </aside>
   );
 }

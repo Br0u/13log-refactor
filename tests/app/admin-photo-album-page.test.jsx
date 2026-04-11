@@ -18,6 +18,10 @@ vi.mock("../../lib/repositories/photo-categories", () => ({
     name: "Editorial",
     slug: "editorial",
     description: "A quiet album",
+    displayTitle: "「世界は　ただ通り過ぎていく」",
+    coverTitle: "「世界は　ただ通り過ぎていく」",
+    indexDescription: "車窗之外，世界剛好經過。\n沒有停留，也沒有帶走什麼。",
+    detailDescription: "車窗之外，世界剛好經過。\n沒有停留，也沒有帶走什麼。",
   })),
   listPhotoCategories: vi.fn(async () => [
     {
@@ -55,6 +59,12 @@ describe("admin photo album page", () => {
 
     expect(markup).toContain("Upload photo");
     expect(markup).toContain("Editorial");
+    expect(markup).toContain("Edit album");
+    expect(markup).toContain('name="displayTitle"');
+    expect(markup).toContain('name="coverTitle"');
+    expect(markup).toContain('name="indexDescription"');
+    expect(markup).toContain('name="detailDescription"');
+    expect(markup).toContain("「世界は　ただ通り過ぎていく」");
     expect(markup).toContain("Morning light in photo-cat-1");
     expect(markup).not.toContain("Select album");
     expect(markup).toContain("Leave title empty to reuse each file name during batch upload.");

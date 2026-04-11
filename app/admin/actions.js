@@ -207,6 +207,10 @@ export async function createPhotoCategoryAction(formData) {
   const name = String(formData.get("name") || "").trim();
   const slug = String(formData.get("slug") || "").trim();
   const description = String(formData.get("description") || "").trim();
+  const displayTitle = String(formData.get("displayTitle") || "").trim();
+  const coverTitle = String(formData.get("coverTitle") || "").trim();
+  const indexDescription = String(formData.get("indexDescription") || "").trim();
+  const detailDescription = String(formData.get("detailDescription") || "").trim();
   const status = String(formData.get("status") || "DRAFT");
   const sortOrder = parseSortOrder(formData.get("sortOrder"));
 
@@ -216,8 +220,27 @@ export async function createPhotoCategoryAction(formData) {
 
   await db.photoCategory.upsert({
     where: { slug },
-    update: { name, description: description || null, status, sortOrder },
-    create: { name, slug, description: description || null, status, sortOrder },
+    update: {
+      name,
+      description: description || null,
+      displayTitle: displayTitle || null,
+      coverTitle: coverTitle || null,
+      indexDescription: indexDescription || null,
+      detailDescription: detailDescription || null,
+      status,
+      sortOrder,
+    },
+    create: {
+      name,
+      slug,
+      description: description || null,
+      displayTitle: displayTitle || null,
+      coverTitle: coverTitle || null,
+      indexDescription: indexDescription || null,
+      detailDescription: detailDescription || null,
+      status,
+      sortOrder,
+    },
   });
 
   revalidateAdminPhotosPaths();

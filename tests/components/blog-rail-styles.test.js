@@ -24,11 +24,21 @@ describe("blog rail styles", () => {
     expect(stylesheet).toMatch(/\.blog-rail__related-link:hover,\s*\.blog-rail__related-link:focus-visible\s*\{[^}]*color:\s*var\(--primary\);/s);
   });
 
+  it("renders the posts intro rail as an asymmetrical image card", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.blog-rail__intro-card\s*\{[^}]*border-radius:\s*0\s+2\.4rem\s+0\s+2\.4rem;/s);
+    expect(stylesheet).toMatch(/\.blog-rail__intro-card\s*\{[^}]*url\("\/images\/backgrounds\/posts-intro-bg\.jpg"\);/s);
+    expect(stylesheet).toMatch(/\.blog-rail__intro-card\s*\{[^}]*background-size:\s*cover;/s);
+    expect(stylesheet).toMatch(/\.blog-rail__intro-text\s*\{[^}]*text-align:\s*center;[^}]*letter-spacing:\s*0\.08em;/s);
+  });
+
   it("repositions the old right-side toc rail into the new blog shell gutter", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toMatch(/body:has\(\.blog-layout\)\s+\.page-toc-rail\s*\{[^}]*left:\s*calc\(50%\s*\+\s*\(var\(--blog-shell-width\)\s*\/\s*2\)\s*\+\s*1rem\);/s);
     expect(stylesheet).toMatch(/body:has\(\.blog-layout\)\s+\.page-toc-rail\s*\{[^}]*width:\s*min\(13rem,\s*calc\(50vw\s*-\s*\(var\(--blog-shell-width\)\s*\/\s*2\)\s*-\s*1\.5rem\)\);/s);
+    expect(stylesheet).toMatch(/\.page-toc-rail\s*\{[^}]*max-height:\s*calc\(100vh\s*-\s*var\(--header-height\)\s*-\s*2rem\);[^}]*max-height:\s*calc\(100dvh\s*-\s*var\(--header-height\)\s*-\s*2rem\);/s);
   });
 
   it("lets the toc title wrap instead of clipping long text", () => {

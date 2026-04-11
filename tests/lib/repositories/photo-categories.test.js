@@ -42,6 +42,10 @@ describe("photo category repository", () => {
     const category = await createPhotoCategory({
       name: "Travel",
       slug: "travel",
+      displayTitle: "「世界は　ただ通り過ぎていく」",
+      coverTitle: "「世界は　ただ通り過ぎていく」",
+      indexDescription: "車窗之外，世界剛好經過。\n沒有停留，也沒有帶走什麼。",
+      detailDescription: "車窗之外，世界剛好經過。\n沒有停留，也沒有帶走什麼。",
       status: "PUBLISHED",
       sortOrder: 3,
     });
@@ -51,6 +55,10 @@ describe("photo category repository", () => {
         name: "Travel",
         slug: "travel",
         description: null,
+        displayTitle: "「世界は　ただ通り過ぎていく」",
+        coverTitle: "「世界は　ただ通り過ぎていく」",
+        indexDescription: "車窗之外，世界剛好經過。\n沒有停留，也沒有帶走什麼。",
+        detailDescription: "車窗之外，世界剛好經過。\n沒有停留，也沒有帶走什麼。",
         status: "PUBLISHED",
         sortOrder: 3,
       },
@@ -103,6 +111,10 @@ describe("photo category repository", () => {
     const category = await updatePhotoCategory("photo-category-1", {
       name: "April",
       slug: "april",
+      displayTitle: "「四月的空氣」",
+      coverTitle: "「四月的空氣」",
+      indexDescription: "光線變輕了。\n風裡開始有新的氣味。",
+      detailDescription: "光線變輕了。\n風裡開始有新的氣味。",
       status: "DRAFT",
       sortOrder: 1,
     });
@@ -113,6 +125,10 @@ describe("photo category repository", () => {
         name: "April",
         slug: "april",
         description: null,
+        displayTitle: "「四月的空氣」",
+        coverTitle: "「四月的空氣」",
+        indexDescription: "光線變輕了。\n風裡開始有新的氣味。",
+        detailDescription: "光線變輕了。\n風裡開始有新的氣味。",
         status: "DRAFT",
         sortOrder: 1,
       },
