@@ -1,13 +1,22 @@
 import React from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { notFound, redirect } from "next/navigation";
 import { deletePhotoAction } from "../../../actions";
 import AdminConfirmSubmitButton from "../../../../../components/admin/AdminConfirmSubmitButton";
+import AdminPhotoCategoryForm from "../../../../../components/admin/AdminPhotoCategoryForm";
 import AdminPhotoForm from "../../../../../components/admin/AdminPhotoForm";
-import { getPhotoCategoryById, listPhotoCategories } from "../../../../../lib/repositories/photo-categories";
+import { getPhotoCategoryById, listPhotoCategories, updatePhotoCategory } from "../../../../../lib/repositories/photo-categories";
 import { listAdminPhotos } from "../../../../../lib/repositories/photos";
 
 export const dynamic = "force-dynamic";
+
+function parseSortOrder(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : null;
+}
 
 function PhotoCard({ photo }) {
   const albumId = photo.categoryId || photo.category?.id;
@@ -46,8 +55,9 @@ function PhotoCard({ photo }) {
   );
 }
 
-export default async function AdminPhotoAlbumPage({ params }) {
+export default async function AdminPhotoAlbumPage({ params, searchParams }) {
   const { id } = await params;
+  const sp = await searchParams;
   const [category, categories, photos] = await Promise.all([
     getPhotoCategoryById(id),
     listPhotoCategories(),
@@ -56,6 +66,48 @@ export default async function AdminPhotoAlbumPage({ params }) {
 
   if (!category) {
     notFound();
+  }
+
+  async function updatePhotoCategoryAction(_previousState, formData) {
+    "use server";
+
+    try {
+      const name = String(formData.get("name") || "").trim();
+      const slug = String(formData.get("slug") || "").trim();
+      const description = String(formData.get("description") || "").trim();
+      const displayTitle = String(formData.get("displayTitle") || "").trim();
+      const coverTitle = String(formData.get("coverTitle") || "").trim();
+      const indexDescription = String(formData.get("indexDescription") || "").trim();
+      const detailDescription = String(formData.get("detailDescription") || "").trim();
+      const status = String(formData.get("status") || "DRAFT");
+      const sortOrder = parseSortOrder(formData.get("sortOrder"));
+
+      if (!name || !slug) {
+        return { error: "Name and slug are required." };
+      }
+
+      await updatePhotoCategory(category.id, {
+        name,
+        slug,
+        description,
+        displayTitle,
+        coverTitle,
+        indexDescription,
+        detailDescription,
+        status,
+        sortOrder,
+      });
+
+      revalidatePath("/admin/photos");
+      revalidatePath(`/admin/photos/${category.id}`);
+      revalidatePath("/photos");
+      revalidatePath(`/photos/${slug}`);
+      redirect(`/admin/photos/${category.id}?updated=1`);
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : "Unable to update album right now.",
+      };
+    }
   }
 
   return (
@@ -69,6 +121,20 @@ export default async function AdminPhotoAlbumPage({ params }) {
       </header>
       <div className="admin-page__panel admin-page__panel--stacked">
         <div className="admin-photo-layout">
+          <div className="admin-page__panel admin-page__panel--stacked">
+            <div className="admin-card__header">
+              <p className="admin-eyebrow">Album</p>
+              <h2>Edit album</h2>
+              <p className="admin-page-copy">更新前台标题、封面文案和详情页说明，下面继续管理这本画册里的照片。</p>
+            </div>
+            <AdminPhotoCategoryForm
+              action={updatePhotoCategoryAction}
+              initialValue={category}
+              successMessage={sp?.updated === "1" ? "Album saved." : ""}
+              submitLabel="Update album"
+              pendingLabel="Updating..."
+            />
+          </div>
           <AdminPhotoForm
             categories={categories}
             albumId={category.id}

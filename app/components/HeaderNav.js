@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { href: "/about", label: "About" },
   { href: "/link", label: "Link" },
   { href: "/playzone", label: "Playzone" },
-  { href: "/photos/index.html", label: "Photos" },
+  { href: "/photos", label: "Photos" },
 ];
 
 function isActive(pathname, href) {

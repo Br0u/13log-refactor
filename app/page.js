@@ -24,7 +24,7 @@ export default function HomePage() {
         <div className="buttons">
           <Link className="button" href="/posts/"><span className="button-inner">Posts</span></Link>
           <Link className="button" href="/about/"><span className="button-inner">About</span></Link>
-          <Link className="button" href="/photos/index.html"><span className="button-inner">Photos</span></Link>
+          <Link className="button" href="/photos/"><span className="button-inner">Photos</span></Link>
           <Link className="button" href="/link/"><span className="button-inner">Link</span></Link>
           <Link className="button" href="/playzone/"><span className="button-inner">Playzone</span></Link>
         </div>

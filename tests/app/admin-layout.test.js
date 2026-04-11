@@ -24,4 +24,10 @@ describe("admin layout", () => {
     expect(stylesheet).toMatch(/\.main:has\(\.admin-shell\)[^{]*\{[^}]*max-width:\s*none;/s);
     expect(stylesheet).toMatch(/\.main:has\(\.admin-shell\)[^{]*\{[^}]*padding-inline:\s*0;/s);
   });
+
+  it("uses dynamic viewport height for the admin login shell", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.admin-login-shell\s*\{[^}]*min-height:\s*calc\(100vh\s*-\s*var\(--header-height\)\s*-\s*2rem\);[^}]*min-height:\s*calc\(100dvh\s*-\s*var\(--header-height\)\s*-\s*2rem\);/s);
+  });
 });

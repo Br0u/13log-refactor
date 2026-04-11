@@ -54,8 +54,7 @@ export default async function PostsPage({ searchParams }) {
     <div className="blog-layout blog-layout--posts-index">
       <BlogRail
         variant="posts"
-        introTitle="前言"
-        introBody="写下来的东西会慢一点，先经过自己，再流向别人。这里保留分类和标签，但更希望它们像一条连续的阅读线。"
+        introBody="你看我时很远，你看云时很近。"
       />
       <section className="blog-layout__main">
         <header className="page-header">

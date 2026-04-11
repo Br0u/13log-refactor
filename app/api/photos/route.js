@@ -8,11 +8,14 @@ function json(body, status = 200) {
   });
 }
 
-export async function GET() {
-  const [categories, photos] = await Promise.all([
-    listPhotoCategories({ status: "PUBLISHED" }),
-    listPublishedPhotos(),
-  ]);
+export async function GET(request) {
+  const url = new URL(request.url);
+  const album = url.searchParams.get("album")?.trim();
+
+  const categories = await listPhotoCategories({ status: "PUBLISHED" });
+  const photos = album
+    ? await listPublishedPhotos({ categorySlug: album })
+    : [];
 
   return json({
     categories: categories.map((category) => ({

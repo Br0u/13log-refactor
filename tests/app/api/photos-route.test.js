@@ -55,8 +55,8 @@ vi.mock("../../../lib/repositories/photo-categories", () => ({
 import { GET as photosRoute } from "../../../app/api/photos/route";
 
 describe("public photos api", () => {
-  it("returns published photos and photo categories for the flip-book page", async () => {
-    const response = await photosRoute();
+  it("returns published categories first so the flip-book page can load albums on demand", async () => {
+    const response = await photosRoute(new Request("http://localhost:3000/api/photos"));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -64,21 +64,30 @@ describe("public photos api", () => {
       categories: [
         { id: "cat-1", name: "Travel", slug: "travel", sortOrder: 2 },
       ],
-      photos: [
-        {
-          id: "photo-1",
-          title: "Morning Light",
-          imageUrl: "https://cdn.example.com/morning-light.jpg",
-          category: {
-            id: "cat-1",
-            name: "Travel",
-            slug: "travel",
-          },
-          publishedAt: "2026-03-18T10:00:00.000Z",
-        },
-      ],
+      photos: [],
     });
     expect(listPhotoCategoriesMock).toHaveBeenCalledWith({ status: "PUBLISHED" });
-    expect(listPublishedPhotosMock).toHaveBeenCalled();
+    expect(listPublishedPhotosMock).not.toHaveBeenCalled();
+  });
+
+  it("returns only the requested album photos when a batch slug is provided", async () => {
+    const response = await photosRoute(new Request("http://localhost:3000/api/photos?album=travel"));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.photos).toEqual([
+      {
+        id: "photo-1",
+        title: "Morning Light",
+        imageUrl: "https://cdn.example.com/morning-light.jpg",
+        category: {
+          id: "cat-1",
+          name: "Travel",
+          slug: "travel",
+        },
+        publishedAt: "2026-03-18T10:00:00.000Z",
+      },
+    ]);
+    expect(listPublishedPhotosMock).toHaveBeenCalledWith({ categorySlug: "travel" });
   });
 });

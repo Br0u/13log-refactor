@@ -26,6 +26,10 @@ async function createPhotoCategoryAction(_previousState, formData) {
     const name = String(formData.get("name") || "").trim();
     const slug = String(formData.get("slug") || "").trim();
     const description = String(formData.get("description") || "").trim();
+    const displayTitle = String(formData.get("displayTitle") || "").trim();
+    const coverTitle = String(formData.get("coverTitle") || "").trim();
+    const indexDescription = String(formData.get("indexDescription") || "").trim();
+    const detailDescription = String(formData.get("detailDescription") || "").trim();
     const status = String(formData.get("status") || "DRAFT");
     const sortOrder = parseSortOrder(formData.get("sortOrder"));
 
@@ -37,6 +41,10 @@ async function createPhotoCategoryAction(_previousState, formData) {
       name,
       slug,
       description,
+      displayTitle,
+      coverTitle,
+      indexDescription,
+      detailDescription,
       status,
       sortOrder,
     });
@@ -63,6 +71,10 @@ async function updatePhotoCategoryStatusAction(categoryId, formData) {
     name: category.name,
     slug: category.slug,
     description: category.description || "",
+    displayTitle: category.displayTitle || "",
+    coverTitle: category.coverTitle || "",
+    indexDescription: category.indexDescription || "",
+    detailDescription: category.detailDescription || "",
     status: String(formData.get("status") || category.status || "DRAFT"),
     sortOrder: category.sortOrder ?? 0,
   });

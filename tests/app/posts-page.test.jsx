@@ -46,7 +46,8 @@ describe("posts index page", () => {
     expect(markup).toContain(">/ posts<");
     expect(markup).toContain('href="/link"');
     expect(markup).not.toContain("/rss.xml");
-    expect(markup).toContain(">前言<");
+    expect(markup).toContain("<span>你看我时很远，</span><span>你看云时很近。</span>");
+    expect(markup).toContain("blog-rail__intro-card");
     expect(markup).toContain('href="/posts?tag=Notes"');
   });
 
