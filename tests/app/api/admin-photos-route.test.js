@@ -92,4 +92,51 @@ describe("admin photos api", () => {
     });
     expect(body).toEqual({ created: 2 });
   });
+
+  it("skips invalid upload payloads but still saves valid images", async () => {
+    const token = await createAdminSession({ username: "admin" });
+    cookiesMock.mockResolvedValue({
+      get() {
+        return { value: token };
+      },
+    });
+
+    const response = await adminPhotosRoute(new Request("http://localhost:3000/api/admin/photos", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        categoryId: "album-1",
+        uploads: [
+          {
+            url: "https://blob.example/first.jpg",
+            pathname: "admin-images/first.jpg",
+            fileName: "first.jpg",
+          },
+          {
+            url: "",
+            pathname: "",
+            fileName: "broken.jpg",
+          },
+        ],
+      }),
+    }));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(createPhotoMock).toHaveBeenCalledTimes(1);
+    expect(createPhotoMock).toHaveBeenCalledWith({
+      title: "first",
+      caption: "",
+      imageUrl: "https://blob.example/first.jpg",
+      pathname: "admin-images/first.jpg",
+      sortOrder: null,
+      categoryId: "album-1",
+    });
+    expect(body).toEqual({
+      created: 1,
+      failed: [
+        { fileName: "broken.jpg", message: "Uploaded image metadata is incomplete." },
+      ],
+    });
+  });
 });

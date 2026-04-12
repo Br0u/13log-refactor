@@ -41,6 +41,9 @@ export async function POST(request) {
     return json({ message: "Album and uploaded images are required." }, 400);
   }
 
+  const failed = [];
+  let created = 0;
+
   for (let index = 0; index < uploads.length; index += 1) {
     const upload = uploads[index];
     const imageUrl = String(upload?.url || "").trim();
@@ -48,17 +51,30 @@ export async function POST(request) {
     const fileName = String(upload?.fileName || "").trim();
 
     if (!imageUrl || !pathname) {
-      return json({ message: "Uploaded image metadata is incomplete." }, 400);
+      failed.push({ fileName: fileName || `upload-${index + 1}`, message: "Uploaded image metadata is incomplete." });
+      continue;
     }
 
-    await createPhoto({
-      title: title || fallbackTitle(fileName),
-      caption,
-      imageUrl,
-      pathname,
-      sortOrder: sortOrder == null ? null : sortOrder + index,
-      categoryId,
-    });
+    try {
+      await createPhoto({
+        title: title || fallbackTitle(fileName),
+        caption,
+        imageUrl,
+        pathname,
+        sortOrder: sortOrder == null ? null : sortOrder + created,
+        categoryId,
+      });
+      created += 1;
+    } catch (error) {
+      failed.push({
+        fileName: fileName || `upload-${index + 1}`,
+        message: error instanceof Error ? error.message : "Unable to save photo right now.",
+      });
+    }
+  }
+
+  if (!created && failed.length) {
+    return json({ message: failed[0].message, failed }, 400);
   }
 
   revalidatePath("/admin");
@@ -66,5 +82,5 @@ export async function POST(request) {
   revalidatePath(`/admin/photos/${categoryId}`);
   revalidatePath("/photos");
 
-  return json({ created: uploads.length }, 200);
+  return json(failed.length ? { created, failed } : { created }, 200);
 }

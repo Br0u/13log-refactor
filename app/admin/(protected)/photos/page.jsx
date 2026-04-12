@@ -12,46 +12,27 @@ export const metadata = {
   title: "Photos | 13log Admin",
 };
 
-function parseSortOrder(value) {
-  const raw = String(value || "").trim();
-  if (!raw) return null;
-  const parsed = Number(raw);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
 async function createPhotoCategoryAction(_previousState, formData) {
   "use server";
 
   try {
     const name = String(formData.get("name") || "").trim();
     const slug = String(formData.get("slug") || "").trim();
-    const description = String(formData.get("description") || "").trim();
-    const displayTitle = String(formData.get("displayTitle") || "").trim();
-    const coverTitle = String(formData.get("coverTitle") || "").trim();
-    const indexDescription = String(formData.get("indexDescription") || "").trim();
-    const detailDescription = String(formData.get("detailDescription") || "").trim();
     const status = String(formData.get("status") || "DRAFT");
-    const sortOrder = parseSortOrder(formData.get("sortOrder"));
 
     if (!name || !slug) {
       return { error: "Name and slug are required." };
     }
 
-    await createPhotoCategory({
+    const category = await createPhotoCategory({
       name,
       slug,
-      description,
-      displayTitle,
-      coverTitle,
-      indexDescription,
-      detailDescription,
       status,
-      sortOrder,
     });
 
     revalidatePath("/admin/photos");
     revalidatePath("/photos");
-    redirect("/admin/photos");
+    redirect(`/admin/photos/${category.id}`);
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Unable to save category right now.",
@@ -71,6 +52,7 @@ async function updatePhotoCategoryStatusAction(categoryId, formData) {
     name: category.name,
     slug: category.slug,
     description: category.description || "",
+    albumAnnotation: category.albumAnnotation || "",
     displayTitle: category.displayTitle || "",
     coverTitle: category.coverTitle || "",
     indexDescription: category.indexDescription || "",
@@ -97,7 +79,7 @@ export default async function AdminPhotosPage() {
       </header>
       <div className="admin-page__panel admin-page__panel--stacked">
         <div className="admin-photo-layout">
-          <AdminPhotoCategoryForm action={createPhotoCategoryAction} />
+          <AdminPhotoCategoryForm action={createPhotoCategoryAction} mode="quick-create" />
         </div>
         <div className="admin-table admin-panel-table">
           <div className="admin-table__head admin-table__head--taxonomy">

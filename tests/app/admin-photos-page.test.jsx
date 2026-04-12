@@ -26,8 +26,12 @@ describe("admin photos page", () => {
     expect(markup).toContain("Editorial");
     expect(markup).toContain("A quiet album");
     expect(markup).toContain("PUBLISHED");
-    expect(markup).toContain('name="displayTitle"');
-    expect(markup).toContain('name="coverTitle"');
+    expect(markup).toContain('name="name"');
+    expect(markup).toContain('name="slug"');
+    expect(markup).toContain('name="status"');
+    expect(markup).not.toContain('name="displayTitle"');
+    expect(markup).not.toContain('name="coverTitle"');
+    expect(markup).not.toContain('name="albumAnnotation"');
     expect(markup).toContain('href="/admin/photos/photo-cat-1"');
     expect(markup).toContain('name="status"');
     expect(markup).not.toContain('class="admin-secondary-link">Save</button>');

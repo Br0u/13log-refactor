@@ -18,11 +18,11 @@ vi.mock("next/navigation", async () => {
 
 vi.mock("../../lib/public-photos", () => ({
   getPublicPhotoAlbumBySlug: vi.fn(async (slug) => (
-    slug === "car"
+    slug === "car" || slug === "car park"
       ? {
           id: "album-1",
           name: "Car",
-          slug: "car",
+          slug,
           description: "A quiet album from the road.",
           photoCount: 2,
           coverImageUrl: "/images/gallery/travel-cover.jpg",
@@ -72,5 +72,15 @@ describe("photo album page", () => {
     })).rejects.toThrow("NEXT_NOT_FOUND");
 
     expect(notFoundMock).toHaveBeenCalled();
+  });
+
+  it("decodes encoded album slugs before loading the public album", async () => {
+    const markup = renderToStaticMarkup(await PhotoAlbumPage({
+      params: Promise.resolve({ slug: "car%20park" }),
+    }));
+
+    const { getPublicPhotoAlbumBySlug } = await import("../../lib/public-photos");
+    expect(getPublicPhotoAlbumBySlug).toHaveBeenCalledWith("car park");
+    expect(markup).toContain("Morning platform");
   });
 });
