@@ -8,6 +8,8 @@ describe("playzone page", () => {
 
     expect(source).toContain('title: "Playzone | 我的小小世界"');
     expect(source).toContain('className="blog-layout blog-layout--link-index playzone-layout"');
+    expect(source).toContain('variant="link"');
+    expect(source).toContain("hideIntroCard");
     expect(source).toContain('className="blog-layout__main"');
     expect(source).toContain('className="link-essay-group"');
     expect(source).toContain('className="link-essay-list"');
@@ -41,11 +43,10 @@ describe("playzone page", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
     const globals = fs.readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.playzone-layout\s*\{[^}]*--blog-shell-width:\s*min\(1180px,\s*100%\);/s);
     expect(stylesheet).toMatch(/\.playzone-layout\s+\.link-essay-list\s*\{[^}]*gap:\s*1rem;/s);
     expect(stylesheet).toMatch(/\.playzone-layout\s+\.link-essay-entry__preview\s*\{[^}]*min-height:\s*12rem;/s);
     expect(stylesheet).toMatch(/\.playzone-layout\s+\.link-essay-entry__title\s*\{[^}]*font-size:\s*1\.25rem;/s);
-    expect(globals).toMatch(/\.main:has\(\.playzone-layout\)\s*\{[^}]*max-width:\s*none;[^}]*padding-inline:\s*20px;/s);
+    expect(globals).toMatch(/\.main:has\(\.playzone-layout\)\s*\{[^}]*max-width:\s*var\(--blog-shell-width\);[^}]*padding-inline:\s*0;/s);
     expect(stylesheet).not.toContain(".playzone-card");
   });
 });

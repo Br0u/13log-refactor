@@ -8,11 +8,7 @@ export const metadata = {
 export default function PlayzonePage() {
   return (
     <div className="blog-layout blog-layout--link-index playzone-layout">
-      <BlogRail
-        variant="link"
-        introTitle="Playzone"
-        introBody="这里放一些自己的小项目，像 link 页一样按条目浏览。"
-      />
+      <BlogRail variant="link" hideIntroCard />
       <section className="blog-layout__main">
         <header className="page-header">
           <h1>Playzone</h1>
