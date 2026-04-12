@@ -43,6 +43,9 @@ export default async function PhotosPage() {
                 return (
                   <>
               <div className="photo-album-card__body">
+                {album.albumAnnotation ? (
+                  <p className="photo-album-card__annotation">{album.albumAnnotation}</p>
+                ) : null}
                 <h2 className="photo-album-card__title">
                   <Link href={`/photos/${encodeURIComponent(album.slug)}`}>
                     {copy.coverTitleLines.map((line, index) => (

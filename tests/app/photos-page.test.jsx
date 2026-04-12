@@ -8,6 +8,7 @@ vi.mock("../../lib/public-photos", () => ({
       id: "album-1",
       name: "Car",
       slug: "car",
+      albumAnnotation: "注释词 A",
       description: "",
       photoCount: 3,
       coverImageUrl: "/images/gallery/car-cover.jpg",
@@ -17,6 +18,7 @@ vi.mock("../../lib/public-photos", () => ({
       id: "album-2",
       name: "Random",
       slug: "random",
+      albumAnnotation: null,
       description: "",
       photoCount: 8,
       coverImageUrl: "/images/gallery/random-cover.jpg",
@@ -26,6 +28,7 @@ vi.mock("../../lib/public-photos", () => ({
       id: "album-3",
       name: "April",
       slug: "april",
+      albumAnnotation: "注释词 C",
       description: "",
       photoCount: 6,
       coverImageUrl: "/images/gallery/april-cover.jpg",
@@ -35,6 +38,7 @@ vi.mock("../../lib/public-photos", () => ({
       id: "album-4",
       name: "Again",
       slug: "again",
+      albumAnnotation: "注释词 D",
       description: "",
       photoCount: 5,
       coverImageUrl: "/images/gallery/again-cover.jpg",
@@ -66,10 +70,15 @@ describe("photos index page", () => {
     expect(markup).toContain("photo-album-card");
     expect(markup).toContain("photo-album-card__body");
     expect(markup).toContain("photo-album-card__cover");
+    expect(markup).toContain("photo-album-card__annotation");
+    expect(markup).toContain("注释词 A");
+    expect(markup).toContain("注释词 C");
+    expect(markup).toContain("注释词 D");
     expect(markup).toContain("photo-page-note");
     expect(markup).toContain("大多是零散散落在朋友圈里的影像，懒于归档，索性一并收拢于此。");
     expect(markup).toContain("拍摄设备：手机与相机。");
     expect(markup).not.toContain("blog-rail__section--intro");
     expect(markup).not.toContain("flip-gallery");
+    expect(markup).not.toContain(">null<");
   });
 });

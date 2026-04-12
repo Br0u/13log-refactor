@@ -1515,8 +1515,19 @@ body:has(.blog-layout) {
   padding-top: 0.3rem;
 }
 
+.photo-album-card__annotation {
+  margin: 0 0 0.15rem;
+  padding-left: 32px;
+  font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: 12.5px;
+  line-height: 1.7;
+  letter-spacing: 0.22em;
+  color: rgba(67, 67, 67, 0.58);
+  text-transform: none;
+}
+
 .photo-album-card__title {
-  margin: 24px 0 0;
+  margin: 0;
   font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
   font-size: 24px;
   line-height: 36px;

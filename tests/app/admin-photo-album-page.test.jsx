@@ -18,6 +18,7 @@ vi.mock("../../lib/repositories/photo-categories", () => ({
     name: "Editorial",
     slug: "editorial",
     description: "A quiet album",
+    albumAnnotation: "注释词",
     displayTitle: "「世界は　ただ通り過ぎていく」",
     coverTitle: "「世界は　ただ通り過ぎていく」",
     indexDescription: "車窗之外，世界剛好經過。\n沒有停留，也沒有帶走什麼。",
@@ -60,6 +61,7 @@ describe("admin photo album page", () => {
     expect(markup).toContain("Upload photo");
     expect(markup).toContain("Editorial");
     expect(markup).toContain("Edit album");
+    expect(markup).toContain('name="albumAnnotation"');
     expect(markup).toContain('name="displayTitle"');
     expect(markup).toContain('name="coverTitle"');
     expect(markup).toContain('name="indexDescription"');
@@ -81,6 +83,7 @@ describe("admin photo album page", () => {
       name: "Car",
       slug: "car",
       description: "A quiet album",
+      albumAnnotation: "",
       displayTitle: "",
       coverTitle: "",
       indexDescription: "",
