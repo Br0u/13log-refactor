@@ -13,8 +13,17 @@ function resolveAlbumCopy(album) {
   };
 }
 
+function decodeAlbumSlug(value) {
+  try {
+    return decodeURIComponent(String(value || ""));
+  } catch {
+    return String(value || "");
+  }
+}
+
 export async function generateMetadata({ params }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeAlbumSlug(rawSlug);
   const album = await getPublicPhotoAlbumBySlug(slug);
 
   if (!album) {
@@ -31,7 +40,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function PhotoAlbumPage({ params }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeAlbumSlug(rawSlug);
   const album = await getPublicPhotoAlbumBySlug(slug);
 
   if (!album) {

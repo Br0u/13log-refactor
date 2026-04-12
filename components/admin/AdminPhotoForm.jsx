@@ -30,6 +30,7 @@ export default function AdminPhotoForm({
   const [clientError, setClientError] = useState("");
   const [clientSuccess, setClientSuccess] = useState("");
   const [clientPending, setClientPending] = useState(false);
+  const [uploadQueue, setUploadQueue] = useState([]);
   const formRef = useRef(null);
   const currentState = controlledFormState || formState;
   const values = {
@@ -40,6 +41,75 @@ export default function AdminPhotoForm({
   };
   const isEditMode = mode === "edit";
   const useClientCreateFlow = Boolean(createEndpoint) && !isEditMode;
+
+  function setQueueFromFiles(files) {
+    setUploadQueue(files.map((file) => ({
+      fileName: file.name,
+      status: "queued",
+      message: "Queued",
+    })));
+  }
+
+  function updateQueueItem(index, nextState) {
+    setUploadQueue((current) => current.map((item, itemIndex) => (
+      itemIndex === index ? { ...item, ...nextState } : item
+    )));
+  }
+
+  async function uploadSingleFile(file, index) {
+    updateQueueItem(index, { status: "uploading", message: "Uploading..." });
+
+    if (!String(file.type || "").startsWith("image/")) {
+      const result = { ok: false, fileName: file.name, message: "Only image uploads are supported." };
+      updateQueueItem(index, { status: "failed", message: result.message });
+      return result;
+    }
+
+    const uploadFormData = new FormData();
+    uploadFormData.set("file", file);
+
+    const uploadResponse = await fetch("/api/admin/uploads/image", {
+      method: "POST",
+      body: uploadFormData,
+    });
+
+    const uploadBody = await uploadResponse.json().catch(() => ({}));
+    if (!uploadResponse.ok) {
+      const result = {
+        ok: false,
+        fileName: file.name,
+        message: uploadBody?.message || "Image upload failed.",
+      };
+      updateQueueItem(index, { status: "failed", message: result.message });
+      return result;
+    }
+
+    const result = {
+      ok: true,
+      fileName: file.name,
+      url: String(uploadBody?.url || ""),
+      pathname: String(uploadBody?.pathname || ""),
+    };
+    updateQueueItem(index, { status: "uploaded", message: "Uploaded" });
+    return result;
+  }
+
+  async function uploadFilesWithConcurrency(files, concurrency = 3) {
+    const results = new Array(files.length);
+    let cursor = 0;
+
+    async function worker() {
+      while (cursor < files.length) {
+        const index = cursor;
+        cursor += 1;
+        results[index] = await uploadSingleFile(files[index], index);
+      }
+    }
+
+    const workerCount = Math.min(concurrency, files.length);
+    await Promise.all(Array.from({ length: workerCount }, () => worker()));
+    return results;
+  }
 
   async function handleClientCreateSubmit(event) {
     event.preventDefault();
@@ -61,33 +131,23 @@ export default function AdminPhotoForm({
     setClientPending(true);
     setClientError("");
     setClientSuccess("");
+    setQueueFromFiles(files);
 
     try {
-      const uploads = [];
+      const uploadResults = await uploadFilesWithConcurrency(files);
+      const uploads = uploadResults
+        .filter((result) => result?.ok)
+        .map((result) => ({
+          url: result.url,
+          pathname: result.pathname,
+          fileName: result.fileName,
+        }));
+      const failedUploads = uploadResults
+        .filter((result) => result && !result.ok)
+        .map((result) => ({ fileName: result.fileName, message: result.message }));
 
-      for (const file of files) {
-        if (!String(file.type || "").startsWith("image/")) {
-          throw new Error("Only image uploads are supported.");
-        }
-
-        const uploadFormData = new FormData();
-        uploadFormData.set("file", file);
-
-        const uploadResponse = await fetch("/api/admin/uploads/image", {
-          method: "POST",
-          body: uploadFormData,
-        });
-
-        const uploadBody = await uploadResponse.json().catch(() => ({}));
-        if (!uploadResponse.ok) {
-          throw new Error(uploadBody?.message || "Image upload failed.");
-        }
-
-        uploads.push({
-          url: String(uploadBody?.url || ""),
-          pathname: String(uploadBody?.pathname || ""),
-          fileName: file.name,
-        });
+      if (!uploads.length) {
+        throw new Error(failedUploads[0]?.message || "Unable to save photo right now.");
       }
 
       const createResponse = await fetch(createEndpoint, {
@@ -109,8 +169,18 @@ export default function AdminPhotoForm({
         throw new Error(createBody?.message || "Unable to save photo right now.");
       }
 
+      const failedCreates = Array.isArray(createBody?.failed) ? createBody.failed : [];
+      const allFailures = [...failedUploads, ...failedCreates];
+      const createdCount = Number(createBody?.created) || uploads.length;
+
       form.reset();
-      setClientSuccess("Photos saved.");
+      setUploadQueue((current) => current.map((item) => {
+        const failure = allFailures.find((entry) => entry.fileName === item.fileName);
+        return failure
+          ? { ...item, status: "failed", message: failure.message }
+          : { ...item, status: "saved", message: "Saved" };
+      }));
+      setClientSuccess(allFailures.length ? `${createdCount} 张已保存，${allFailures.length} 张失败` : "Photos saved.");
       router.refresh();
     } catch (error) {
       setClientError(error instanceof Error ? error.message : "Unable to save photo right now.");
@@ -137,10 +207,26 @@ export default function AdminPhotoForm({
       </div>
       {successMessage || clientSuccess ? <p className="admin-form-notice">{successMessage || clientSuccess}</p> : null}
       {currentState?.error || clientError ? <p className="admin-form-notice">{currentState?.error || clientError}</p> : null}
+      {uploadQueue.length ? (
+        <ul className="admin-upload-queue">
+          {uploadQueue.map((item) => (
+            <li key={item.fileName} className={`admin-upload-queue__item admin-upload-queue__item--${item.status}`}>
+              {`${item.fileName} — ${item.message}`}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {!isEditMode ? (
         <label>
           <span>Image</span>
-          <input name="file" type="file" accept="image/*" multiple required />
+          <input
+            name="file"
+            type="file"
+            accept="image/*"
+            multiple
+            required
+            onChange={(event) => setQueueFromFiles(Array.from(event.target.files || []))}
+          />
           <small className="admin-form-hint">You can choose multiple images at once on mobile or desktop.</small>
         </label>
       ) : null}
