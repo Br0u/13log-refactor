@@ -36,11 +36,7 @@ export default async function LinkPage() {
 
   return (
     <div className="blog-layout blog-layout--link-index">
-      <BlogRail
-        variant="link"
-        introTitle="前言"
-        introBody="这里收着一些会反复回看的站点、播客和入口。它们不急着更新，却会在某些时刻重新发亮。"
-      />
+      <BlogRail variant="link" hideIntroCard />
       <section className="blog-layout__main">
         <header className="page-header">
           <h1>{intro.title}</h1>

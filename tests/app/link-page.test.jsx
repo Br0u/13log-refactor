@@ -10,7 +10,7 @@ describe("link page", () => {
     expect(source).toContain("Content Blogs");
     expect(source).toContain('className="blog-layout blog-layout--link-index"');
     expect(source).toContain('variant="link"');
-    expect(source).toContain('introTitle="前言"');
+    expect(source).toContain("hideIntroCard");
     expect(source).toContain('className="link-essay-group"');
     expect(source).toContain('className="link-essay-list"');
     expect(source).toContain('className="link-essay-entry__eyebrow"');

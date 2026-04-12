@@ -6,10 +6,23 @@ import { deletePhotoAction } from "../../../actions";
 import AdminConfirmSubmitButton from "../../../../../components/admin/AdminConfirmSubmitButton";
 import AdminPhotoCategoryForm from "../../../../../components/admin/AdminPhotoCategoryForm";
 import AdminPhotoForm from "../../../../../components/admin/AdminPhotoForm";
+import { getPhotoAlbumCopy } from "../../../../../lib/photo-album-copy";
 import { getPhotoCategoryById, listPhotoCategories, updatePhotoCategory } from "../../../../../lib/repositories/photo-categories";
 import { listAdminPhotos } from "../../../../../lib/repositories/photos";
 
 export const dynamic = "force-dynamic";
+
+function mergeAlbumCopy(category) {
+  const fallback = getPhotoAlbumCopy(category.slug, category.name, category.description || "");
+
+  return {
+    ...category,
+    displayTitle: category.displayTitle || fallback.displayName,
+    coverTitle: category.coverTitle || fallback.coverTitleLines.join("\n"),
+    indexDescription: category.indexDescription || fallback.body.join("\n"),
+    detailDescription: category.detailDescription || fallback.body.join("\n"),
+  };
+}
 
 function parseSortOrder(value) {
   const raw = String(value || "").trim();
@@ -67,6 +80,8 @@ export default async function AdminPhotoAlbumPage({ params, searchParams }) {
   if (!category) {
     notFound();
   }
+
+  const categoryWithCopy = mergeAlbumCopy(category);
 
   async function updatePhotoCategoryAction(_previousState, formData) {
     "use server";
@@ -129,7 +144,7 @@ export default async function AdminPhotoAlbumPage({ params, searchParams }) {
             </div>
             <AdminPhotoCategoryForm
               action={updatePhotoCategoryAction}
-              initialValue={category}
+              initialValue={categoryWithCopy}
               successMessage={sp?.updated === "1" ? "Album saved." : ""}
               submitLabel="Update album"
               pendingLabel="Updating..."

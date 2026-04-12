@@ -73,4 +73,25 @@ describe("admin photo album page", () => {
     expect(markup).toContain("Edit");
     expect(markup).toContain("Delete photo");
   });
+
+  it("falls back to legacy album copy when the database fields are still empty", async () => {
+    const { getPhotoCategoryById } = await import("../../lib/repositories/photo-categories");
+    getPhotoCategoryById.mockResolvedValueOnce({
+      id: "photo-cat-1",
+      name: "Car",
+      slug: "car",
+      description: "A quiet album",
+      displayTitle: "",
+      coverTitle: "",
+      indexDescription: "",
+      detailDescription: "",
+    });
+
+    const markup = renderToStaticMarkup(await AdminPhotoAlbumPage({
+      params: Promise.resolve({ id: "photo-cat-1" }),
+    }));
+
+    expect(markup).toContain('value="世界は　ただ通り過ぎていく"');
+    expect(markup).toContain(">車窗之外，世界剛好經過。\n沒有停留，也沒有帶走什麼。</textarea>");
+  });
 });

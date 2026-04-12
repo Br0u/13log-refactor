@@ -28,6 +28,7 @@ export default function BlogRail({
   variant = "posts",
   introTitle = "",
   introBody = "",
+  hideIntroCard = false,
   meta = "",
   tocHtml = "",
   relatedPosts = [],
@@ -70,13 +71,16 @@ export default function BlogRail({
             </section>
           ) : null}
         </>
-      ) : introTitle || introBody ? (
+      ) : !hideIntroCard && (introTitle || introBody) ? (
         <section className="blog-rail__section blog-rail__section--intro">
           <div className="blog-rail__intro-card">
             {introTitle ? <h2 className="blog-rail__heading">{introTitle}</h2> : null}
             {introBody ? (
               <p className="blog-rail__intro-text">
-                <span>你看我时很远，</span>
+                <span>你，</span>
+                <span>一会看我，</span>
+                <span>一会看云。</span>
+                <span>我觉得你看我时很远，</span>
                 <span>你看云时很近。</span>
               </p>
             ) : null}

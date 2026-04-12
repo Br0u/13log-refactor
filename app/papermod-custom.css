@@ -3623,10 +3623,6 @@ body:has(.blog-layout) .page-toc-rail {
 }
 
 /* Playzone */
-.playzone-layout {
-  --blog-shell-width: min(1180px, 100%);
-}
-
 .playzone-layout .link-essay-list {
   gap: 1rem;
 }
