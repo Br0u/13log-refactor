@@ -85,6 +85,7 @@ model PhotoCategory {
   name        String   @unique
   slug        String   @unique
   description String?
+  albumAnnotation String?
   displayTitle String?
   coverTitle   String?
   indexDescription String?

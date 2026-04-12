@@ -20,6 +20,7 @@ describe("admin photo category form", () => {
 
     expect(markup).toContain('name="name"');
     expect(markup).toContain('name="slug"');
+    expect(markup).toContain('name="albumAnnotation"');
     expect(markup).toContain('name="displayTitle"');
     expect(markup).toContain('name="coverTitle"');
     expect(markup).toContain('name="indexDescription"');

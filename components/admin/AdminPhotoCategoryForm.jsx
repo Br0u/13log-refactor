@@ -25,6 +25,7 @@ export default function AdminPhotoCategoryForm({
     name: initialValue?.name || "",
     slug: initialValue?.slug || "",
     description: initialValue?.description || "",
+    albumAnnotation: initialValue?.albumAnnotation || "",
     displayTitle: initialValue?.displayTitle || "",
     coverTitle: initialValue?.coverTitle || "",
     indexDescription: initialValue?.indexDescription || "",
@@ -53,6 +54,10 @@ export default function AdminPhotoCategoryForm({
       <label>
         <span>Description</span>
         <textarea name="description" rows={3} defaultValue={values.description} />
+      </label>
+      <label>
+        <span>Annotation</span>
+        <input name="albumAnnotation" defaultValue={values.albumAnnotation} />
       </label>
       <label>
         <span>Display Title</span>

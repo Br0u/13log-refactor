@@ -207,6 +207,7 @@ export async function createPhotoCategoryAction(formData) {
   const name = String(formData.get("name") || "").trim();
   const slug = String(formData.get("slug") || "").trim();
   const description = String(formData.get("description") || "").trim();
+  const albumAnnotation = String(formData.get("albumAnnotation") || "").trim();
   const displayTitle = String(formData.get("displayTitle") || "").trim();
   const coverTitle = String(formData.get("coverTitle") || "").trim();
   const indexDescription = String(formData.get("indexDescription") || "").trim();
@@ -223,6 +224,7 @@ export async function createPhotoCategoryAction(formData) {
     update: {
       name,
       description: description || null,
+      albumAnnotation: albumAnnotation || null,
       displayTitle: displayTitle || null,
       coverTitle: coverTitle || null,
       indexDescription: indexDescription || null,
@@ -234,6 +236,7 @@ export async function createPhotoCategoryAction(formData) {
       name,
       slug,
       description: description || null,
+      albumAnnotation: albumAnnotation || null,
       displayTitle: displayTitle || null,
       coverTitle: coverTitle || null,
       indexDescription: indexDescription || null,

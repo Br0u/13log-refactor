@@ -17,6 +17,7 @@ function mergeAlbumCopy(category) {
 
   return {
     ...category,
+    albumAnnotation: category.albumAnnotation || "",
     displayTitle: category.displayTitle || fallback.displayName,
     coverTitle: category.coverTitle || fallback.coverTitleLines.join("\n"),
     indexDescription: category.indexDescription || fallback.body.join("\n"),
@@ -90,6 +91,7 @@ export default async function AdminPhotoAlbumPage({ params, searchParams }) {
       const name = String(formData.get("name") || "").trim();
       const slug = String(formData.get("slug") || "").trim();
       const description = String(formData.get("description") || "").trim();
+      const albumAnnotation = String(formData.get("albumAnnotation") || "").trim();
       const displayTitle = String(formData.get("displayTitle") || "").trim();
       const coverTitle = String(formData.get("coverTitle") || "").trim();
       const indexDescription = String(formData.get("indexDescription") || "").trim();
@@ -105,6 +107,7 @@ export default async function AdminPhotoAlbumPage({ params, searchParams }) {
         name,
         slug,
         description,
+        albumAnnotation,
         displayTitle,
         coverTitle,
         indexDescription,

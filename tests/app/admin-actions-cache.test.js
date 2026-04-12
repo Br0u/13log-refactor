@@ -214,6 +214,7 @@ describe("admin action cache behavior", () => {
     const formData = new FormData();
     formData.set("name", "Travel");
     formData.set("slug", "travel");
+    formData.set("albumAnnotation", "注释词");
     formData.set("displayTitle", "「世界は　ただ通り過ぎていく」");
     formData.set("coverTitle", "「世界は　ただ通り過ぎていく」");
     formData.set("indexDescription", "車窗之外，世界剛好經過。");
@@ -228,6 +229,7 @@ describe("admin action cache behavior", () => {
       update: {
         name: "Travel",
         description: null,
+        albumAnnotation: "注释词",
         displayTitle: "「世界は　ただ通り過ぎていく」",
         coverTitle: "「世界は　ただ通り過ぎていく」",
         indexDescription: "車窗之外，世界剛好經過。",
@@ -239,6 +241,7 @@ describe("admin action cache behavior", () => {
         name: "Travel",
         slug: "travel",
         description: null,
+        albumAnnotation: "注释词",
         displayTitle: "「世界は　ただ通り過ぎていく」",
         coverTitle: "「世界は　ただ通り過ぎていく」",
         indexDescription: "車窗之外，世界剛好經過。",
