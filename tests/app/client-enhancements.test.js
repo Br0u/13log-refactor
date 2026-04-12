@@ -17,9 +17,11 @@ describe("client enhancements", () => {
     expect(source).toContain('from "./client-enhancements/contentEnhancements"');
     expect(source).toContain('from "./client-enhancements/linkPreview"');
     expect(source).toContain('from "./client-enhancements/tocRail"');
+    expect(source).toContain('from "./client-enhancements/imageZoom"');
     expect(source).not.toContain("function initSpoilersAndPlaylist()");
     expect(source).not.toContain("function initTocRail()");
     expect(source).not.toContain("function initLinkPreview()");
+    expect(source).not.toContain("function initImageZoom()");
   });
 
   it("only mounts TOC and link preview enhancers on routes that actually need them", () => {
@@ -29,7 +31,8 @@ describe("client enhancements", () => {
     expect(source).toContain('const isLinkPage = pathname === "/link" || pathname.startsWith("/link/")');
     expect(source).toContain("if (isPostPage || isLinkPage) {");
     expect(source).toContain("cleanups.push(initTocRail())");
-    expect(source).toContain("if (isLinkPage) {");
+    expect(source).toContain("if (isLinkPage || isPlayzonePage) {");
     expect(source).toContain("initLinkPreview()");
+    expect(source).toContain("cleanups.push(initImageZoom())");
   });
 });

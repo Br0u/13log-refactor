@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { initCodeCopyButtons, initSpoilersAndPlaylist } from "./client-enhancements/contentEnhancements";
+import { initImageZoom } from "./client-enhancements/imageZoom";
 import { initLinkPreview } from "./client-enhancements/linkPreview";
 import { initTocRail } from "./client-enhancements/tocRail";
 
@@ -115,6 +116,7 @@ export default function ClientEnhancements() {
     cleanups.push(initAnchorSmoothScroll());
     cleanups.push(initTopLink());
     cleanups.push(initSpoilersAndPlaylist());
+    cleanups.push(initImageZoom());
     if (isPostPage || isLinkPage) {
       cleanups.push(initTocRail());
     }
