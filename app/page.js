@@ -4,14 +4,42 @@ export default function HomePage() {
   return (
     <section className="profile profile--rainy-mask">
       <div className="profile_inner">
-        <img
-          draggable="false"
-          src="/images/avatar.jpg"
-          alt="Avatar"
-          title="Avatar"
-          height="150"
-          width="150"
-        />
+        <div className="profile-avatar-card" tabIndex={0} aria-label="头像动画">
+          <div className="profile-avatar-scene" aria-hidden="true">
+            <img
+              className="profile-avatar-frame profile-avatar-frame--base"
+              draggable="false"
+              src="/images/home/curious-cats-fallen-flower-base.png"
+              alt=""
+              height="240"
+              width="240"
+            />
+            <img
+              className="profile-avatar-frame profile-avatar-frame--hover"
+              draggable="false"
+              src="/images/home/curious-cats-wilted-flower-base.png"
+              alt=""
+              height="240"
+              width="240"
+            />
+            <img
+              className="profile-avatar-popout profile-avatar-popout--base"
+              draggable="false"
+              src="/images/home/curious-cats-fallen-flower-cat.png"
+              alt=""
+              height="372"
+              width="380"
+            />
+            <img
+              className="profile-avatar-popout profile-avatar-popout--hover"
+              draggable="false"
+              src="/images/home/curious-cats-wilted-flower-cat.png"
+              alt=""
+              height="372"
+              width="380"
+            />
+          </div>
+        </div>
         <h1>花似伊，柳似伊</h1>
         <span>Books · Life</span>
         <div className="profile-links">

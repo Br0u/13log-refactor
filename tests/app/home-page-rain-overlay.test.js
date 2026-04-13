@@ -7,6 +7,15 @@ describe("home page rain overlay markup", () => {
     const source = fs.readFileSync(path.join(process.cwd(), "app/page.js"), "utf8");
 
     expect(source).toContain('className="profile profile--rainy-mask"');
+    expect(source).toContain('className="profile-avatar-card"');
+    expect(source).toContain('className="profile-avatar-scene"');
+    expect(source).toContain('className="profile-avatar-popout profile-avatar-popout--base"');
+    expect(source).toContain('className="profile-avatar-popout profile-avatar-popout--hover"');
+    expect(source).not.toContain('className="profile-avatar-note"');
+    expect(source).toContain('/images/home/curious-cats-fallen-flower-base.png');
+    expect(source).toContain('/images/home/curious-cats-wilted-flower-base.png');
+    expect(source).toContain('/images/home/curious-cats-fallen-flower-cat.png');
+    expect(source).toContain('/images/home/curious-cats-wilted-flower-cat.png');
     expect(source).toContain("花似伊，柳似伊");
     expect(source).toContain("Books · Life");
     expect(source).toContain("button-inner\">Posts");

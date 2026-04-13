@@ -10,6 +10,20 @@ describe("home page hero styles", () => {
     expect(source).toContain(">Playzone<");
   });
 
+  it("styles the home avatar as a two-frame hover scene using the artwork's own circular border", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.profile-avatar-card\s*\{[^}]*position:\s*relative;/s);
+    expect(stylesheet).toMatch(/\.profile-avatar-scene\s*\{[^}]*overflow:\s*visible;/s);
+    expect(stylesheet).not.toMatch(/\.profile-avatar-scene\s*\{[^}]*border-radius:\s*999px;/s);
+    expect(stylesheet).toMatch(/\.profile-avatar-frame\s*\{[^}]*object-fit:\s*contain;/s);
+    expect(stylesheet).toMatch(/\.profile-avatar-popout\s*\{[^}]*position:\s*absolute;/s);
+    expect(stylesheet).toMatch(/\.profile-avatar-popout--hover\s*\{[^}]*opacity:\s*0;/s);
+    expect(stylesheet).toMatch(/\.profile-avatar-card:hover\s+\.profile-avatar-popout--hover,[\s\S]*\.profile-avatar-card:focus-within\s+\.profile-avatar-popout--hover\s*\{[^}]*opacity:\s*1;/s);
+    expect(stylesheet).not.toContain(".profile-avatar-note");
+    expect(stylesheet).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*\.profile-avatar-scene,[\s\S]*\.profile-avatar-frame,[\s\S]*\.profile-avatar-popout[\s\S]*transition:\s*none;/s);
+  });
+
   it("uses Ma Shan Zheng for the home hero title", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
