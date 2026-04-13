@@ -1,10 +1,11 @@
 export function initLinkPreview() {
   const cards = Array.from(document.querySelectorAll("[data-link-card][data-preview-enabled='true']"));
-  if (!cards.length) return;
+  if (!cards.length) return () => {};
 
   const CACHE_KEY = "link-preview-cache-v1";
   const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
   let cache = {};
+  let isActive = true;
 
   try {
     cache = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}") || {};
@@ -91,15 +92,17 @@ export function initLinkPreview() {
   const io = new IntersectionObserver(
     (entries, obs) => {
       entries.forEach(async (entry) => {
-        if (!entry.isIntersecting) return;
+        if (!entry.isIntersecting || !isActive) return;
         const card = entry.target;
         const url = card.getAttribute("data-preview-url") || "";
         const cached = cache[url]?.data;
         if (cached) {
+          if (!isActive || !card.isConnected) return;
           apply(card, cached);
           card.classList.remove("link-board-card--preview-pending");
         } else {
           const meta = await fetchMeta(url);
+          if (!isActive || !card.isConnected) return;
           if (meta) {
             cache[url] = { ts: Date.now(), data: meta };
             persist();
@@ -116,4 +119,9 @@ export function initLinkPreview() {
   );
 
   cards.forEach((card) => io.observe(card));
+
+  return () => {
+    isActive = false;
+    io.disconnect();
+  };
 }

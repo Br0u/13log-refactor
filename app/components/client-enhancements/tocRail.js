@@ -108,7 +108,13 @@ export function initTocRail() {
   build();
 
   return () => {
-    if (detachActivate) detachActivate();
+    if (detachActivate) {
+      detachActivate();
+      detachActivate = null;
+    }
+    boundHeadings = [];
+    list.innerHTML = "";
+    rail.hidden = true;
     window.removeEventListener("resize", build);
   };
 }
