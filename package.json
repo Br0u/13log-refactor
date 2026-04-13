@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "prisma generate && next dev",
-    "build": "node -e \"require('node:fs').rmSync('.next-local', { recursive: true, force: true })\" && prisma generate && next build",
+    "build": "node -e \"require('node:fs').rmSync('.next-prod', { recursive: true, force: true })\" && prisma generate && next build",
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",

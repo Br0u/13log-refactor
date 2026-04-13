@@ -17,7 +17,7 @@ export default function HomePage() {
             <img
               className="profile-avatar-frame profile-avatar-frame--hover"
               draggable="false"
-              src="/images/home/curious-cats-wilted-flower-base.png"
+              src="/images/home/curious-cats-fallen-flower-base.png"
               alt=""
               height="240"
               width="240"
