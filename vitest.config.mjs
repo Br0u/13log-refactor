@@ -9,6 +9,7 @@ export default defineConfig({
       "**/.git/**",
       "**/.next/**",
       "**/.next-local/**",
+      "**/.next-prod/**",
       "**/.next-dev-*/**",
       "**/.playwright-cli/**",
       "**/.superpowers/**",
