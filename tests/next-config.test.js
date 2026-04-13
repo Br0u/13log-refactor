@@ -11,11 +11,12 @@ describe("next config", () => {
     expect(source).not.toContain('".next-local"');
   });
 
-  it("uses .next for dev and a separate .next-prod directory for production builds", () => {
+  it("uses .next for dev and Vercel builds, with .next-prod reserved for local non-Vercel production builds", () => {
     const source = fs.readFileSync(path.join(process.cwd(), "next.config.mjs"), "utf8");
 
     expect(source).toContain('const isDev = process.env.NODE_ENV === "development";');
-    expect(source).toContain('distDir: isDev ? ".next" : ".next-prod"');
+    expect(source).toContain('const isVercel = process.env.VERCEL === "1";');
+    expect(source).toContain('distDir: isDev || isVercel ? ".next" : ".next-prod"');
     expect(nextConfig.distDir).toBe(".next-prod");
   });
 
