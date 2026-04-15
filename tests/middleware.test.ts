@@ -95,6 +95,7 @@ describe("risk middleware", () => {
     expect(payload.riskScore).toBe(0);
     expect(payload.riskLabel).toBe("normal");
     expect(payload.ipHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(payload.ipSummary).toBe("203.0.113.x");
   });
 
   it("blocks bot traffic with 403", async () => {

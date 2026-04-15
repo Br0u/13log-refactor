@@ -12,6 +12,7 @@ export const runtime = "nodejs";
 
 const riskPayloadSchema = z.object({
   ipHash: z.string().min(1),
+  ipSummary: z.string().min(1),
   path: z.string().min(1),
   country: z.string().optional().nullable(),
   region: z.string().optional().nullable(),
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
 
   const baseLog = {
     ipHash: payload.ipHash,
+    ipSummary: payload.ipSummary,
     path: payload.path,
     country: payload.country || null,
     region: payload.region || null,

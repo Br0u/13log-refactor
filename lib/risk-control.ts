@@ -16,6 +16,23 @@ export type RiskAssessment = {
   riskLabel: RiskLabel;
 };
 
+export function summarizeIpAddress(ipAddress: string) {
+  const raw = normalizeValue(ipAddress).split(",")[0].trim();
+  if (!raw) return "unknown";
+
+  if (raw.includes(":")) {
+    const segments = raw.split(":").filter(Boolean);
+    return `${segments.slice(0, 2).join(":") || raw}::*`;
+  }
+
+  const parts = raw.split(".");
+  if (parts.length === 4) {
+    return `${parts[0]}.${parts[1]}.${parts[2]}.x`;
+  }
+
+  return raw;
+}
+
 const STATIC_FILE_RE = /\.(?:css|js|mjs|map|png|jpg|jpeg|gif|svg|ico|webp|avif|txt|xml|json|woff2?)$/i;
 const STATIC_PATHS = new Set(["/favicon.ico", "/robots.txt", "/sitemap.xml"]);
 const DATA_CENTER_MARKERS = [
@@ -31,6 +48,9 @@ const DATA_CENTER_MARKERS = [
   "data center",
   "datacenter",
 ];
+
+const AUTOMATION_USER_AGENT_RE = /(bot|crawler|spider|scrapy|curl|wget|python-requests|python-urllib|aiohttp|httpclient|go-http-client|okhttp|postmanruntime|insomnia|libwww-perl|apache-httpclient|java\/|node-fetch|undici)/i;
+const BROWSER_USER_AGENT_RE = /(mozilla\/5\.0|chrome\/|safari\/|firefox\/|edg\/|version\/)/i;
 
 function normalizeValue(value?: string | null) {
   return String(value || "").trim();
@@ -84,23 +104,38 @@ export function shouldSkipRiskEvaluation(request: NextRequest) {
 export function computeRiskAssessment(input: RiskAssessmentInput): RiskAssessment {
   let riskScore = 0;
 
-  if (normalizeValue(input.country).toUpperCase() === "CN") {
-    riskScore += 40;
-  }
+  const userAgent = normalizeValue(input.userAgent);
+  const referer = normalizeValue(input.referer);
+  const country = normalizeValue(input.country);
+  const region = normalizeValue(input.region);
+  const city = normalizeValue(input.city);
 
-  if (!normalizeValue(input.referer)) {
+  const hasBrowserLikeUserAgent = BROWSER_USER_AGENT_RE.test(userAgent);
+  const hasAutomationUserAgent = AUTOMATION_USER_AGENT_RE.test(userAgent);
+  const hasPreciseGeo = Boolean(region && city);
+  const hasAnyGeo = Boolean(country || region || city);
+
+  if (!userAgent) {
+    riskScore += 35;
+  } else if (hasAutomationUserAgent) {
+    riskScore += 55;
+  } else if (!hasBrowserLikeUserAgent) {
     riskScore += 20;
-  }
-
-  if (normalizeValue(input.userAgent).includes("Chrome/142")) {
-    riskScore += 20;
-  }
-
-  if (!normalizeValue(input.region) || !normalizeValue(input.city)) {
-    riskScore += 10;
   }
 
   if (input.isDataCenter) {
+    riskScore += 25;
+  }
+
+  if (!hasPreciseGeo) {
+    riskScore += hasAnyGeo ? 5 : 10;
+  }
+
+  if (!referer) {
+    riskScore += 5;
+  }
+
+  if (input.isDataCenter && hasAutomationUserAgent) {
     riskScore += 20;
   }
 
@@ -108,7 +143,7 @@ export function computeRiskAssessment(input: RiskAssessmentInput): RiskAssessmen
     return { riskScore, riskLabel: "bot" };
   }
 
-  if (riskScore >= 40) {
+  if (riskScore >= 30) {
     return { riskScore, riskLabel: "suspicious" };
   }
 

@@ -53,6 +53,7 @@ describe("internal risk api", () => {
         referer: "https://example.com",
         riskScore: 0,
         riskLabel: "normal",
+        ipSummary: "203.0.113.x",
       }),
     }));
 
@@ -64,6 +65,7 @@ describe("internal risk api", () => {
     });
     expect(createAccessLogMock).toHaveBeenCalledWith(expect.objectContaining({
       ipHash: "abc",
+      ipSummary: "203.0.113.x",
       isBlocked: true,
       blockReason: "blacklist",
     }));
@@ -89,6 +91,7 @@ describe("internal risk api", () => {
         referer: "https://example.com",
         riskScore: 10,
         riskLabel: "normal",
+        ipSummary: "203.0.113.x",
       }),
     }));
 
@@ -99,6 +102,7 @@ describe("internal risk api", () => {
     });
     expect(createAccessLogMock).toHaveBeenCalledWith(expect.objectContaining({
       ipHash: "rate-limit",
+      ipSummary: "203.0.113.x",
       isBlocked: true,
       blockReason: "rate_limit",
     }));
@@ -123,6 +127,7 @@ describe("internal risk api", () => {
         referer: "https://example.com",
         riskScore: 0,
         riskLabel: "normal",
+        ipSummary: "203.0.113.x",
       }),
     }));
 
@@ -134,6 +139,7 @@ describe("internal risk api", () => {
     expect(countRecentAccessLogsMock).not.toHaveBeenCalled();
     expect(createAccessLogMock).toHaveBeenCalledWith(expect.objectContaining({
       ipHash: "public-page",
+      ipSummary: "203.0.113.x",
       path: "/posts",
       isBlocked: false,
       blockReason: null,
@@ -159,6 +165,7 @@ describe("internal risk api", () => {
         referer: "https://example.com",
         riskScore: 0,
         riskLabel: "normal",
+        ipSummary: "203.0.113.x",
       }),
     }));
 
@@ -170,6 +177,7 @@ describe("internal risk api", () => {
     expect(countRecentAccessLogsMock).not.toHaveBeenCalled();
     expect(createAccessLogMock).toHaveBeenCalledWith(expect.objectContaining({
       ipHash: "admin-page",
+      ipSummary: "203.0.113.x",
       path: "/admin/visits",
       isBlocked: false,
       blockReason: null,
@@ -191,10 +199,11 @@ describe("internal risk api", () => {
         country: "CN",
         region: "",
         city: "",
-        userAgent: "Mozilla/5.0 Chrome/142.0.0.0 Safari/537.36",
+        userAgent: "python-requests/2.32.3",
         referer: "",
-        riskScore: 90,
+        riskScore: 85,
         riskLabel: "bot",
+        ipSummary: "203.0.113.x",
       }),
     }));
 
@@ -205,6 +214,7 @@ describe("internal risk api", () => {
     });
     expect(createAccessLogMock).toHaveBeenCalledWith(expect.objectContaining({
       ipHash: "bot-ip",
+      ipSummary: "203.0.113.x",
       riskLabel: "bot",
       isBlocked: true,
       blockReason: "bot",
@@ -223,12 +233,13 @@ describe("internal risk api", () => {
         ipHash: "suspicious-ip",
         path: "/posts",
         country: "CA",
-        region: "Ontario",
-        city: "Guelph",
-        userAgent: "Mozilla/5.0 Chrome/142.0.0.0 Safari/537.36",
+        region: "",
+        city: "",
+        userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/142.0.0.0 Safari/537.36",
         referer: "",
-        riskScore: 40,
+        riskScore: 35,
         riskLabel: "suspicious",
+        ipSummary: "203.0.113.x",
       }),
     }));
 
@@ -239,7 +250,43 @@ describe("internal risk api", () => {
     });
     expect(createAccessLogMock).toHaveBeenCalledWith(expect.objectContaining({
       ipHash: "suspicious-ip",
+      ipSummary: "203.0.113.x",
       riskLabel: "suspicious",
+      isBlocked: false,
+      blockReason: null,
+    }));
+  });
+
+  it("allows ordinary browser traffic from any country when no other risk signals exist", async () => {
+    const response = await riskPostRoute(new Request("http://localhost:3000/api/internal/risk", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-risk-internal": "1",
+      },
+      body: JSON.stringify({
+        ipHash: "cn-human",
+        path: "/posts",
+        country: "CN",
+        region: "Guangdong",
+        city: "Shenzhen",
+        userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_3 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1",
+        referer: "https://example.com",
+        riskScore: 5,
+        riskLabel: "normal",
+        ipSummary: "203.0.113.x",
+      }),
+    }));
+
+    expect(await response.json()).toEqual({
+      action: "allow",
+      status: 200,
+      reason: "logged",
+    });
+    expect(createAccessLogMock).toHaveBeenCalledWith(expect.objectContaining({
+      ipHash: "cn-human",
+      ipSummary: "203.0.113.x",
+      riskLabel: "normal",
       isBlocked: false,
       blockReason: null,
     }));

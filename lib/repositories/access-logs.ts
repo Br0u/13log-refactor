@@ -2,6 +2,7 @@ import { db } from "../db";
 
 export type AccessLogInput = {
   ipHash: string;
+  ipSummary: string;
   path: string;
   country?: string | null;
   region?: string | null;
@@ -36,6 +37,7 @@ export async function createAccessLog(input: AccessLogInput) {
   return db.accessLog.create({
     data: {
       ipHash: input.ipHash,
+      ipSummary: input.ipSummary,
       path: input.path,
       country: input.country || null,
       region: input.region || null,
