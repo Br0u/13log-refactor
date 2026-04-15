@@ -168,6 +168,7 @@ model VisitLog {
 model AccessLog {
   id          String   @id @default(cuid())
   ipHash      String
+  ipSummary   String
   path        String
   country     String?
   region      String?

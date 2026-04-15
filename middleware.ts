@@ -8,6 +8,7 @@ import {
   isDataCenterRequest,
   isProtectedPath,
   shouldSkipRiskEvaluation,
+  summarizeIpAddress,
 } from "./lib/risk-control";
 
 type RiskApiDecision = {
@@ -19,7 +20,9 @@ async function evaluateRisk(request: NextRequest) {
   const geo = getRequestGeo(request);
   const referer = request.headers.get("referer") || "";
   const userAgent = request.headers.get("user-agent") || "";
-  const ipHash = await hashIpAddress(getClientIp(request));
+  const clientIp = getClientIp(request);
+  const ipHash = await hashIpAddress(clientIp);
+  const ipSummary = summarizeIpAddress(clientIp);
   const assessment = computeRiskAssessment({
     ...geo,
     referer,
@@ -35,6 +38,7 @@ async function evaluateRisk(request: NextRequest) {
     },
     body: JSON.stringify({
       ipHash,
+      ipSummary,
       path: request.nextUrl.pathname,
       country: geo.country,
       region: geo.region,

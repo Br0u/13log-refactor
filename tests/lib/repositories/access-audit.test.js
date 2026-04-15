@@ -63,7 +63,7 @@ describe("access audit repository", () => {
     expect(filters.where.createdAt.lte).toBeInstanceOf(Date);
   });
 
-  it("loads summary cards, risk cards, rows, and blacklist state from access logs", async () => {
+  it("loads summary cards, risk cards, rows, and derived display state from access logs", async () => {
     countMock
       .mockResolvedValueOnce(12)
       .mockResolvedValueOnce(48)
@@ -81,6 +81,7 @@ describe("access audit repository", () => {
       {
         id: "log-1",
         ipHash: "hash-1",
+        ipSummary: "203.0.113.x",
         path: "/posts",
         country: "CA",
         region: "Ontario",
@@ -89,7 +90,7 @@ describe("access audit repository", () => {
         riskScore: 40,
         blockReason: null,
         referer: "https://google.com",
-        userAgent: "Mozilla/5.0",
+        userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 Chrome/142.0.0.0 Safari/537.36",
         createdAt: new Date("2026-03-27T16:00:00.000Z"),
       },
     ]);
@@ -116,11 +117,38 @@ describe("access audit repository", () => {
       riskLabel: "suspicious",
       riskScore: 40,
       blacklistReason: "bot_threshold",
+      ipSummary: "203.0.113.x",
+      locationSummary: {
+        primary: "加拿大 / 安大略省 / 圭尔夫",
+        secondary: "CA · Ontario · Guelph",
+      },
+      deviceSummary: {
+        primary: "Chrome 142 · macOS 14",
+        secondary: "桌面端",
+        browser: "Chrome 142",
+        os: "macOS 14",
+        device: "桌面端",
+      },
     });
     expect(findManyMock).toHaveBeenCalledWith(expect.objectContaining({
       where: expect.objectContaining({
         riskLabel: { in: ["suspicious", "bot"] },
       }),
+      select: {
+        id: true,
+        ipHash: true,
+        ipSummary: true,
+        path: true,
+        country: true,
+        region: true,
+        city: true,
+        userAgent: true,
+        referer: true,
+        riskScore: true,
+        riskLabel: true,
+        blockReason: true,
+        createdAt: true,
+      },
       take: 100,
     }));
   });
