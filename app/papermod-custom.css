@@ -692,7 +692,7 @@ body::before {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.56;
+  opacity: 0.46;
   -webkit-mask-image: radial-gradient(
     ellipse 30rem 20rem at 50% 46%,
     transparent 0,
@@ -710,18 +710,23 @@ body::before {
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   background:
-    radial-gradient(1.65rem 2.1rem at 5% 20%, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.18) 58%, transparent 74%),
-    radial-gradient(0.7rem 1rem at 12% 35%, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.1) 56%, transparent 72%),
-    radial-gradient(1.5rem 1.95rem at 88% 22%, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.18) 55%, transparent 74%),
-    radial-gradient(1rem 1.4rem at 92% 62%, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.1) 54%, transparent 72%),
-    radial-gradient(0.85rem 1.15rem at 18% 78%, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.08) 52%, transparent 70%),
-    radial-gradient(1.3rem 1.65rem at 76% 82%, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.1) 52%, transparent 72%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-  filter: blur(0.2px);
+    radial-gradient(1.65rem 2.1rem at center, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.18) 56%, transparent 74%),
+    radial-gradient(0.88rem 1.2rem at center, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.1) 54%, transparent 72%),
+    radial-gradient(1.5rem 1.95rem at center, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.16) 55%, transparent 74%),
+    radial-gradient(1.05rem 1.42rem at center, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.1) 54%, transparent 72%),
+    radial-gradient(0.82rem 1.08rem at center, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.08) 52%, transparent 70%),
+    radial-gradient(1.18rem 1.52rem at center, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0.1) 52%, transparent 72%),
+    radial-gradient(0.42rem 0.64rem at center, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.06) 48%, transparent 68%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.01));
+  background-repeat: no-repeat;
+  background-size: 20% 30%, 15% 22%, 23% 32%, 17% 25%, 13% 20%, 19% 28%, 11% 16%, 100% 100%;
+  background-position: 4% 8%, 13% 28%, 86% 10%, 92% 48%, 18% 68%, 78% 74%, 56% 18%, 0 0;
+  animation: rainyMaskDrops 13.8s linear infinite, rainyMaskBreath 8.5s ease-in-out infinite alternate;
+  filter: blur(0.18px);
 }
 
 .main .profile.profile--rainy-mask::after {
-  opacity: 0.34;
+  opacity: 0.26;
   -webkit-mask-image: radial-gradient(
     ellipse 31rem 20.5rem at 50% 46%,
     transparent 0,
@@ -741,11 +746,15 @@ body::before {
   background:
     radial-gradient(24rem 18rem at 14% 16%, var(--ink-wash-a), transparent 68%),
     radial-gradient(22rem 16rem at 86% 82%, var(--ink-wash-b), transparent 70%),
-    linear-gradient(103deg, transparent 0 12%, rgba(255, 255, 255, 0.16) 12.8%, transparent 13.6%) 8% 0 / 18% 100% repeat-x,
-    linear-gradient(101deg, transparent 0 18%, rgba(255, 255, 255, 0.12) 18.8%, transparent 19.6%) 34% 0 / 14% 100% repeat-x,
-    linear-gradient(100deg, transparent 0 24%, rgba(255, 255, 255, 0.1) 24.7%, transparent 25.5%) 68% 0 / 16% 100% repeat-x,
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 28%, transparent 100%);
-  animation: rainyMaskSlide 5.6s linear infinite;
+    linear-gradient(103deg, transparent 0 16%, rgba(255, 255, 255, 0.105) 16.7%, transparent 17.8%),
+    linear-gradient(101deg, transparent 0 22%, rgba(255, 255, 255, 0.082) 22.8%, transparent 24%),
+    linear-gradient(100deg, transparent 0 28%, rgba(255, 255, 255, 0.072) 28.7%, transparent 29.9%),
+    linear-gradient(104deg, transparent 0 36%, rgba(255, 255, 255, 0.058) 36.8%, transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent 28%, transparent 100%);
+  background-repeat: no-repeat, no-repeat, repeat-y, repeat-y, repeat-y, repeat-y, no-repeat;
+  background-size: 100% 100%, 100% 100%, 18% 22rem, 14% 26rem, 16% 18rem, 12% 30rem, 100% 100%;
+  background-position: 0 0, 0 0, 7% -20%, 35% -34%, 72% -12%, 54% -44%, 0 0;
+  animation: rainyMaskStreaks 9.8s linear infinite, rainyMaskMist 17s ease-in-out infinite alternate;
 }
 
 .main .profile.profile--rainy-mask .profile_inner {
@@ -753,12 +762,50 @@ body::before {
   z-index: 3;
 }
 
-@keyframes rainyMaskSlide {
+@keyframes rainyMaskDrops {
   from {
-    transform: translate3d(0, -2%, 0);
+    background-position: 4% 8%, 13% 28%, 86% 10%, 92% 48%, 18% 68%, 78% 74%, 56% 18%, 0 0;
   }
+
   to {
-    transform: translate3d(-1.5%, 4%, 0);
+    background-position: 11% 46%, 18% 70%, 79% 38%, 97% 92%, 25% 100%, 72% 100%, 60% 56%, 0 0;
+  }
+}
+
+@keyframes rainyMaskBreath {
+  from {
+    opacity: 0.38;
+  }
+
+  to {
+    opacity: 0.52;
+  }
+}
+
+@keyframes rainyMaskStreaks {
+  from {
+    background-position: 0 0, 0 0, 7% -20%, 35% -34%, 72% -12%, 54% -44%, 0 0;
+  }
+
+  to {
+    background-position: 0 0, 0 0, 3% 112%, 41% 118%, 67% 108%, 58% 124%, 0 0;
+  }
+}
+
+@keyframes rainyMaskMist {
+  from {
+    filter: blur(0.15px);
+  }
+
+  to {
+    filter: blur(0.55px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main .profile.profile--rainy-mask::before,
+  .main .profile.profile--rainy-mask::after {
+    animation: none;
   }
 }
 
