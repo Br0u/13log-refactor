@@ -21,6 +21,14 @@ function fallbackTitle(fileName = "Photo") {
   return String(fileName || "Photo").replace(/\.[^.]+$/, "").trim() || "Photo";
 }
 
+function failedUpload(fileName, message, clientId = "") {
+  return {
+    ...(clientId ? { clientId } : {}),
+    fileName,
+    message,
+  };
+}
+
 export async function POST(request) {
   const cookieStore = await cookies();
   const token = cookieStore.get(ADMIN_SESSION_COOKIE)?.value || "";
@@ -49,9 +57,10 @@ export async function POST(request) {
     const imageUrl = String(upload?.url || "").trim();
     const pathname = String(upload?.pathname || "").trim();
     const fileName = String(upload?.fileName || "").trim();
+    const clientId = String(upload?.clientId || "").trim();
 
     if (!imageUrl || !pathname) {
-      failed.push({ fileName: fileName || `upload-${index + 1}`, message: "Uploaded image metadata is incomplete." });
+      failed.push(failedUpload(fileName || `upload-${index + 1}`, "Uploaded image metadata is incomplete.", clientId));
       continue;
     }
 
@@ -66,10 +75,11 @@ export async function POST(request) {
       });
       created += 1;
     } catch (error) {
-      failed.push({
-        fileName: fileName || `upload-${index + 1}`,
-        message: error instanceof Error ? error.message : "Unable to save photo right now.",
-      });
+      failed.push(failedUpload(
+        fileName || `upload-${index + 1}`,
+        error instanceof Error ? error.message : "Unable to save photo right now.",
+        clientId,
+      ));
     }
   }
 
