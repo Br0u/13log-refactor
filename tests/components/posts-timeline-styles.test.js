@@ -11,14 +11,22 @@ describe("posts timeline styles", () => {
     expect(stylesheet).not.toMatch(/@media\s*\(min-width:\s*1200px\)\s*\{[\s\S]*\.posts-masonry\s*\{[^}]*column-count:\s*3;/s);
   });
 
-  it("switches the posts page timeline into a single-column square-corner list mode", () => {
+  it("switches the posts page timeline into a single-column editorial list mode", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s*\{[^}]*column-count:\s*1;/s);
-    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card\s*\{[^}]*border-radius:\s*0;[^}]*background:\s*transparent;[^}]*border:\s*none;[^}]*box-shadow:\s*none;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card\s*\{[^}]*padding:\s*0\.35rem\s+0\s+0\.2rem;[^}]*border-radius:\s*0;[^}]*background:\s*transparent;[^}]*border:\s*none;[^}]*box-shadow:\s*none;/s);
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card__title\s+a,\s*\.posts-masonry--posts-list\s+\.post-preview-card__excerpt-block,\s*\.posts-masonry--posts-list\s+\.post-preview-card__meta\s*\{[^}]*color:\s*color-mix\(in srgb,\s*var\(--secondary\)\s*92%,\s*var\(--content\)\);/s);
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\.posts-masonry--interactive\[data-micro-focus=""\]\s+\.post-preview-card:hover,\s*\.posts-masonry--posts-list:not\(\.posts-masonry--interactive\)\s+\.post-preview-card:hover\s*\{[^}]*transform:\s*none;[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;[^}]*border-color:\s*transparent;/s);
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__title\s+a,\s*\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__excerpt-block,\s*\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__meta\s*\{[^}]*color:\s*var\(--primary\);/s);
+  });
+
+  it("keeps micro posts carded in the posts list layout", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro\s*\{[^}]*border-radius:\s*1\.2rem;[^}]*border:\s*none;[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro\s+\.post-preview-card__micro-surface\s*\{[^}]*padding:\s*clamp\(1\.02rem,[^}]*border:\s*1px\s+solid\s+color-mix\(in srgb,\s*var\(--border\)\s*16%,\s*rgba\(255,\s*255,\s*255,\s*0\.035\)\);/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\.posts-masonry--interactive\[data-micro-focus=""\]\s+\.post-preview-card--micro:hover\s+\.post-preview-card__micro-surface,\s*\.posts-masonry--posts-list:not\(\.posts-masonry--interactive\)\s+\.post-preview-card--micro:hover\s+\.post-preview-card__micro-surface\s*\{[^}]*box-shadow:\s*[^}]*0\s+6px\s+16px\s+rgba\(43,\s*34,\s*22,\s*0\.014\)/s);
   });
 
   it("adds a soft backdrop layer when a micro post is focused", () => {
