@@ -70,6 +70,7 @@ describe("admin photo album page", () => {
     expect(markup).toContain("Morning light in photo-cat-1");
     expect(markup).not.toContain("Select album");
     expect(markup).toContain("Leave title empty to reuse each file name during batch upload.");
+    expect(markup).toContain("Mobile HEIC/HEIF files are accepted.");
     expect(markup).toContain("admin-photo-grid");
     expect(markup).toContain('href="/admin/photos/album/photo-cat-1/photo-1"');
     expect(markup).toContain("Edit");

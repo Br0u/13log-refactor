@@ -2,7 +2,9 @@
 
 import React, { useActionState, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { upload } from "@vercel/blob/client";
 import AdminSubmitButton from "./AdminSubmitButton";
+import { buildAdminImagePath, inferImageContentType, isSupportedAdminImageFile } from "../../lib/admin-image-files";
 
 const INITIAL_FORM_STATE = {
   error: "",
@@ -43,7 +45,8 @@ export default function AdminPhotoForm({
   const useClientCreateFlow = Boolean(createEndpoint) && !isEditMode;
 
   function setQueueFromFiles(files) {
-    setUploadQueue(files.map((file) => ({
+    setUploadQueue(files.map((file, index) => ({
+      id: `${index}-${file.name}-${file.size}-${file.lastModified || 0}`,
       fileName: file.name,
       status: "queued",
       message: "Queued",
@@ -59,55 +62,54 @@ export default function AdminPhotoForm({
   async function uploadSingleFile(file, index) {
     updateQueueItem(index, { status: "uploading", message: "Uploading..." });
 
-    if (!String(file.type || "").startsWith("image/")) {
-      const result = { ok: false, fileName: file.name, message: "Only image uploads are supported." };
+    const clientId = `${index}-${file.name}-${file.size}-${file.lastModified || 0}`;
+    if (!isSupportedAdminImageFile(file)) {
+      const result = { ok: false, clientId, fileName: file.name, message: "Only image uploads are supported." };
       updateQueueItem(index, { status: "failed", message: result.message });
       return result;
     }
 
-    const uploadFormData = new FormData();
-    uploadFormData.set("file", file);
+    try {
+      const contentType = inferImageContentType(file);
+      const uploaded = await upload(buildAdminImagePath(file.name || "image"), file, {
+        access: "public",
+        handleUploadUrl: "/api/admin/uploads/image/client",
+        contentType,
+        multipart: true,
+        onUploadProgress(progress) {
+          const percentage = Math.max(0, Math.min(100, Math.round(progress?.percentage || 0)));
+          updateQueueItem(index, { status: "uploading", message: `Uploading ${percentage}%` });
+        },
+      });
 
-    const uploadResponse = await fetch("/api/admin/uploads/image", {
-      method: "POST",
-      body: uploadFormData,
-    });
-
-    const uploadBody = await uploadResponse.json().catch(() => ({}));
-    if (!uploadResponse.ok) {
+      const result = {
+        ok: true,
+        clientId,
+        fileName: file.name,
+        url: String(uploaded?.url || ""),
+        pathname: String(uploaded?.pathname || ""),
+        mimeType: contentType,
+        size: file.size || 0,
+      };
+      updateQueueItem(index, { status: "uploaded", message: "Uploaded" });
+      return result;
+    } catch (error) {
       const result = {
         ok: false,
+        clientId,
         fileName: file.name,
-        message: uploadBody?.message || "Image upload failed.",
+        message: error instanceof Error ? error.message : "Image upload failed.",
       };
       updateQueueItem(index, { status: "failed", message: result.message });
       return result;
     }
-
-    const result = {
-      ok: true,
-      fileName: file.name,
-      url: String(uploadBody?.url || ""),
-      pathname: String(uploadBody?.pathname || ""),
-    };
-    updateQueueItem(index, { status: "uploaded", message: "Uploaded" });
-    return result;
   }
 
-  async function uploadFilesWithConcurrency(files, concurrency = 3) {
+  async function uploadFiles(files) {
     const results = new Array(files.length);
-    let cursor = 0;
-
-    async function worker() {
-      while (cursor < files.length) {
-        const index = cursor;
-        cursor += 1;
-        results[index] = await uploadSingleFile(files[index], index);
-      }
+    for (let index = 0; index < files.length; index += 1) {
+      results[index] = await uploadSingleFile(files[index], index);
     }
-
-    const workerCount = Math.min(concurrency, files.length);
-    await Promise.all(Array.from({ length: workerCount }, () => worker()));
     return results;
   }
 
@@ -122,9 +124,15 @@ export default function AdminPhotoForm({
     const submission = new FormData(form);
     const fileInput = form.querySelector('input[name="file"]');
     const files = Array.from(fileInput?.files || []).filter((entry) => entry instanceof File && entry.size > 0);
+    const categoryId = String(submission.get("categoryId") || "").trim();
 
     if (!files.length) {
-      setClientError("Only image uploads are supported.");
+      setClientError("Choose at least one image.");
+      return;
+    }
+
+    if (!categoryId) {
+      setClientError("Album is required.");
       return;
     }
 
@@ -134,17 +142,20 @@ export default function AdminPhotoForm({
     setQueueFromFiles(files);
 
     try {
-      const uploadResults = await uploadFilesWithConcurrency(files);
+      const uploadResults = await uploadFiles(files);
       const uploads = uploadResults
         .filter((result) => result?.ok)
         .map((result) => ({
+          clientId: result.clientId,
           url: result.url,
           pathname: result.pathname,
           fileName: result.fileName,
+          mimeType: result.mimeType,
+          size: result.size,
         }));
       const failedUploads = uploadResults
         .filter((result) => result && !result.ok)
-        .map((result) => ({ fileName: result.fileName, message: result.message }));
+        .map((result) => ({ clientId: result.clientId, fileName: result.fileName, message: result.message }));
 
       if (!uploads.length) {
         throw new Error(failedUploads[0]?.message || "Unable to save photo right now.");
@@ -156,7 +167,7 @@ export default function AdminPhotoForm({
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          categoryId: String(submission.get("categoryId") || ""),
+          categoryId,
           title: String(submission.get("title") || ""),
           caption: String(submission.get("caption") || ""),
           sortOrder: String(submission.get("sortOrder") || ""),
@@ -175,7 +186,9 @@ export default function AdminPhotoForm({
 
       form.reset();
       setUploadQueue((current) => current.map((item) => {
-        const failure = allFailures.find((entry) => entry.fileName === item.fileName);
+        const failure = allFailures.find((entry) => (
+          entry.clientId ? entry.clientId === item.id : entry.fileName === item.fileName
+        ));
         return failure
           ? { ...item, status: "failed", message: failure.message }
           : { ...item, status: "saved", message: "Saved" };
@@ -210,7 +223,7 @@ export default function AdminPhotoForm({
       {uploadQueue.length ? (
         <ul className="admin-upload-queue">
           {uploadQueue.map((item) => (
-            <li key={item.fileName} className={`admin-upload-queue__item admin-upload-queue__item--${item.status}`}>
+            <li key={item.id} className={`admin-upload-queue__item admin-upload-queue__item--${item.status}`}>
               {`${item.fileName} — ${item.message}`}
             </li>
           ))}
@@ -222,12 +235,12 @@ export default function AdminPhotoForm({
           <input
             name="file"
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             multiple
             required
             onChange={(event) => setQueueFromFiles(Array.from(event.target.files || []))}
           />
-          <small className="admin-form-hint">You can choose multiple images at once on mobile or desktop.</small>
+          <small className="admin-form-hint">Choose one or many images. Mobile HEIC/HEIF files are accepted.</small>
         </label>
       ) : null}
       <label>

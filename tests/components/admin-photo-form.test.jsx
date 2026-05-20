@@ -35,6 +35,7 @@ describe("admin photo form", () => {
     expect(markup).toContain('name="file"');
     expect(markup).toContain('multiple=""');
     expect(markup).toContain('accept="image/');
+    expect(markup).toContain(".heic,.heif");
     expect(markup).toContain('name="title"');
     expect(markup).toContain('name="caption"');
     expect(markup).toContain("Editorial");
@@ -43,6 +44,7 @@ describe("admin photo form", () => {
     expect(markup).toContain('name="sortOrder"');
     expect(markup).toContain("Leave empty to append after existing photos in this album.");
     expect(markup).toContain("Leave title empty to reuse each file name during batch upload.");
+    expect(markup).toContain("Mobile HEIC/HEIF files are accepted.");
     expect(markup).toContain("Upload photo");
     expect(markup).toContain("Save photo");
   });

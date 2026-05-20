@@ -72,7 +72,7 @@ describe("admin image upload api", () => {
       },
     });
 
-    const oversizedImage = new File([new Uint8Array(16 * 1024 * 1024)], "huge.jpg", { type: "image/jpeg" });
+    const oversizedImage = new File([new Uint8Array(51 * 1024 * 1024)], "huge.jpg", { type: "image/jpeg" });
     const formData = new FormData();
     formData.set("file", oversizedImage);
 
@@ -134,5 +134,37 @@ describe("admin image upload api", () => {
       width: 800,
       height: 600,
     });
+  });
+
+  it("accepts mobile image files that have no browser-provided MIME type", async () => {
+    const token = await createAdminSession({ username: "admin" });
+    cookiesMock.mockResolvedValue({
+      get() {
+        return { value: token };
+      },
+    });
+    uploadAdminImageMock.mockResolvedValue({
+      url: "https://blob.example/mobile.heic",
+      pathname: "admin-images/mobile.heic",
+      mimeType: "image/heic",
+      size: 1234,
+      width: null,
+      height: null,
+    });
+    createMediaAssetMock.mockResolvedValue({
+      id: "asset-1",
+      url: "https://blob.example/mobile.heic",
+    });
+
+    const formData = new FormData();
+    formData.set("file", new File(["heic"], "IMG_0001.HEIC", { type: "" }));
+
+    const response = await imageUploadRoute(new Request("http://localhost:3000/api/admin/uploads/image", {
+      method: "POST",
+      body: formData,
+    }));
+
+    expect(response.status).toBe(200);
+    expect(uploadAdminImageMock).toHaveBeenCalled();
   });
 });
