@@ -37,10 +37,12 @@ describe("AdminLoginForm", () => {
     expect(screen.getByText("Password:")).toBeTruthy();
   });
 
-  it("navigates to /admin after a successful login without refreshing the login page", async () => {
+  it("loads /admin after a successful login so the session cookie is read server-side", async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
     });
+    const assignMock = vi.fn();
+    vi.stubGlobal("location", { assign: assignMock });
 
     render(<AdminLoginForm />);
 
@@ -53,8 +55,8 @@ describe("AdminLoginForm", () => {
     fireEvent.submit(screen.getByRole("button", { name: "Sign in" }).closest("form"));
 
     await waitFor(() => {
-      expect(pushMock).toHaveBeenCalledWith("/admin");
+      expect(assignMock).toHaveBeenCalledWith("/admin");
     });
-    expect(refreshMock).not.toHaveBeenCalled();
+    expect(pushMock).not.toHaveBeenCalled();
   });
 });

@@ -2,10 +2,8 @@
 
 import React from "react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function AdminLoginForm() {
-  const router = useRouter();
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,7 +27,7 @@ export default function AdminLoginForm() {
       return;
     }
 
-    router.push("/admin");
+    globalThis.location.assign("/admin");
   }
 
   return (
