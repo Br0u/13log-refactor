@@ -1319,7 +1319,7 @@ body:has(.blog-layout) {
   gap: 0.36rem;
   min-height: 2.08rem;
   padding: 0.18rem 0.68rem;
-  border-radius: 999px;
+  border-radius: 0.42rem;
   color: color-mix(in srgb, var(--secondary) 94%, var(--content));
   text-decoration: none;
   text-transform: uppercase;
@@ -1330,14 +1330,11 @@ body:has(.blog-layout) {
   transition: color 0.18s ease, transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
 }
 
-.blog-rail--posts .blog-rail__nav-link:first-child {
-  color: var(--primary);
-  background:
-    radial-gradient(140% 120% at 12% 8%, rgba(255, 255, 255, 0.38), transparent 54%),
-    color-mix(in srgb, var(--entry) 48%, transparent);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.26),
-    0 6px 16px rgba(57, 45, 30, 0.028);
+.blog-rail__nav-link.is-active,
+.blog-rail__nav-link[aria-current="page"] {
+  color: color-mix(in srgb, var(--primary) 88%, var(--secondary));
+  background: color-mix(in srgb, var(--entry) 24%, transparent);
+  box-shadow: none;
 }
 
 .blog-rail__nav-link::before {
@@ -1355,6 +1352,11 @@ body:has(.blog-layout) {
 .blog-rail__nav-link:nth-child(2)::before { content: "♙"; }
 .blog-rail__nav-link:nth-child(3)::before { content: "↗"; }
 .blog-rail__nav-link:nth-child(4)::before { content: "▧"; }
+
+.blog-rail__nav-link.is-active::before,
+.blog-rail__nav-link[aria-current="page"]::before {
+  color: color-mix(in srgb, var(--primary) 66%, var(--secondary));
+}
 
 .blog-rail__nav-link:hover,
 .blog-rail__nav-link:focus-visible,

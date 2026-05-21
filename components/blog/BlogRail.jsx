@@ -2,23 +2,37 @@ import React from "react";
 import Link from "next/link";
 
 const DEFAULT_NAV_ITEMS = [
-  { href: "/posts/", label: "/ posts" },
-  { href: "/about/", label: "/ about" },
-  { href: "/link/", label: "/ Link" },
-  { href: "/photos/", label: "/ Photos" },
+  { href: "/posts/", label: "/ posts", section: "posts" },
+  { href: "/about/", label: "/ about", section: "about" },
+  { href: "/link/", label: "/ Link", section: "link" },
+  { href: "/photos/", label: "/ Photos", section: "photos" },
 ];
 
-function RailLink({ item }) {
+function resolveActiveSection(variant) {
+  if (variant === "detail") return "posts";
+  return variant;
+}
+
+function RailLink({ activeSection, item }) {
+  const isActive = item.section === activeSection;
+  const className = `blog-rail__nav-link${isActive ? " is-active" : ""}`;
+
   if (item.external) {
     return (
-      <a className="blog-rail__nav-link" href={item.href} target="_blank" rel="noopener noreferrer">
+      <a
+        className={className}
+        href={item.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-current={isActive ? "page" : undefined}
+      >
         {item.label}
       </a>
     );
   }
 
   return (
-    <Link className="blog-rail__nav-link" href={item.href}>
+    <Link className={className} href={item.href} aria-current={isActive ? "page" : undefined}>
       {item.label}
     </Link>
   );
@@ -35,10 +49,12 @@ export default function BlogRail({
   backHref = "/posts",
   backLabel = "返回 Posts",
 }) {
+  const activeSection = resolveActiveSection(variant);
+
   return (
     <aside className={`blog-rail blog-rail--${variant}`}>
       <nav className="blog-rail__nav" aria-label="博客导览">
-        {DEFAULT_NAV_ITEMS.map((item) => <RailLink item={item} key={item.href} />)}
+        {DEFAULT_NAV_ITEMS.map((item) => <RailLink activeSection={activeSection} item={item} key={item.href} />)}
       </nav>
 
       {variant === "detail" ? (
