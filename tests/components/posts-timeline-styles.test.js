@@ -16,8 +16,9 @@ describe("posts timeline styles", () => {
 
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s*\{[^}]*column-count:\s*1;/s);
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card\s*\{[^}]*padding:\s*0\.35rem\s+0\s+0\.2rem;[^}]*border-radius:\s*0;[^}]*background:\s*transparent;[^}]*border:\s*none;[^}]*box-shadow:\s*none;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--post\s*\{[^}]*padding:\s*clamp\(0\.96rem,[^}]*border:\s*1px\s+solid\s+#000;[^}]*border-radius:\s*0\.35rem;[^}]*background:\s*transparent;[^}]*box-shadow:\s*0\s+7px\s+18px\s+rgba\(0,\s*0,\s*0,\s*0\.08\);/s);
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card__title\s+a,\s*\.posts-masonry--posts-list\s+\.post-preview-card__excerpt-block,\s*\.posts-masonry--posts-list\s+\.post-preview-card__meta\s*\{[^}]*color:\s*color-mix\(in srgb,\s*var\(--secondary\)\s*92%,\s*var\(--content\)\);/s);
-    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\.posts-masonry--interactive\[data-micro-focus=""\]\s+\.post-preview-card:hover,\s*\.posts-masonry--posts-list:not\(\.posts-masonry--interactive\)\s+\.post-preview-card:hover\s*\{[^}]*transform:\s*none;[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;[^}]*border-color:\s*transparent;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\.posts-masonry--interactive\[data-micro-focus=""\]\s+\.post-preview-card--post:hover,\s*\.posts-masonry--posts-list:not\(\.posts-masonry--interactive\)\s+\.post-preview-card--post:hover\s*\{[^}]*transform:\s*none;[^}]*border-color:\s*#000;[^}]*background:\s*transparent;[^}]*box-shadow:\s*0\s+7px\s+18px\s+rgba\(0,\s*0,\s*0,\s*0\.08\);/s);
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__title\s+a,\s*\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__excerpt-block,\s*\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__meta\s*\{[^}]*color:\s*var\(--primary\);/s);
   });
 
@@ -108,23 +109,13 @@ describe("posts timeline styles", () => {
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*\.posts-masonry--posts-list\s+\.post-preview-card__micro-image\s*\{[^}]*max-height:\s*9rem;/s);
   });
 
-  it("keeps the native scrollbar hidden when the range frame is shown", () => {
+  it("uses the native system scrollbar for focused micropost surfaces", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*scrollbar-width:\s*none;/s);
-    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*scrollbar-color:\s*[^;]+;/s);
-    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface::-webkit-scrollbar\s*\{[^}]*width:\s*0;[^}]*height:\s*0;/s);
-  });
-
-  it("renders a proportional scroll range frame for focused microposts", () => {
-    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
-
-    expect(stylesheet).toMatch(/\.post-preview-card__micro-scroll-range\s*\{[^}]*position:\s*absolute;[^}]*transform:\s*scaleY\(0\.82\);/s);
-    expect(stylesheet).toMatch(/\.post-preview-card__micro-scroll-range\s*\{[^}]*opacity:\s*0\.[\d]+;/s);
-    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active:hover\s+\.post-preview-card__micro-scroll-range\[data-scrollable="true"\]\s*\{[^}]*opacity:\s*0\.[\d]+;/s);
-    expect(stylesheet).toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-scroll-range\[data-scrollable="true"\]\[data-scroll-hint-active="true"\]\s*\{[^}]*opacity:\s*0\.[\d]+;/s);
-    expect(stylesheet).toMatch(/\.post-preview-card__micro-scroll-thumb\s*\{[^}]*height:\s*calc\(var\(--micro-scroll-window,\s*0\.24\)\s*\*\s*100%\);/s);
-    expect(stylesheet).toMatch(/\.post-preview-card__micro-scroll-thumb\s*\{[^}]*top:\s*calc\(var\(--micro-scroll-progress,\s*0\)\s*\*\s*\(100%\s*-\s*\(var\(--micro-scroll-window,\s*0\.24\)\s*\*\s*100%\)\)\);/s);
+    expect(stylesheet).not.toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface\s*\{[^}]*scrollbar-width:\s*none;/s);
+    expect(stylesheet).not.toMatch(/\.posts-masonry--interactive\[data-micro-focus\]:not\(\[data-micro-focus=""\]\)\s+\.post-preview-card--micro\.is-micro-active\s+\.post-preview-card__micro-surface::-webkit-scrollbar/s);
+    expect(stylesheet).not.toContain("post-preview-card__micro-scroll-range");
+    expect(stylesheet).not.toContain("post-preview-card__micro-scroll-thumb");
   });
 
   it("styles micropost heart likes as a quiet footer action", () => {
