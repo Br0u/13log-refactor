@@ -617,7 +617,7 @@ describe("PostsTimeline", () => {
     expect(scrollSurface.style.getPropertyValue("--micro-surface-max-height")).toBe("760px");
   });
 
-  it("updates the active micropost range frame as the card scroll position changes", () => {
+  it("keeps focused micropost scrolling on the native surface without a custom range frame", () => {
     render(
       <PostsTimeline
         entries={[
@@ -644,15 +644,12 @@ describe("PostsTimeline", () => {
 
     fireEvent.scroll(scrollSurface);
 
-    const range = screen.getByTestId("timeline-card-micro-1-scroll-range");
-    expect(range.getAttribute("data-scrollable")).toBe("true");
-    expect(range.style.getPropertyValue("--micro-scroll-progress")).toBe("0.4");
-    expect(range.style.getPropertyValue("--micro-scroll-window")).toBe("0.375");
+    expect(scrollSurface.className).toBe("post-preview-card__micro-surface");
+    expect(screen.queryByTestId("timeline-card-micro-1-scroll-range")).toBeNull();
+    expect(screen.queryByTestId("timeline-card-micro-1-scroll-thumb")).toBeNull();
   });
 
-  it("keeps the active micropost range frame highlighted briefly after scrolling", async () => {
-    vi.useFakeTimers();
-
+  it("keeps a focused micropost active after native surface scrolling", () => {
     render(
       <PostsTimeline
         entries={[
@@ -678,15 +675,9 @@ describe("PostsTimeline", () => {
 
     fireEvent.scroll(scrollSurface);
 
-    const range = screen.getByTestId("timeline-card-micro-1-scroll-range");
-    expect(range.getAttribute("data-scroll-hint-active")).toBe("true");
-
-    await act(async () => {
-      vi.advanceTimersByTime(1000);
-    });
-
-    expect(range.getAttribute("data-scroll-hint-active")).toBe("false");
-    vi.useRealTimers();
+    expect(screen.getByTestId("timeline-card-micro-1").className).toContain("is-micro-active");
+    expect(screen.getByTestId("posts-timeline").getAttribute("data-micro-focus")).toBe("micro-1");
+    expect(screen.queryByTestId("timeline-card-micro-1-scroll-range")).toBeNull();
   });
 
   it("does not focus a micropost card when its like button is clicked", async () => {

@@ -136,7 +136,7 @@ describe("PostPreviewCard", () => {
     expect(markup).not.toContain("post-preview-card__micro-image post-preview-card__micro-image");
   });
 
-  it("renders a micropost scroll range when scroll chrome data is provided", () => {
+  it("uses native scrolling instead of rendering a custom micropost scroll range", () => {
     const markup = renderToStaticMarkup(
       <PostPreviewCard
         post={{
@@ -157,10 +157,10 @@ describe("PostPreviewCard", () => {
       />
     );
 
-    expect(markup).toContain("post-preview-card__micro-scroll-range");
-    expect(markup).toContain("post-preview-card__micro-scroll-thumb");
-    expect(markup).toContain("--micro-scroll-progress:0.4");
-    expect(markup).toContain("--micro-scroll-window:0.28");
+    expect(markup).not.toContain("post-preview-card__micro-scroll-range");
+    expect(markup).not.toContain("post-preview-card__micro-scroll-thumb");
+    expect(markup).not.toContain("--micro-scroll-progress");
+    expect(markup).not.toContain("--micro-scroll-window");
   });
 
   it("renders a micropost heart like button with the current count", () => {

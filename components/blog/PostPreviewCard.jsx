@@ -138,21 +138,6 @@ export default function PostPreviewCard({
             ? { "--micro-surface-max-height": `${microScrollChrome.surfaceMaxHeight}px` }
             : undefined}
         >
-          {showMicroScrollRange ? (
-            <div
-              className="post-preview-card__micro-scroll-range"
-              data-testid={dataTestId ? `${dataTestId}-scroll-range` : undefined}
-              data-scrollable={microScrollChrome.isScrollable ? "true" : "false"}
-              data-scroll-hint-active={microScrollChrome.isHintActive ? "true" : "false"}
-              style={{
-                "--micro-scroll-progress": String(microScrollChrome.progress ?? 0),
-                "--micro-scroll-window": String(microScrollChrome.viewportRatio ?? 1),
-              }}
-              aria-hidden="true"
-            >
-              <span className="post-preview-card__micro-scroll-thumb" />
-            </div>
-          ) : null}
           {microMarkup ? (
             <div className="post-preview-card__content">
               <div
