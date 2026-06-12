@@ -68,7 +68,6 @@ export default async function PostDetailPage({ params }) {
         variant="detail"
         introTitle={post.title}
         meta={formatPostMeta(post)}
-        tocHtml={tocHtml}
         relatedPosts={relatedPosts}
       />
       <article className="post-single post-single--blended blog-layout__main">

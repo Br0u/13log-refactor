@@ -2,10 +2,10 @@ import React from "react";
 import Link from "next/link";
 
 const DEFAULT_NAV_ITEMS = [
-  { href: "/posts/", label: "/ posts", section: "posts" },
-  { href: "/about/", label: "/ about", section: "about" },
-  { href: "/link/", label: "/ Link", section: "link" },
-  { href: "/photos/", label: "/ Photos", section: "photos" },
+  { href: "/posts/", label: "/ POSTS", section: "posts" },
+  { href: "/about/", label: "/ ABOUT", section: "about" },
+  { href: "/link/", label: "/ LINK", section: "link" },
+  { href: "/photos/", label: "/ PHOTOS", section: "photos" },
 ];
 
 function resolveActiveSection(variant) {
@@ -53,6 +53,13 @@ export default function BlogRail({
 
   return (
     <aside className={`blog-rail blog-rail--${variant}`}>
+      <div className="blog-rail__brand">
+        <Link className="blog-rail__brand-home" href="/" aria-label="13log home">
+          <span className="blog-rail__brand-mark">13log</span>
+        </Link>
+        <p className="blog-rail__brand-kicker">/ MY LITTLE WORLD /</p>
+      </div>
+
       <nav className="blog-rail__nav" aria-label="博客导览">
         {DEFAULT_NAV_ITEMS.map((item) => <RailLink activeSection={activeSection} item={item} key={item.href} />)}
       </nav>
