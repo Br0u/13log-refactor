@@ -23,7 +23,7 @@ vi.mock("../../components/blog/PostLikeButton", () => ({
 vi.mock("../../lib/content", () => ({
   buildTocHtml: () => "",
   formatPostMeta: () => "2026-03-15 | Notes",
-  renderMarkdown: vi.fn(async () => "<p>Body copy.</p>"),
+  renderMarkdown: vi.fn(async () => "<p>本文内容由AI协助完成</p><hr><h1>Example Post</h1><p>Body copy.</p>"),
   withHeadingAnchors: (html) => html,
 }));
 
@@ -66,5 +66,15 @@ describe("post detail page", () => {
     expect(markup).toContain("Example Post");
     expect(markup).toContain("相关文章");
     expect(markup.indexOf("blog-rail blog-rail--detail")).toBeLessThan(markup.indexOf("post-single post-single--blended"));
+  });
+
+  it("drops a markdown h1 when it duplicates the page title", async () => {
+    const element = await PostDetailPage({
+      params: Promise.resolve({ slug: "example-post" }),
+    });
+    const markup = renderToStaticMarkup(element);
+
+    expect(markup).not.toContain("<h1>Example Post</h1><p>Body copy.</p>");
+    expect(markup).toContain('<div class="post-content"><p>本文内容由AI协助完成</p><hr><p>Body copy.</p></div>');
   });
 });

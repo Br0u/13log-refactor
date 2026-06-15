@@ -7,6 +7,7 @@ const IMAGE_SELECTOR = [
 
 export function initImageZoom() {
   const boundImages = new Set();
+  let observer = null;
   let overlay = null;
   let previousOverflow = "";
   let previousBodyPosition = "";
@@ -163,34 +164,44 @@ export function initImageZoom() {
     focusWithoutScroll(closeButton);
   }
 
-  const targets = Array.from(document.querySelectorAll(IMAGE_SELECTOR)).filter((node) => node instanceof HTMLImageElement);
-  targets.forEach((image) => {
-    if (boundImages.has(image) || image.dataset.imageZoomBound === "true") return;
-    boundImages.add(image);
-    image.dataset.imageZoomBound = "true";
-    if (!image.hasAttribute("tabindex")) {
-      image.setAttribute("tabindex", "0");
-    }
-
-    const onClick = () => openOverlay(image);
-    const onKeyDown = (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        openOverlay(image);
+  function bindZoomTargets() {
+    const targets = Array.from(document.querySelectorAll(IMAGE_SELECTOR)).filter((node) => node instanceof HTMLImageElement);
+    targets.forEach((image) => {
+      if (boundImages.has(image) || image.dataset.imageZoomBound === "true") return;
+      boundImages.add(image);
+      image.dataset.imageZoomBound = "true";
+      if (!image.hasAttribute("tabindex")) {
+        image.setAttribute("tabindex", "0");
       }
-    };
 
-    image.addEventListener("click", onClick);
-    image.addEventListener("keydown", onKeyDown);
-    image.__imageZoomCleanup = () => {
-      image.removeEventListener("click", onClick);
-      image.removeEventListener("keydown", onKeyDown);
-      delete image.dataset.imageZoomBound;
-      delete image.__imageZoomCleanup;
-    };
-  });
+      const onClick = () => openOverlay(image);
+      const onKeyDown = (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openOverlay(image);
+        }
+      };
+
+      image.addEventListener("click", onClick);
+      image.addEventListener("keydown", onKeyDown);
+      image.__imageZoomCleanup = () => {
+        image.removeEventListener("click", onClick);
+        image.removeEventListener("keydown", onKeyDown);
+        delete image.dataset.imageZoomBound;
+        delete image.__imageZoomCleanup;
+      };
+    });
+  }
+
+  bindZoomTargets();
+
+  if (typeof MutationObserver !== "undefined" && document.body) {
+    observer = new MutationObserver(bindZoomTargets);
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
 
   return () => {
+    observer?.disconnect();
     boundImages.forEach((image) => {
       image.__imageZoomCleanup?.();
     });
