@@ -40,24 +40,13 @@ export function initTocRail() {
     const pathname = window.location.pathname || "";
     const isPostPage = pathname.startsWith("/posts/");
     const isLinkPage = pathname === "/link" || pathname.startsWith("/link/");
-    const tocEnabled = isPostPage || isLinkPage;
-    if (!tocEnabled) return;
+    if (isPostPage || !isLinkPage) return;
 
-    if (isLinkPage) {
-      const main = document.querySelector("main");
-      if (!main) return;
-      boundHeadings = Array.from(main.querySelectorAll(".link-section-title, .post-content h2, .post-content h3")).filter(
-        (h) => !h.closest(".toc")
-      );
-    } else {
-      const container = document.querySelector("main .post-content");
-      if (!container) return;
-
-      boundHeadings = Array.from(container.querySelectorAll("h2, h3")).filter((h) => !h.closest(".toc"));
-      if (!boundHeadings.length) {
-        boundHeadings = Array.from(container.querySelectorAll("h1")).filter((h) => !h.closest(".toc"));
-      }
-    }
+    const main = document.querySelector("main");
+    if (!main) return;
+    boundHeadings = Array.from(main.querySelectorAll(".link-section-title, .post-content h2, .post-content h3")).filter(
+      (h) => !h.closest(".toc")
+    );
 
     if (!boundHeadings.length) return;
 

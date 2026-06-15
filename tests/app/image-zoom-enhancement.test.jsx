@@ -92,6 +92,35 @@ describe("image zoom enhancement", () => {
     vi.useRealTimers();
   });
 
+  it("binds micropost images added after the initial posts list render", async () => {
+    vi.stubGlobal("requestAnimationFrame", (callback) => {
+      callback();
+      return 1;
+    });
+
+    document.body.innerHTML = `
+      <section class="posts-masonry posts-masonry--posts-list">
+        <article class="post-preview-card post-preview-card--micro"></article>
+      </section>
+    `;
+
+    const cleanup = initImageZoom();
+    const image = document.createElement("img");
+    image.className = "post-preview-card__micro-image";
+    image.src = "/late-micro.jpg";
+    image.alt = "late micro image";
+    document.querySelector(".post-preview-card--micro")?.appendChild(image);
+
+    await Promise.resolve();
+
+    expect(image.getAttribute("data-image-zoom-bound")).toBe("true");
+
+    image.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(document.querySelector(".image-lightbox__image")?.getAttribute("src")).toBe("/late-micro.jpg");
+
+    cleanup();
+  });
+
   it("focuses overlay controls without scrolling the background page", () => {
     vi.useFakeTimers();
     vi.stubGlobal("requestAnimationFrame", (callback) => {

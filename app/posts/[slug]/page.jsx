@@ -40,6 +40,25 @@ function pickRelatedPosts(currentPost, allPosts, limit = 6) {
     .map((entry) => entry.item);
 }
 
+function normalizeHeadingText(text = "") {
+  return String(text)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function removeDuplicateTitleH1(html = "", title = "") {
+  const normalizedTitle = normalizeHeadingText(title);
+  if (!normalizedTitle) return html || "";
+
+  let removed = false;
+  return String(html || "").replace(/<h1\b[^>]*>([\s\S]*?)<\/h1>\s*/gi, (full, inner) => {
+    if (removed || normalizeHeadingText(inner) !== normalizedTitle) return full;
+    removed = true;
+    return "";
+  });
+}
+
 export async function generateMetadata({ params }) {
   const p = await params;
   const slug = resolveSlug(p?.slug);
@@ -57,7 +76,8 @@ export default async function PostDetailPage({ params }) {
   const post = await getPublicPostBySlug(slug);
   if (!post) notFound();
 
-  const html = withHeadingAnchors(await renderMarkdown(post.content));
+  const renderedHtml = await renderMarkdown(post.content);
+  const html = withHeadingAnchors(removeDuplicateTitleH1(renderedHtml, post.title));
   const tocHtml = buildTocHtml(html);
   const relatedPosts = pickRelatedPosts(post, await getPublicPosts());
   const comments = await getApprovedCommentsBySlug(post.slug);

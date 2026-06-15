@@ -44,7 +44,7 @@ describe("toc rail enhancement", () => {
     expect(list?.children.length).toBe(0);
   });
 
-  it("clears and hides the TOC rail when leaving a post page", () => {
+  it("keeps the floating TOC rail hidden on post pages", () => {
     document.body.innerHTML = `
       <main>
         <article class="post-single">
@@ -64,8 +64,8 @@ describe("toc rail enhancement", () => {
     const rail = document.getElementById("page-toc-rail");
     const list = document.getElementById("page-toc-rail-list");
 
-    expect(rail?.hidden).toBe(false);
-    expect(list?.children.length).toBe(2);
+    expect(rail?.hidden).toBe(true);
+    expect(list?.children.length).toBe(0);
 
     cleanup();
 

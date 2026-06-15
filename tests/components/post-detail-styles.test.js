@@ -12,15 +12,15 @@ describe("post detail styles", () => {
   it("gives post titles a restrained literary serif treatment", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.post-single\s+\.post-title\s*\{[^}]*font-family:\s*"Noto Serif CJK SC",\s*"Source Han Serif SC",\s*"Songti SC",\s*"STSong",\s*"SimSun",\s*serif;/s);
-    expect(stylesheet).toMatch(/\.post-single\s+\.post-title\s*\{[^}]*font-weight:\s*500;/s);
-    expect(stylesheet).toMatch(/\.post-single\s+\.post-title\s*\{[^}]*line-height:\s*1\.4[58];/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-title\s*\{[^}]*font-family:\s*var\(--serif-font\);/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-title\s*\{[^}]*font-weight:\s*800;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-title\s*\{[^}]*line-height:\s*1\.2;/s);
   });
 
   it("renders blockquotes as quiet editorial callouts instead of heavy cards", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+blockquote\s*\{[^}]*border-left:\s*1(?:\.\d+)?px\s+solid\s+[^;]+;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+blockquote\s*\{[^}]*border-left:\s*2px\s+solid\s+[^;]+;/s);
     expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+blockquote\s*\{[^}]*font-style:\s*normal;/s);
     expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+blockquote\s*\{[^}]*box-shadow:\s*none;/s);
   });
@@ -28,15 +28,24 @@ describe("post detail styles", () => {
   it("keeps the main article body in the same restrained serif family", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.post-single\s+\.post-content,\s*[\s\S]*?\.post-single\s+\.post-content\s+table\s*\{[^}]*font-family:\s*"Noto Serif CJK SC",\s*"Source Han Serif SC",\s*"Songti SC",\s*"STSong",\s*"SimSun",\s*serif;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content,\s*[\s\S]*?\.post-single\s+\.post-content\s+table\s*\{[^}]*font-family:\s*var\(--serif-font\);/s);
     expect(stylesheet).not.toMatch(/\.post-single\s+\.post-content,\s*[\s\S]*?\.post-single\s+\.post-content\s+table\s*\{[^}]*Ma Shan Zheng/s);
   });
 
   it("refines body copy rhythm for long-form reading", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s*\{[^}]*font-size:\s*1\.2[68]rem;[^}]*line-height:\s*2\.(0[58]|1);/s);
-    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+p\s*\{[^}]*text-indent:\s*2em;[^}]*margin-top:\s*0\.2[68]rem;[^}]*margin-bottom:\s*1\.3[58]rem;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s*\{[^}]*font-size:\s*1\.2rem;[^}]*line-height:\s*1\.92;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+p\s*\{[^}]*text-indent:\s*2em;[^}]*margin-top:\s*0\.18rem;[^}]*margin-bottom:\s*1\.16rem;/s);
+  });
+
+  it("keeps in-content headings below the page title in visual weight", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+h1,\s*[\s\S]*?\.post-single\s+\.post-content\s+h4\s*\{[^}]*font-weight:\s*720;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+h1\s*\{[^}]*font-size:\s*1\.72rem;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+h2\s*\{[^}]*font-size:\s*1\.46rem;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+h3\s*\{[^}]*font-size:\s*1\.22rem;/s);
   });
 
   it("does not enlarge or unindent the first paragraph in blended post layouts", () => {
@@ -51,16 +60,24 @@ describe("post detail styles", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toMatch(/\.post-single\s*\{[^}]*padding:\s*2\.6rem\s+clamp\(1\.6rem,\s*4\.2vw,\s*3\.4rem\)\s+2\.9rem;[^}]*max-width:\s*min\(100%,\s*48rem\);[^}]*margin:\s*0\s+auto;/s);
-    expect(stylesheet).toMatch(/\.post-single\s+\.post-title\s*\{[^}]*max-width:\s*16ch;[^}]*margin:\s*0\s+0\s+1\.6rem;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-title\s*\{[^}]*max-width:\s*16ch;[^}]*margin:\s*0\s+0\s+1\.2rem;/s);
   });
 
   it("softens the blended article header and metadata chrome", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.post-single--blended\s+\.post-header\s*\{[^}]*border-bottom:\s*none;/s);
-    expect(stylesheet).toMatch(/\.post-single--blended\s+\.post-meta\s*\{[^}]*font-family:\s*"Noto Serif CJK SC",\s*"Source Han Serif SC",\s*"Songti SC",\s*"STSong",\s*"SimSun",\s*serif;/s);
+    expect(stylesheet).toMatch(/\.post-single--blended\s+\.post-header\s*\{[^}]*border-bottom:\s*1px\s+solid\s+[^;]+;/s);
+    expect(stylesheet).toMatch(/\.post-single--blended\s+\.post-meta\s*\{[^}]*font-family:\s*var\(--serif-font\);/s);
     expect(stylesheet).toMatch(/\.post-single--blended\s+\.post-meta\s*\{[^}]*text-transform:\s*none;/s);
     expect(stylesheet).not.toMatch(/\.post-single--blended\s+\.post-meta::before/s);
+  });
+
+  it("removes the decorative first separator and softens code blocks on blended posts", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.post-single--blended\s+\.post-content\s*>\s*p:first-child\s*\+\s*hr\s*\{[^}]*display:\s*none;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+pre\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--primary\)\s*82%,\s*var\(--code-bg\)\);/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+pre\s+code\s*\{[^}]*background:\s*transparent\s*!important;/s);
   });
 
   it("restyles the related rail as a quiet footer section instead of a side rail", () => {
