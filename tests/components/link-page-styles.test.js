@@ -8,7 +8,7 @@ describe("link page styles", () => {
 
     expect(stylesheet).toMatch(/\.link-essay-group\s*\{[^}]*display:\s*grid;[^}]*gap:\s*1\.[\d]+rem;/s);
     expect(stylesheet).toMatch(/\.link-essay-list\s*\{[^}]*display:\s*grid;[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\);[^}]*gap:\s*clamp\(0\.85rem,/s);
-    expect(stylesheet).toMatch(/\.link-essay-entry\s*\{[^}]*padding:\s*clamp\(0\.96rem,[^}]*border:\s*1px\s+solid\s+#000;[^}]*border-radius:\s*0\.35rem;[^}]*background:\s*transparent;[^}]*box-shadow:\s*0\s+7px\s+18px\s+rgba\(0,\s*0,\s*0,\s*0\.08\);/s);
+    expect(stylesheet).toMatch(/\.link-essay-entry\s*\{[^}]*padding:\s*clamp\(0\.96rem,[^}]*border:\s*1px\s+solid\s+#000;[^}]*border-radius:\s*0\.35rem;[^}]*background:\s*transparent;[^}]*box-shadow:\s*0\.42rem\s+0\.42rem\s+0\s+#000;/s);
     expect(stylesheet).toMatch(/\.link-essay-entry:not\(:last-child\)::after\s*\{[^}]*content:\s*"\.\.\.";[^}]*text-align:\s*center;/s);
   });
 

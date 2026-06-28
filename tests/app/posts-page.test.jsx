@@ -39,11 +39,11 @@ describe("posts index page", () => {
     expect(markup).toContain('data-layout="posts-list"');
     expect(markup).toContain("blog-layout blog-layout--posts-index");
     expect(markup).toContain("blog-rail");
-    expect(markup.indexOf(">/ posts<")).toBeLessThan(markup.indexOf(">/ about<"));
+    expect(markup.indexOf(">/ POSTS<")).toBeLessThan(markup.indexOf(">/ ABOUT<"));
     expect(markup).toContain('href="/about"');
-    expect(markup).toContain(">/ about<");
+    expect(markup).toContain(">/ ABOUT<");
     expect(markup).toContain('href="/posts"');
-    expect(markup).toContain(">/ posts<");
+    expect(markup).toContain(">/ POSTS<");
     expect(markup).toContain('href="/link"');
     expect(markup).not.toContain("/rss.xml");
     expect(markup).toContain("<span>你，</span><span>一会看我，</span><span>一会看云。</span><span>我觉得你看我时很远，</span><span>你看云时很近。</span>");
