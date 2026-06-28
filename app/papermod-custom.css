@@ -637,12 +637,28 @@ body::before {
 #menu a {
   display: inline-flex;
   align-items: center;
+  position: relative;
   min-height: 1.65rem;
   padding: 0.18rem 0.34rem;
   border-radius: 0.3rem;
   color: var(--secondary);
   transition: color 0.18s ease, transform 0.18s ease, opacity 0.18s ease;
   opacity: 0.82;
+}
+
+#menu a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0.34rem;
+  width: 0.44rem;
+  height: 0.44rem;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: none;
+  opacity: 0;
+  transform: translateX(-50%) scale(0.8);
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
 #menu a span {
@@ -669,6 +685,12 @@ body::before {
   border-bottom: none;
   box-shadow: none;
   opacity: 1;
+}
+
+#menu a.active::after,
+#menu a[aria-current="page"]::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
 }
 
 #menu a.active span,
@@ -1160,10 +1182,10 @@ body::before {
     line-height: 1.25;
   }
 
-  #menu a::before {
-    content: "/";
-    margin-right: 0.22rem;
-    color: color-mix(in srgb, var(--secondary) 72%, transparent);
+  #menu a::after {
+    bottom: -0.36rem;
+    width: 0.42rem;
+    height: 0.42rem;
   }
 
   #menu a:hover,
@@ -1176,9 +1198,9 @@ body::before {
     border-bottom: none;
   }
 
-  #menu a.active::before,
-  #menu a[aria-current="page"]::before {
-    color: color-mix(in srgb, var(--primary) 55%, transparent);
+  #menu a.active::after,
+  #menu a[aria-current="page"]::after {
+    opacity: 1;
   }
 
   .profile h1 { font-size: 1.7rem; }
@@ -1319,7 +1341,7 @@ body:has(.blog-layout) {
   border: 1px solid #000;
   border-radius: 0.35rem;
   background: transparent;
-  box-shadow: none;
+  box-shadow: 0.42rem 0.42rem 0 #000;
   color: var(--primary);
 }
 
@@ -1334,9 +1356,22 @@ body:has(.blog-layout) {
 
 .blog-rail__brand-home {
   display: inline-flex;
+  align-items: center;
+  gap: 0.72rem;
   width: fit-content;
   color: var(--primary);
   text-decoration: none;
+}
+
+.blog-rail__brand-logo {
+  flex: 0 0 auto;
+  width: 4.2rem;
+  height: 4.2rem;
+}
+
+.blog-rail__brand-text {
+  display: grid;
+  gap: 0.16rem;
 }
 
 .blog-rail__brand-mark {
@@ -1348,6 +1383,7 @@ body:has(.blog-layout) {
 
 .blog-rail__brand-kicker {
   margin: 0;
+  display: block;
   color: color-mix(in srgb, var(--secondary) 86%, var(--content));
   font-family: var(--latin-font);
   font-size: 0.74rem;
@@ -1599,14 +1635,14 @@ body:has(.blog-layout) {
 }
 
 .blog-layout--post-detail .blog-rail--detail {
-  position: static;
-  top: auto;
-  gap: 0.78rem;
-  padding: 0.15rem 0 0;
-  border: none;
-  border-radius: 0;
+  position: sticky;
+  top: calc(var(--header-height) + 1.4rem);
+  gap: 1rem;
+  padding: clamp(0.9rem, 1.8vw, 1.08rem);
+  border: 1px solid #000;
+  border-radius: 0.35rem;
   background: transparent;
-  box-shadow: none;
+  box-shadow: 0.42rem 0.42rem 0 #000;
 }
 
 .blog-layout--post-detail .blog-rail__brand {
@@ -1617,6 +1653,11 @@ body:has(.blog-layout) {
 
 .blog-layout--post-detail .blog-rail__brand-mark {
   font-size: 1.36rem;
+}
+
+.blog-layout--post-detail .blog-rail__brand-logo {
+  width: 3.35rem;
+  height: 3.35rem;
 }
 
 .blog-layout--post-detail .blog-rail__nav {
@@ -1676,7 +1717,7 @@ body:has(.blog-layout) {
   border: 1px solid #000;
   border-radius: 0.35rem;
   background: transparent;
-  box-shadow: 0 7px 18px rgba(0, 0, 0, 0.08);
+  box-shadow: 0.42rem 0.42rem 0 #000;
 }
 
 .link-essay-entry:not(:last-child)::after {
@@ -1904,7 +1945,7 @@ body:has(.blog-layout) {
   text-decoration: none;
   background: color-mix(in srgb, var(--entry) 92%, var(--theme));
   border-radius: 0 1.6rem 0 1.6rem;
-  box-shadow: 0 10px 24px rgba(25, 20, 15, 0.06);
+  box-shadow: none;
 }
 
 .photo-album-card__cover img {
@@ -2033,7 +2074,7 @@ body:has(.blog-layout) {
   height: auto;
   border: 1px solid rgba(48, 40, 32, 0.9);
   background: color-mix(in srgb, var(--entry) 90%, var(--theme));
-  box-shadow: 0 14px 30px rgba(25, 20, 15, 0.07);
+  box-shadow: none;
 }
 
 .photo-album-caption {
@@ -3419,7 +3460,7 @@ body:has(.blog-layout--post-detail) .page-toc-rail {
   border: 1px solid #000;
   border-radius: 0.35rem;
   background: transparent;
-  box-shadow: 0 7px 18px rgba(0, 0, 0, 0.08);
+  box-shadow: 0.42rem 0.42rem 0 #000;
 }
 
 .posts-masonry--posts-list .post-preview-card__title a,
@@ -3474,15 +3515,13 @@ body:has(.blog-layout--post-detail) .page-toc-rail {
 
 .posts-masonry--posts-list .post-preview-card--micro .post-preview-card__micro-surface {
   padding: clamp(1.02rem, 2vw, 1.42rem) clamp(1.02rem, 2.4vw, 1.72rem) clamp(0.9rem, 1.72vw, 1.16rem);
-  border: 1px solid color-mix(in srgb, var(--border) 16%, rgba(255, 255, 255, 0.035));
+  border: 1px solid #000;
   border-radius: inherit;
   background:
     radial-gradient(120% 140% at 9% 0%, color-mix(in srgb, var(--entry) 22%, rgba(255, 255, 255, 0.06)), transparent 62%),
     radial-gradient(95% 120% at 88% 100%, color-mix(in srgb, var(--bg-spot-3) 18%, transparent), transparent 66%),
     linear-gradient(180deg, color-mix(in srgb, var(--entry) 28%, transparent), color-mix(in srgb, var(--theme) 22%, transparent));
-  box-shadow:
-    0 5px 14px rgba(43, 34, 22, 0.01),
-    inset 0 1px 0 color-mix(in srgb, var(--entry) 10%, rgba(255, 255, 255, 0.08));
+  box-shadow: 0.34rem 0.34rem 0 #000;
 }
 
 .posts-masonry--posts-list .post-preview-card--micro::before {
@@ -3594,7 +3633,7 @@ body:has(.blog-layout--post-detail) .page-toc-rail {
   transform: none;
   border-color: #000;
   background: transparent;
-  box-shadow: 0 7px 18px rgba(0, 0, 0, 0.08);
+  box-shadow: 0.42rem 0.42rem 0 #000;
 }
 
 .posts-masonry--posts-list.posts-masonry--interactive[data-micro-focus=""] .post-preview-card--micro:hover,
@@ -3607,14 +3646,12 @@ body:has(.blog-layout--post-detail) .page-toc-rail {
 
 .posts-masonry--posts-list.posts-masonry--interactive[data-micro-focus=""] .post-preview-card--micro:hover .post-preview-card__micro-surface,
 .posts-masonry--posts-list:not(.posts-masonry--interactive) .post-preview-card--micro:hover .post-preview-card__micro-surface {
-  border-color: color-mix(in srgb, var(--border) 22%, rgba(255, 255, 255, 0.05));
+  border-color: #000;
   background:
     radial-gradient(120% 140% at 9% 0%, color-mix(in srgb, var(--entry) 28%, rgba(255, 255, 255, 0.08)), transparent 62%),
     radial-gradient(95% 120% at 88% 100%, color-mix(in srgb, var(--bg-spot-3) 22%, transparent), transparent 66%),
     linear-gradient(180deg, color-mix(in srgb, var(--entry) 34%, transparent), color-mix(in srgb, var(--theme) 28%, transparent));
-  box-shadow:
-    0 6px 16px rgba(43, 34, 22, 0.014),
-    inset 0 1px 0 color-mix(in srgb, var(--entry) 12%, rgba(255, 255, 255, 0.1));
+  box-shadow: 0.34rem 0.34rem 0 #000;
 }
 
 .posts-masonry--posts-list .post-preview-card:hover .post-preview-card__title a,

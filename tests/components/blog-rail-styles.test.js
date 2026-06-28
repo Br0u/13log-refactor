@@ -25,10 +25,10 @@ describe("blog rail styles", () => {
     expect(stylesheet).toMatch(/\.blog-rail__related-link:hover,\s*\.blog-rail__related-link:focus-visible\s*\{[^}]*color:\s*var\(--accent\);/s);
   });
 
-  it("keeps the post detail rail from behaving like a floating window", () => {
+  it("keeps the post detail rail framed like the shared posts rail", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.blog-layout--post-detail\s+\.blog-rail--detail\s*\{[^}]*position:\s*static;[^}]*padding:\s*0\.15rem\s+0\s+0;[^}]*border:\s*none;[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;/s);
+    expect(stylesheet).toMatch(/\.blog-layout--post-detail\s+\.blog-rail--detail\s*\{[^}]*position:\s*sticky;[^}]*top:\s*calc\(var\(--header-height\)\s*\+\s*1\.4rem\);[^}]*padding:\s*clamp\(0\.9rem,[^}]*border:\s*1px\s+solid\s+#000;[^}]*border-radius:\s*0\.35rem;[^}]*background:\s*transparent;[^}]*box-shadow:\s*0\.42rem\s+0\.42rem\s+0\s+#000;/s);
     expect(stylesheet).toMatch(/\.blog-layout--post-detail\s+\.blog-rail__brand\s*\{[^}]*min-height:\s*0;[^}]*padding:\s*0\s+0\s+0\.82rem;/s);
     expect(stylesheet).toMatch(/\.blog-layout--post-detail\s+\.blog-rail__heading\s*\{[^}]*font-size:\s*0\.94rem;[^}]*line-height:\s*1\.42;[^}]*overflow-wrap:\s*anywhere;/s);
     expect(stylesheet).toMatch(/\.blog-layout--post-detail\s+\.blog-rail__related-link\s*\{[^}]*display:\s*-webkit-box;[^}]*-webkit-line-clamp:\s*2;[^}]*white-space:\s*normal;/s);

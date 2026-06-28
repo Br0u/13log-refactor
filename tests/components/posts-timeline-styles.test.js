@@ -16,9 +16,9 @@ describe("posts timeline styles", () => {
 
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s*\{[^}]*column-count:\s*1;/s);
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card\s*\{[^}]*padding:\s*0\.35rem\s+0\s+0\.2rem;[^}]*border-radius:\s*0;[^}]*background:\s*transparent;[^}]*border:\s*none;[^}]*box-shadow:\s*none;/s);
-    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--post\s*\{[^}]*padding:\s*clamp\(0\.96rem,[^}]*border:\s*1px\s+solid\s+#000;[^}]*border-radius:\s*0\.35rem;[^}]*background:\s*transparent;[^}]*box-shadow:\s*0\s+7px\s+18px\s+rgba\(0,\s*0,\s*0,\s*0\.08\);/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--post\s*\{[^}]*padding:\s*clamp\(0\.96rem,[^}]*border:\s*1px\s+solid\s+#000;[^}]*border-radius:\s*0\.35rem;[^}]*background:\s*transparent;[^}]*box-shadow:\s*0\.42rem\s+0\.42rem\s+0\s+#000;/s);
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card__title\s+a,\s*\.posts-masonry--posts-list\s+\.post-preview-card__excerpt-block,\s*\.posts-masonry--posts-list\s+\.post-preview-card__meta\s*\{[^}]*color:\s*color-mix\(in srgb,\s*var\(--secondary\)\s*92%,\s*var\(--content\)\);/s);
-    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\.posts-masonry--interactive\[data-micro-focus=""\]\s+\.post-preview-card--post:hover,\s*\.posts-masonry--posts-list:not\(\.posts-masonry--interactive\)\s+\.post-preview-card--post:hover\s*\{[^}]*transform:\s*none;[^}]*border-color:\s*#000;[^}]*background:\s*transparent;[^}]*box-shadow:\s*0\s+7px\s+18px\s+rgba\(0,\s*0,\s*0,\s*0\.08\);/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\.posts-masonry--interactive\[data-micro-focus=""\]\s+\.post-preview-card--post:hover,\s*\.posts-masonry--posts-list:not\(\.posts-masonry--interactive\)\s+\.post-preview-card--post:hover\s*\{[^}]*transform:\s*none;[^}]*border-color:\s*#000;[^}]*background:\s*transparent;[^}]*box-shadow:\s*0\.42rem\s+0\.42rem\s+0\s+#000;/s);
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__title\s+a,\s*\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__excerpt-block,\s*\.posts-masonry--posts-list\s+\.post-preview-card:hover\s+\.post-preview-card__meta\s*\{[^}]*color:\s*var\(--primary\);/s);
   });
 
@@ -26,8 +26,8 @@ describe("posts timeline styles", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro\s*\{[^}]*border-radius:\s*1\.2rem;[^}]*border:\s*none;[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;/s);
-    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro\s+\.post-preview-card__micro-surface\s*\{[^}]*padding:\s*clamp\(1\.02rem,[^}]*border:\s*1px\s+solid\s+color-mix\(in srgb,\s*var\(--border\)\s*16%,\s*rgba\(255,\s*255,\s*255,\s*0\.035\)\);/s);
-    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\.posts-masonry--interactive\[data-micro-focus=""\]\s+\.post-preview-card--micro:hover\s+\.post-preview-card__micro-surface,\s*\.posts-masonry--posts-list:not\(\.posts-masonry--interactive\)\s+\.post-preview-card--micro:hover\s+\.post-preview-card__micro-surface\s*\{[^}]*box-shadow:\s*[^}]*0\s+6px\s+16px\s+rgba\(43,\s*34,\s*22,\s*0\.014\)/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro\s+\.post-preview-card__micro-surface\s*\{[^}]*padding:\s*clamp\(1\.02rem,[^}]*border:\s*1px\s+solid\s+#000;[^}]*box-shadow:\s*0\.34rem\s+0\.34rem\s+0\s+#000;/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\.posts-masonry--interactive\[data-micro-focus=""\]\s+\.post-preview-card--micro:hover\s+\.post-preview-card__micro-surface,\s*\.posts-masonry--posts-list:not\(\.posts-masonry--interactive\)\s+\.post-preview-card--micro:hover\s+\.post-preview-card__micro-surface\s*\{[^}]*border-color:\s*#000;[^}]*box-shadow:\s*0\.34rem\s+0\.34rem\s+0\s+#000;/s);
   });
 
   it("adds a soft backdrop layer when a micro post is focused", () => {
