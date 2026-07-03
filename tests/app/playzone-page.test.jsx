@@ -46,6 +46,9 @@ describe("playzone page", () => {
     expect(stylesheet).toMatch(/\.playzone-layout\s+\.link-essay-list\s*\{[^}]*gap:\s*1rem;/s);
     expect(stylesheet).toMatch(/\.playzone-layout\s+\.link-essay-entry__preview\s*\{[^}]*min-height:\s*12rem;/s);
     expect(stylesheet).toMatch(/\.playzone-layout\s+\.link-essay-entry__title\s*\{[^}]*font-size:\s*1\.25rem;/s);
+    expect(stylesheet).toContain("body:has(.playzone-layout)");
+    expect(stylesheet).toContain('url("/images/backgrounds/playzone-ink-bg.png") center / cover no-repeat fixed');
+    expect(stylesheet).toContain(".dark body:has(.playzone-layout)");
     expect(globals).toMatch(/\.main:has\(\.playzone-layout\)\s*\{[^}]*max-width:\s*var\(--blog-shell-width\);[^}]*padding-inline:\s*0;/s);
     expect(stylesheet).not.toContain(".playzone-card");
   });

@@ -14,39 +14,23 @@ export default function HomePage() {
   return (
     <section className="profile profile--rainy-mask">
       <div className="profile_inner">
-        <div className="profile-avatar-card" tabIndex={0} aria-label="头像动画">
+        <div className="profile-avatar-card" tabIndex={0} aria-label="头像">
           <div className="profile-avatar-scene" aria-hidden="true">
             <img
-              className="profile-avatar-frame profile-avatar-frame--base"
+              className="profile-avatar-image profile-avatar-image--base"
               draggable="false"
-              src="/images/home/curious-cats-fallen-flower-base.png"
+              src="/images/home/avatar-cats-ink.png"
               alt=""
-              height="240"
-              width="240"
+              height="1024"
+              width="1536"
             />
             <img
-              className="profile-avatar-frame profile-avatar-frame--hover"
+              className="profile-avatar-image profile-avatar-image--hover"
               draggable="false"
-              src="/images/home/curious-cats-fallen-flower-base.png"
+              src="/images/home/avatar-cats-ink-hover.png"
               alt=""
-              height="240"
-              width="240"
-            />
-            <img
-              className="profile-avatar-popout profile-avatar-popout--base"
-              draggable="false"
-              src="/images/home/curious-cats-fallen-flower-cat.png"
-              alt=""
-              height="372"
-              width="380"
-            />
-            <img
-              className="profile-avatar-popout profile-avatar-popout--hover"
-              draggable="false"
-              src="/images/home/curious-cats-wilted-flower-cat.png"
-              alt=""
-              height="372"
-              width="380"
+              height="1024"
+              width="1536"
             />
           </div>
         </div>

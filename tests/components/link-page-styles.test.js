@@ -3,6 +3,14 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 describe("link page styles", () => {
+  it("uses the dedicated ink landscape background without applying it to playzone", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toContain("body:has(.blog-layout--link-index:not(.playzone-layout))");
+    expect(stylesheet).toContain('url("/images/backgrounds/link-ink-bg.png") center / cover no-repeat fixed');
+    expect(stylesheet).toContain(".dark body:has(.blog-layout--link-index:not(.playzone-layout))");
+  });
+
   it("turns the link page into a quiet single-column reading flow", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
