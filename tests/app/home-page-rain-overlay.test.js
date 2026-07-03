@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -10,13 +9,14 @@ describe("home page rain overlay markup", () => {
     expect(source).toContain('className="profile profile--rainy-mask"');
     expect(source).toContain('className="profile-avatar-card"');
     expect(source).toContain('className="profile-avatar-scene"');
-    expect(source).toContain('className="profile-avatar-popout profile-avatar-popout--base"');
-    expect(source).toContain('className="profile-avatar-popout profile-avatar-popout--hover"');
+    expect(source).toContain('className="profile-avatar-image profile-avatar-image--base"');
+    expect(source).toContain('className="profile-avatar-image profile-avatar-image--hover"');
     expect(source).not.toContain('className="profile-avatar-note"');
-    expect(source).toContain('/images/home/curious-cats-fallen-flower-base.png');
-    expect(source).not.toContain('/images/home/curious-cats-wilted-flower-base.png');
-    expect(source).toContain('/images/home/curious-cats-fallen-flower-cat.png');
-    expect(source).toContain('/images/home/curious-cats-wilted-flower-cat.png');
+    expect(source).toContain('/images/home/avatar-cats-ink.png');
+    expect(source).toContain('/images/home/avatar-cats-ink-hover.png');
+    expect(source).not.toContain('/images/home/curious-cats-fallen-flower-base.png');
+    expect(source).not.toContain('/images/home/curious-cats-fallen-flower-cat.png');
+    expect(source).not.toContain('/images/home/curious-cats-wilted-flower-cat.png');
     expect(source).toContain("花似伊，柳似伊");
     expect(source).toContain("Books · Life");
     expect(source).toContain("button-inner\">Posts");
@@ -25,14 +25,16 @@ describe("home page rain overlay markup", () => {
     expect(source).toContain("button-inner\">Link");
   });
 
-  it("uses one corrected transparent base artwork without the duplicated black cat face", () => {
-    const fallenAssetPath = path.join(process.cwd(), "public/images/home/curious-cats-fallen-flower-base.png");
-    const fallenAsset = fs.readFileSync(fallenAssetPath);
-    const fallenChecksum = crypto.createHash("sha256").update(fallenAsset).digest("hex");
+  it("uses the new cat ink avatar artwork", () => {
+    const avatarAssetPath = path.join(process.cwd(), "public/images/home/avatar-cats-ink.png");
+    const hoverAssetPath = path.join(process.cwd(), "public/images/home/avatar-cats-ink-hover.png");
+    const avatarAsset = fs.readFileSync(avatarAssetPath);
+    const hoverAsset = fs.readFileSync(hoverAssetPath);
 
-    expect(fallenChecksum).not.toBe("6868fc20755fabe3260e1f44f6e0dd94924958e54cd78a6743129373850c67a7");
-    expect(fallenChecksum).not.toBe("c71e1d9bc6d97f7ccc638f7a27254e2e64596185220db23e2838c6011d48aacf");
-    expect(fallenAsset[25]).toBe(6);
+    expect(avatarAsset.subarray(1, 4).toString("ascii")).toBe("PNG");
+    expect(hoverAsset.subarray(1, 4).toString("ascii")).toBe("PNG");
+    expect(avatarAsset[25]).toBe(6);
+    expect(hoverAsset[25]).toBe(6);
   });
 
   it("points the Photos shortcut at the site-native photos index", () => {

@@ -1,4 +1,6 @@
 import React from "react";
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -80,5 +82,14 @@ describe("photos index page", () => {
     expect(markup).not.toContain("blog-rail__section--intro");
     expect(markup).not.toContain("flip-gallery");
     expect(markup).not.toContain(">null<");
+  });
+
+  it("uses the dedicated ink landscape background for photos surfaces", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toContain("body:has(.blog-layout--photos-index)");
+    expect(stylesheet).toContain("body:has(.blog-layout--photo-album)");
+    expect(stylesheet).toContain('url("/images/backgrounds/photos-ink-bg.png") center / cover no-repeat fixed');
+    expect(stylesheet).toContain(".dark body:has(.blog-layout--photos-index)");
   });
 });
