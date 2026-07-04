@@ -21,7 +21,7 @@ describe("home page rain overlay styles", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toMatch(/\.main \.profile\.profile--rainy-mask::before\s*\{[^}]*pointer-events:\s*none;/s);
-    expect(stylesheet).toMatch(/\.main \.profile\.profile--rainy-mask::before\s*\{[^}]*opacity:\s*0\.4[0-9]?;/s);
+    expect(stylesheet).toMatch(/\.main \.profile\.profile--rainy-mask::before\s*\{[^}]*opacity:\s*0\.3[0-9]?;/s);
     expect(stylesheet).not.toContain(".profile__rain-canvas");
   });
 
@@ -33,61 +33,49 @@ describe("home page rain overlay styles", () => {
     expect(stylesheet).toMatch(/radial-gradient\([^)]*transparent[^)]*34%[^)]*#000[^)]*52%/s);
   });
 
-  it("animates independent droplet and streak layers instead of sliding one giant overlay", () => {
+  it("styles individual falling drops instead of looping a background texture", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toContain("radial-gradient(1.65rem 2.1rem at center");
-    expect(stylesheet).toContain("radial-gradient(0.42rem 0.64rem at center");
-    expect(stylesheet).toContain("background-size: 20% 30%, 15% 22%, 23% 32%, 17% 25%, 13% 20%, 19% 28%, 11% 16%, 100% 100%;");
-    expect(stylesheet).toContain("background-position: 4% 8%, 13% 28%, 86% 10%, 92% 48%, 18% 68%, 78% 74%, 56% 18%, 0 0;");
-    expect(stylesheet).toMatch(/animation:\s*rainyMaskDrops\s*13\.8s\s*linear\s*infinite,\s*rainyMaskBreath\s*8\.5s\s*ease-in-out\s*infinite\s*alternate;/s);
-    expect(stylesheet).toMatch(/animation:\s*rainyMaskStreaks\s*9\.8s\s*linear\s*infinite,\s*rainyMaskMist\s*17s\s*ease-in-out\s*infinite\s*alternate;/s);
-    expect(stylesheet).not.toContain("rainyMaskSlide");
+    expect(stylesheet).toMatch(/\.home-rain-layer\s*\{[^}]*position:\s*fixed;[^}]*pointer-events:\s*none;/s);
+    expect(stylesheet).toMatch(/\.home-rain-drop\s*\{[^}]*left:\s*var\(--rain-x\);[^}]*animation:\s*homeRainDrop\s+var\(--rain-duration\)\s+cubic-bezier/s);
+    expect(stylesheet).toMatch(/\.home-rain-drop::before\s*\{[^}]*height:\s*var\(--rain-length\);[^}]*background:\s*linear-gradient/s);
+    expect(stylesheet).not.toContain("rainyMaskDrops");
+    expect(stylesheet).not.toContain("rainyMaskStreaks");
   });
 
-  it("uses background-position keyframes for the rain motion rather than translating the full mask", () => {
+  it("uses per-drop transform keyframes for falling and drifting motion", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
-    const dropsKeyframes = stylesheet.slice(
-      stylesheet.indexOf("@keyframes rainyMaskDrops"),
-      stylesheet.indexOf("@keyframes rainyMaskBreath")
-    );
-    const streaksKeyframes = stylesheet.slice(
-      stylesheet.indexOf("@keyframes rainyMaskStreaks"),
-      stylesheet.indexOf("@keyframes rainyMaskMist")
-    );
-    const breathKeyframes = stylesheet.slice(
-      stylesheet.indexOf("@keyframes rainyMaskBreath"),
-      stylesheet.indexOf("@keyframes rainyMaskStreaks")
-    );
-    const mistKeyframes = stylesheet.slice(
-      stylesheet.indexOf("@keyframes rainyMaskMist"),
-      stylesheet.indexOf(".profile-avatar-card")
+    const dropKeyframes = stylesheet.slice(
+      stylesheet.indexOf("@keyframes homeRainDrop"),
+      stylesheet.indexOf("@media (prefers-reduced-motion: reduce)")
     );
 
-    expect(dropsKeyframes).toContain("background-position: 4% 8%, 13% 28%, 86% 10%, 92% 48%, 18% 68%, 78% 74%, 56% 18%, 0 0;");
-    expect(dropsKeyframes).toContain("background-position: 11% 46%, 18% 70%, 79% 38%, 97% 92%, 25% 100%, 72% 100%, 60% 56%, 0 0;");
-    expect(streaksKeyframes).toContain("background-position: 0 0, 0 0, 7% -20%, 35% -34%, 72% -12%, 54% -44%, 0 0;");
-    expect(streaksKeyframes).toContain("background-position: 0 0, 0 0, 3% 112%, 41% 118%, 67% 108%, 58% 124%, 0 0;");
-    expect(breathKeyframes).toContain("opacity: 0.38;");
-    expect(breathKeyframes).toContain("opacity: 0.52;");
-    expect(mistKeyframes).toContain("filter: blur(0.15px);");
-    expect(mistKeyframes).toContain("filter: blur(0.55px);");
-    expect(dropsKeyframes).not.toContain("transform:");
-    expect(streaksKeyframes).not.toContain("transform:");
+    expect(dropKeyframes).toContain("transform: translate3d(0, -12vh, 0) rotate(var(--rain-angle));");
+    expect(dropKeyframes).toContain("transform: translate3d(var(--rain-drift), var(--rain-fall), 0) rotate(var(--rain-angle));");
+    expect(dropKeyframes).toContain("opacity: 0;");
+    expect(dropKeyframes).not.toContain("background-position:");
   });
 
   it("respects reduced-motion by freezing rain animation to a static texture", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/@media \(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*\.main \.profile\.profile--rainy-mask::before,[\s\S]*\.main \.profile\.profile--rainy-mask::after\s*\{[^}]*animation:\s*none;/s);
+    expect(stylesheet).toMatch(/@media \(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*\.home-rain-layer\s*\{[^}]*display:\s*none;/s);
   });
 
   it("adds subtle ink-wash stains behind the homepage without overwhelming the content", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toMatch(/\.main \.profile\.profile--rainy-mask\s*\{[^}]*--ink-wash-a:/s);
+    expect(stylesheet).toMatch(/\.main \.profile\.profile--rainy-mask\s*\{[^}]*--rain-drop-color:/s);
     expect(stylesheet).toContain("radial-gradient(24rem 18rem at 14% 16%, var(--ink-wash-a)");
     expect(stylesheet).toContain("radial-gradient(22rem 16rem at 86% 82%, var(--ink-wash-b)");
-    expect(stylesheet).toMatch(/\.main \.profile\.profile--rainy-mask::after\s*\{[^}]*opacity:\s*0\.2[0-9]?;/s);
+    expect(stylesheet).toMatch(/\.main \.profile\.profile--rainy-mask::after\s*\{[^}]*opacity:\s*0\.1[0-9]?;/s);
+  });
+
+  it("uses cooler, weaker rain highlights in the night home theme", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/body\.dark\.list:has\(\.profile--rainy-mask\)\s+\.main \.profile\.profile--rainy-mask\s*\{[^}]*--rain-drop-color:\s*rgba\(207,\s*224,\s*248,\s*0\.42\);/s);
+    expect(stylesheet).toMatch(/body\.dark\.list:has\(\.profile--rainy-mask\)\s+\.home-rain-layer\s*\{[^}]*mix-blend-mode:\s*screen;/s);
   });
 });

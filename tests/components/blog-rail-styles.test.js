@@ -43,6 +43,14 @@ describe("blog rail styles", () => {
     expect(stylesheet).toMatch(/\.blog-rail__intro-text\s*\{[^}]*text-align:\s*center;[^}]*letter-spacing:\s*0;/s);
   });
 
+  it("switches the posts intro rail to the tall night artwork in dark mode", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__intro-card,\s*body\.dark:has\(\.blog-layout--post-detail\)\s+\.blog-rail__intro-card\s*\{[^}]*image-set\(url\("\/images\/backgrounds\/posts-night-intro-bg\.webp"\)\s+type\("image\/webp"\),\s*url\("\/images\/backgrounds\/posts-night-intro-bg\.png"\)\s+type\("image\/png"\)\);/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__intro-card\s*\{[^}]*border-radius:\s*3\.8rem\s+3\.8rem\s+0\.6rem\s+3\.8rem;/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__intro-text\s*\{[^}]*color:\s*rgba\(213,\s*229,\s*255,\s*0\.82\);/s);
+  });
+
   it("hides the old right-side toc rail on detail pages while preserving the blog gutter fallback", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 

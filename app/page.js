@@ -1,4 +1,5 @@
 ﻿import Link from "next/link";
+import HomeRainLayer from "./components/HomeRainLayer";
 import {
   FileText,
   Gamepad2,
@@ -13,6 +14,7 @@ import {
 export default function HomePage() {
   return (
     <section className="profile profile--rainy-mask">
+      <HomeRainLayer />
       <div className="profile_inner">
         <div className="profile-avatar-card" tabIndex={0} aria-label="头像">
           <div className="profile-avatar-scene" aria-hidden="true">
@@ -31,6 +33,14 @@ export default function HomePage() {
               alt=""
               height="1024"
               width="1536"
+            />
+            <img
+              className="profile-avatar-image profile-avatar-image--night"
+              draggable="false"
+              src="/images/home/avatar-cats-ink-night.png"
+              alt=""
+              height="1254"
+              width="1254"
             />
           </div>
         </div>

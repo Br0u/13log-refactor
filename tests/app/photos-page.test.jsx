@@ -89,7 +89,19 @@ describe("photos index page", () => {
 
     expect(stylesheet).toContain("body:has(.blog-layout--photos-index)");
     expect(stylesheet).toContain("body:has(.blog-layout--photo-album)");
-    expect(stylesheet).toContain('url("/images/backgrounds/photos-ink-bg.png") center / cover no-repeat fixed');
-    expect(stylesheet).toContain(".dark body:has(.blog-layout--photos-index)");
+    expect(stylesheet).toContain('image-set(url("/images/backgrounds/photos-ink-bg.webp") type("image/webp"), url("/images/backgrounds/photos-ink-bg.png") type("image/png")) center / cover no-repeat fixed');
+    expect(stylesheet).toContain("body.dark:has(.blog-layout--photos-index)");
+    expect(stylesheet).toContain('image-set(url("/images/backgrounds/photos-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/photos-night-ink-bg.png") type("image/png")) center / cover no-repeat fixed');
+  });
+
+  it("gives the photos index a blue glass treatment in dark mode", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\),\s*body\.dark:has\(\.blog-layout--photo-album\)\s*\{[^}]*--primary:\s*#dbeaff;[^}]*photos-night-ink-bg\.png/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.blog-rail,\s*body\.dark:has\(\.blog-layout--photo-album\)\s+\.blog-rail\s*\{[^}]*border-color:\s*rgba\(105,\s*157,\s*226,\s*0\.34\);[^}]*background:[^}]*rgba\(5,\s*12,\s*22,\s*0\.34\);[^}]*box-shadow:[^}]*rgba\(0,\s*0,\s*0,\s*0\.62\)/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card::after\s*\{[^}]*border-bottom-color:\s*rgba\(105,\s*157,\s*226,\s*0\.28\);/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__cover\s*\{[^}]*border-color:\s*rgba\(105,\s*157,\s*226,\s*0\.34\);[^}]*background:[^}]*rgba\(4,\s*12,\s*24,\s*0\.62\);[^}]*box-shadow:[^}]*rgba\(0,\s*0,\s*0,\s*0\.58\)/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__cover\s+img\s*\{[^}]*filter:\s*brightness\(0\.68\)\s+saturate\(0\.74\)\s+contrast\(1\.08\);/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.dark:has\(\.blog-layout--photos-index\),\s*body\.dark:has\(\.blog-layout--photo-album\)\s*\{[^}]*photos-night-ink-bg\.png[^}]*no-repeat,/s);
   });
 });

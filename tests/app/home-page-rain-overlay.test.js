@@ -9,11 +9,13 @@ describe("home page rain overlay markup", () => {
     expect(source).toContain('className="profile profile--rainy-mask"');
     expect(source).toContain('className="profile-avatar-card"');
     expect(source).toContain('className="profile-avatar-scene"');
+    expect(source).toContain("<HomeRainLayer />");
     expect(source).toContain('className="profile-avatar-image profile-avatar-image--base"');
     expect(source).toContain('className="profile-avatar-image profile-avatar-image--hover"');
     expect(source).not.toContain('className="profile-avatar-note"');
     expect(source).toContain('/images/home/avatar-cats-ink.png');
     expect(source).toContain('/images/home/avatar-cats-ink-hover.png');
+    expect(source).toContain('/images/home/avatar-cats-ink-night.png');
     expect(source).not.toContain('/images/home/curious-cats-fallen-flower-base.png');
     expect(source).not.toContain('/images/home/curious-cats-fallen-flower-cat.png');
     expect(source).not.toContain('/images/home/curious-cats-wilted-flower-cat.png');
@@ -28,13 +30,17 @@ describe("home page rain overlay markup", () => {
   it("uses the new cat ink avatar artwork", () => {
     const avatarAssetPath = path.join(process.cwd(), "public/images/home/avatar-cats-ink.png");
     const hoverAssetPath = path.join(process.cwd(), "public/images/home/avatar-cats-ink-hover.png");
+    const nightAssetPath = path.join(process.cwd(), "public/images/home/avatar-cats-ink-night.png");
     const avatarAsset = fs.readFileSync(avatarAssetPath);
     const hoverAsset = fs.readFileSync(hoverAssetPath);
+    const nightAsset = fs.readFileSync(nightAssetPath);
 
     expect(avatarAsset.subarray(1, 4).toString("ascii")).toBe("PNG");
     expect(hoverAsset.subarray(1, 4).toString("ascii")).toBe("PNG");
+    expect(nightAsset.subarray(1, 4).toString("ascii")).toBe("PNG");
     expect(avatarAsset[25]).toBe(6);
     expect(hoverAsset[25]).toBe(6);
+    expect(nightAsset[25]).toBe(6);
   });
 
   it("points the Photos shortcut at the site-native photos index", () => {
@@ -44,10 +50,11 @@ describe("home page rain overlay markup", () => {
     expect(source).not.toContain('href="/photos/index.html"');
   });
 
-  it("does not mount a dedicated rainy-day client overlay into the homepage anymore", () => {
+  it("mounts the lightweight custom rain layer instead of the old rainy-day overlay", () => {
     const source = fs.readFileSync(path.join(process.cwd(), "app/page.js"), "utf8");
     const enhancementsSource = fs.readFileSync(path.join(process.cwd(), "app/components/ClientEnhancements.js"), "utf8");
 
+    expect(source).toContain('import HomeRainLayer from "./components/HomeRainLayer";');
     expect(source).not.toContain("HomeRainOverlaySlot");
     expect(enhancementsSource).not.toContain("HomeRainOverlaySlot");
     expect(enhancementsSource).not.toContain('return pathname === "/" ? <HomeRainOverlaySlot /> : null;');

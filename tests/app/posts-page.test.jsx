@@ -33,9 +33,11 @@ describe("posts index page", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toContain("body:has(.blog-layout--posts-index),\nbody:has(.blog-layout--post-detail)");
-    expect(stylesheet).toContain(".dark body:has(.blog-layout--posts-index),\n.dark body:has(.blog-layout--post-detail)");
-    expect(stylesheet).toContain('url("/images/backgrounds/posts-ink-bg.png") center / cover no-repeat fixed');
-    expect(stylesheet).toContain('background: url("/images/backgrounds/posts-ink-bg.png") center / cover no-repeat;');
+    expect(stylesheet).toContain("body.dark:has(.blog-layout--posts-index),\nbody.dark:has(.blog-layout--post-detail)");
+    expect(stylesheet).toContain('image-set(url("/images/backgrounds/posts-ink-bg.webp") type("image/webp"), url("/images/backgrounds/posts-ink-bg.png") type("image/png")) center / cover no-repeat fixed');
+    expect(stylesheet).toContain('image-set(url("/images/backgrounds/posts-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/posts-night-ink-bg.png") type("image/png")) center / cover no-repeat fixed');
+    expect(stylesheet).toContain('background: image-set(url("/images/backgrounds/posts-ink-bg.webp") type("image/webp"), url("/images/backgrounds/posts-ink-bg.png") type("image/png")) center / cover no-repeat;');
+    expect(stylesheet).toContain('image-set(url("/images/backgrounds/posts-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/posts-night-ink-bg.png") type("image/png")) center top / cover no-repeat');
   });
 
   it("renders the posts page without traditional pagination controls", async () => {
