@@ -73,9 +73,20 @@ describe("about page", () => {
     const css = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(css).toContain('body:has(.about-note-layout--ink)');
-    expect(css).toContain('url("/images/backgrounds/about-ink-bg.png") center / cover no-repeat fixed');
+    expect(css).toContain('image-set(url("/images/backgrounds/about-ink-bg.webp") type("image/webp"), url("/images/backgrounds/about-ink-bg.png") type("image/png")) center / cover no-repeat fixed');
+    expect(css).toContain('image-set(url("/images/backgrounds/about-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/about-night-ink-bg.png") type("image/png")) center / cover no-repeat fixed');
     expect(css).toContain(".about-note-layout__side");
     expect(css).toContain("grid-template-columns: minmax(12.5rem, 19.5rem) minmax(0, 1fr)");
     expect(css).toContain("height: clamp(10.5rem, 18vw, 13.5rem)");
+  });
+
+  it("gives the about page a blue glass treatment in dark mode", () => {
+    const css = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(css).toMatch(/body\.dark:has\(\.about-note-layout--ink\)\s*\{[^}]*--primary:\s*#dbeaff;[^}]*about-night-ink-bg\.png/s);
+    expect(css).toMatch(/body\.dark:has\(\.about-note-layout--ink\)\s+\.about-note__media\s+\.about-hero-wrap\s*\{[^}]*border-color:\s*rgba\(126,\s*174,\s*238,\s*0\.4\);[^}]*box-shadow:[^}]*rgba\(0,\s*0,\s*0,\s*0\.58\)/s);
+    expect(css).toMatch(/body\.dark:has\(\.about-note-layout--ink\)\s+\.about-note__content\s*\{[^}]*border:\s*1px\s+solid\s+rgba\(105,\s*157,\s*226,\s*0\.28\);[^}]*background:[^}]*rgba\(5,\s*13,\s*25,\s*0\.54\)/s);
+    expect(css).toMatch(/body\.dark:has\(\.about-note-layout--ink\)\s+\.about-note__map-shell\s*\{[^}]*border-color:\s*rgba\(105,\s*157,\s*226,\s*0\.3\);[^}]*background:[^}]*rgba\(5,\s*13,\s*25,\s*0\.48\);/s);
+    expect(css).toMatch(/body\.dark:has\(\.about-note-layout--ink\)\s+\.about-note__map-frame\s*\{[^}]*filter:\s*grayscale\(1\)\s+invert\(0\.88\)\s+hue-rotate\(180deg\)\s+brightness\(0\.56\)\s+contrast\(1\.08\);/s);
   });
 });

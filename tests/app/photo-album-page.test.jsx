@@ -1,4 +1,6 @@
 import React from "react";
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -82,5 +84,13 @@ describe("photo album page", () => {
     const { getPublicPhotoAlbumBySlug } = await import("../../lib/public-photos");
     expect(getPublicPhotoAlbumBySlug).toHaveBeenCalledWith("car park");
     expect(markup).toContain("Morning platform");
+  });
+
+  it("uses the photos night treatment on album detail surfaces", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.blog-rail,\s*body\.dark:has\(\.blog-layout--photo-album\)\s+\.blog-rail\s*\{[^}]*border-color:\s*rgba\(105,\s*157,\s*226,\s*0\.34\);[^}]*background:[^}]*rgba\(5,\s*12,\s*22,\s*0\.34\);/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photo-album\)\s+\.photo-album-image\s*\{[^}]*border-color:\s*rgba\(105,\s*157,\s*226,\s*0\.34\);[^}]*background:[^}]*rgba\(4,\s*12,\s*24,\s*0\.62\);[^}]*box-shadow:[^}]*rgba\(0,\s*0,\s*0,\s*0\.58\)[^}]*filter:\s*brightness\(0\.74\)\s+saturate\(0\.78\)\s+contrast\(1\.08\);/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photo-album\)\s+\.photo-album-page__description\s*\{[^}]*border-left-color:\s*rgba\(105,\s*157,\s*226,\s*0\.42\);[^}]*color:\s*rgba\(213,\s*229,\s*255,\s*0\.82\);/s);
   });
 });

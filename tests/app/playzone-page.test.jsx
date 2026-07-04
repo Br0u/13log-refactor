@@ -47,9 +47,20 @@ describe("playzone page", () => {
     expect(stylesheet).toMatch(/\.playzone-layout\s+\.link-essay-entry__preview\s*\{[^}]*min-height:\s*12rem;/s);
     expect(stylesheet).toMatch(/\.playzone-layout\s+\.link-essay-entry__title\s*\{[^}]*font-size:\s*1\.25rem;/s);
     expect(stylesheet).toContain("body:has(.playzone-layout)");
-    expect(stylesheet).toContain('url("/images/backgrounds/playzone-ink-bg.png") center / cover no-repeat fixed');
-    expect(stylesheet).toContain(".dark body:has(.playzone-layout)");
+    expect(stylesheet).toContain('image-set(url("/images/backgrounds/playzone-ink-bg.webp") type("image/webp"), url("/images/backgrounds/playzone-ink-bg.png") type("image/png")) center / cover no-repeat fixed');
+    expect(stylesheet).toContain("body.dark:has(.playzone-layout)");
     expect(globals).toMatch(/\.main:has\(\.playzone-layout\)\s*\{[^}]*max-width:\s*var\(--blog-shell-width\);[^}]*padding-inline:\s*0;/s);
     expect(stylesheet).not.toContain(".playzone-card");
+  });
+
+  it("gives playzone a dedicated blue glass treatment in dark mode", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toContain('image-set(url("/images/backgrounds/playzone-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/playzone-night-ink-bg.png") type("image/png")) center / cover no-repeat fixed');
+    expect(stylesheet).toMatch(/body\.dark:has\(\.playzone-layout\)\s*\{[^}]*--primary:\s*#dbeaff;[^}]*playzone-night-ink-bg\.png/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.playzone-layout\)\s+\.blog-rail\s*\{[^}]*border-color:\s*rgba\(105,\s*157,\s*226,\s*0\.34\);[^}]*background:[^}]*rgba\(5,\s*12,\s*22,\s*0\.34\);[^}]*box-shadow:[^}]*rgba\(0,\s*0,\s*0,\s*0\.62\)/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.playzone-layout\)\s+\.link-essay-entry\s*\{[^}]*border-color:\s*rgba\(105,\s*157,\s*226,\s*0\.36\);[^}]*background:[^}]*rgba\(4,\s*12,\s*24,\s*0\.7\)[^}]*box-shadow:[^}]*rgba\(0,\s*0,\s*0,\s*0\.62\)/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.playzone-layout\)\s+\.link-essay-entry__preview\s*\{[^}]*border-color:\s*rgba\(105,\s*157,\s*226,\s*0\.24\);[^}]*background:[^}]*rgba\(4,\s*12,\s*24,\s*0\.72\);[^}]*filter:\s*brightness\(0\.72\)\s+saturate\(0\.7\)\s+contrast\(1\.08\);/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.dark:has\(\.playzone-layout\)\s*\{[^}]*playzone-night-ink-bg\.png[^}]*no-repeat,/s);
   });
 });

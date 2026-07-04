@@ -10,12 +10,16 @@ describe("mobile surface styles", () => {
 
     expect(resetIndex).toBeGreaterThan(-1);
     expect(mobileBackgroundIndex).toBeGreaterThan(resetIndex);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.list:has\(\.profile--rainy-mask\)\s*\{[^}]*home-ink-landscape\.png[^}]*no-repeat,/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--posts-index\),\s*body:has\(\.blog-layout--post-detail\)\s*\{[^}]*posts-ink-bg\.png[^}]*no-repeat,/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--link-index:not\(\.playzone-layout\)\)\s*\{[^}]*link-ink-bg\.png[^}]*no-repeat,/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.playzone-layout\)\s*\{[^}]*playzone-ink-bg\.png[^}]*no-repeat,/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--photos-index\),\s*body:has\(\.blog-layout--photo-album\)\s*\{[^}]*photos-ink-bg\.png[^}]*no-repeat,/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.about-note-layout--ink\)\s*\{[^}]*about-ink-bg\.png[^}]*no-repeat,/s);
+    expect(stylesheet).toMatch(/body\.list:has\(\.profile--rainy-mask\)\s*\{[^}]*home-ink-landscape\.png[^}]*fixed,/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.list:has\(\.profile--rainy-mask\)\s*\{[^}]*home-mobile-ink-bg\.png[^}]*no-repeat,/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.dark\.list:has\(\.profile--rainy-mask\)\s*\{[^}]*home-night-ink-bg\.png[^}]*no-repeat,/s);
+    expect(stylesheet).toMatch(/body:has\(\.blog-layout--posts-index\),\s*body:has\(\.blog-layout--post-detail\)\s*\{[^}]*posts-ink-bg\.png[^}]*fixed,/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--posts-index\),\s*body:has\(\.blog-layout--post-detail\)\s*\{[^}]*posts-mobile-ink-bg\.png[^}]*no-repeat,/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--link-index:not\(\.playzone-layout\)\)\s*\{[^}]*link-mobile-ink-bg\.png[^}]*no-repeat,/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.playzone-layout\)\s*\{[^}]*playzone-mobile-ink-bg\.png[^}]*no-repeat,/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--photos-index\),\s*body:has\(\.blog-layout--photo-album\)\s*\{[^}]*photos-mobile-ink-bg\.png[^}]*no-repeat,/s);
+    expect(stylesheet).toMatch(/body:has\(\.about-note-layout--ink\)\s*\{[^}]*about-ink-bg\.png[^}]*fixed,/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.about-note-layout--ink\)\s*\{[^}]*about-mobile-ink-bg\.png[^}]*no-repeat,/s);
   });
 
   it("tightens the home hero controls for narrow screens", () => {

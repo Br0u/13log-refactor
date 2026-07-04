@@ -30,6 +30,14 @@ describe("posts timeline styles", () => {
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\.posts-masonry--interactive\[data-micro-focus=""\]\s+\.post-preview-card--micro:hover\s+\.post-preview-card__micro-surface,\s*\.posts-masonry--posts-list:not\(\.posts-masonry--interactive\)\s+\.post-preview-card--micro:hover\s+\.post-preview-card__micro-surface\s*\{[^}]*border-color:\s*#000;[^}]*box-shadow:\s*0\.34rem\s+0\.34rem\s+0\s+#000;/s);
   });
 
+  it("gives posts list cards a blue glass treatment in dark mode", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.posts-masonry--posts-list\s+\.post-preview-card--post,\s*body\.dark:has\(\.blog-layout--post-detail\)\s+\.posts-masonry--posts-list\s+\.post-preview-card--post\s*\{[^}]*border-color:\s*rgba\(105,\s*157,\s*226,\s*0\.34\);[^}]*box-shadow:[^}]*rgba\(0,\s*0,\s*0,\s*0\.62\)/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.posts-masonry--posts-list\s+\.post-preview-card__title\s+a,\s*body\.dark:has\(\.blog-layout--posts-index\)\s+\.posts-masonry--posts-list\s+\.post-preview-card__excerpt-block,\s*body\.dark:has\(\.blog-layout--posts-index\)\s+\.posts-masonry--posts-list\s+\.post-preview-card__meta\s*\{[^}]*color:\s*rgba\(213,\s*229,\s*255,\s*0\.86\);/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.posts-masonry--posts-list\s+\.post-preview-card--micro\s+\.post-preview-card__micro-surface\s*\{[^}]*border-color:\s*rgba\(105,\s*157,\s*226,\s*0\.32\);[^}]*box-shadow:[^}]*rgba\(0,\s*0,\s*0,\s*0\.58\)/s);
+  });
+
   it("adds a soft backdrop layer when a micro post is focused", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
