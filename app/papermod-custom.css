@@ -3669,6 +3669,10 @@ body:has(.blog-layout--post-detail) .page-toc-rail {
   padding-top: 0.2rem;
 }
 
+.about-night-profile-card {
+  display: none;
+}
+
 .about-note__eyebrow {
   margin: 0 0 0.42rem;
   font-size: 0.7rem;
@@ -4184,10 +4188,7 @@ body.dark:has(.about-note-layout--ink) .about-guestbook__form button {
   }
 
   body.dark:has(.about-note-layout--ink) .about-note-layout__side {
-    z-index: 2;
-    justify-items: center;
-    gap: 0;
-    margin-bottom: -4.65rem;
+    display: none;
   }
 
   body.dark:has(.about-note-layout--ink) .about-note__media {
@@ -4229,17 +4230,94 @@ body.dark:has(.about-note-layout--ink) .about-guestbook__form button {
 
   body.dark:has(.about-note-layout--ink) .about-note__header {
     margin: 0;
-    padding: 5.25rem 1.12rem 1.18rem;
-    border: 1px solid rgba(126, 174, 238, 0.28);
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    text-align: left;
+    backdrop-filter: none;
+  }
+
+  body.dark:has(.about-note-layout--ink) .about-note__intro-copy {
+    display: none;
+  }
+
+  body.dark:has(.about-note-layout--ink) .about-night-profile-card {
+    display: grid;
+    grid-template-columns: clamp(6rem, 24vw, 9.2rem) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(0.9rem, 4vw, 1.55rem);
+    min-height: clamp(14.1rem, 42vw, 16.4rem);
+    padding: clamp(1rem, 3.6vw, 1.45rem);
+    border: 1px solid rgba(94, 142, 205, 0.48);
     border-radius: 1.05rem;
     background:
-      radial-gradient(120% 140% at 50% 0%, rgba(126, 174, 238, 0.12), transparent 62%),
-      linear-gradient(180deg, rgba(4, 13, 28, 0.66), rgba(2, 8, 18, 0.56));
+      linear-gradient(90deg, rgba(2, 8, 18, 0.54), rgba(3, 11, 24, 0.14) 58%, rgba(3, 11, 24, 0.08)),
+      url("/images/backgrounds/about-mobile-profile-card.png") center / cover no-repeat;
     box-shadow:
-      0 0.65rem 1.55rem rgba(0, 0, 0, 0.34),
-      inset 0 1px 0 rgba(207, 228, 255, 0.09);
-    text-align: center;
-    backdrop-filter: blur(10px);
+      0 0.7rem 1.65rem rgba(0, 0, 0, 0.38),
+      0 0 1.2rem rgba(78, 129, 196, 0.16),
+      inset 0 1px 0 rgba(207, 228, 255, 0.12);
+    overflow: hidden;
+  }
+
+  body.dark:has(.about-note-layout--ink) .about-night-profile-card__avatar {
+    width: clamp(5.8rem, 22vw, 8.6rem);
+    aspect-ratio: 1;
+    align-self: center;
+    justify-self: center;
+    padding: 0.18rem;
+    border: 0.2rem solid rgba(90, 139, 203, 0.82);
+    border-radius: 999px;
+    background: rgba(3, 10, 21, 0.62);
+    box-shadow:
+      0 0 0 1px rgba(207, 228, 255, 0.12),
+      0 0 1.1rem rgba(90, 139, 203, 0.36);
+  }
+
+  body.dark:has(.about-note-layout--ink) .about-night-profile-card__avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+  }
+
+  body.dark:has(.about-note-layout--ink) .about-night-profile-card__copy {
+    display: grid;
+    gap: 0.42rem;
+    min-width: 0;
+  }
+
+  body.dark:has(.about-note-layout--ink) .about-night-profile-card__name {
+    color: rgba(232, 242, 255, 0.98);
+    font-family: var(--latin-font);
+    font-size: clamp(2.1rem, 8vw, 3rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0;
+    text-shadow: 0 0 0.75rem rgba(111, 164, 235, 0.24);
+  }
+
+  body.dark:has(.about-note-layout--ink) .about-night-profile-card__motto {
+    margin: 0;
+    color: rgba(201, 220, 247, 0.86);
+    font-family: var(--serif-font);
+    font-size: clamp(1rem, 4.2vw, 1.34rem);
+    font-style: italic;
+    line-height: 1.25;
+  }
+
+  body.dark:has(.about-note-layout--ink) .about-night-profile-card__verse {
+    margin: 0.42rem 0 0;
+    color: rgba(213, 229, 255, 0.78);
+    font-size: clamp(0.94rem, 3.6vw, 1.12rem);
+    line-height: 1.62;
+    text-shadow: 0 0.12rem 0.6rem rgba(0, 0, 0, 0.52);
+  }
+
+  body.dark:has(.about-note-layout--ink) .about-night-profile-card__verse span {
+    display: block;
   }
 
   body.dark:has(.about-note-layout--ink) .about-note__eyebrow {
@@ -5734,7 +5812,7 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
   }
 
   body:has(.blog-layout--posts-index) .blog-rail {
-    --posts-mobile-intro-width: clamp(13.4rem, 44%, 18rem);
+    --posts-mobile-intro-width: clamp(10rem, 31%, 13.2rem);
     position: relative;
     top: auto;
     display: grid;
@@ -5755,7 +5833,8 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
     border: 1px solid rgba(80, 92, 112, 0.2);
     border-radius: 1.18rem;
     background:
-      radial-gradient(110% 120% at 12% 0%, rgba(255, 255, 255, 0.48), transparent 60%),
+      linear-gradient(90deg, rgba(255, 253, 246, 0.5), rgba(255, 253, 246, 0.18)),
+      url("/images/backgrounds/posts-mobile-rail-bg.png") center / 106% 106% no-repeat,
       rgba(255, 253, 246, 0.64);
     box-shadow:
       0 0.6rem 1.4rem rgba(55, 48, 38, 0.12),
@@ -5787,7 +5866,7 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
     order: 2;
     position: absolute;
     top: 1.18rem;
-    right: 1.08rem;
+    right: clamp(5.8rem, 18vw, 8.8rem);
     bottom: 1.18rem;
     z-index: 1;
     display: grid;
@@ -5817,7 +5896,7 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
   body:has(.blog-layout--posts-index) .blog-rail__intro-text {
     gap: 0.02rem;
     color: rgba(76, 70, 62, 0.74);
-    font-size: clamp(0.78rem, 2.8vw, 0.9rem);
+    font-size: clamp(0.7rem, 2.4vw, 0.82rem);
     line-height: 1.9;
     text-align: left;
   }
@@ -5950,7 +6029,7 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
   }
 
   body.dark:has(.blog-layout--posts-index) .blog-rail {
-    --posts-mobile-intro-width: clamp(13.4rem, 44%, 18rem);
+    --posts-mobile-intro-width: clamp(10rem, 31%, 13.2rem);
     position: relative;
     top: auto;
     display: grid;
@@ -5970,8 +6049,9 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
     border: 1px solid rgba(126, 174, 238, 0.34);
     border-radius: 1.18rem;
     background:
-      radial-gradient(110% 120% at 12% 0%, rgba(141, 190, 255, 0.12), transparent 60%),
-      linear-gradient(180deg, rgba(4, 13, 28, 0.72), rgba(2, 8, 18, 0.62));
+      linear-gradient(90deg, rgba(4, 13, 28, 0.58), rgba(4, 13, 28, 0.18)),
+      url("/images/backgrounds/posts-mobile-night-rail-bg.png") center / 106% 106% no-repeat,
+      rgba(2, 8, 18, 0.62);
     box-shadow:
       0 0.6rem 1.6rem rgba(0, 0, 0, 0.34),
       inset 0 1px 0 rgba(207, 228, 255, 0.1);
@@ -6006,7 +6086,7 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
     order: 2;
     position: absolute;
     top: 1.18rem;
-    right: 1.08rem;
+    right: clamp(5.8rem, 18vw, 8.8rem);
     bottom: 1.18rem;
     z-index: 1;
     display: grid;
@@ -6077,7 +6157,7 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
     gap: 0.02rem;
     text-align: left;
     color: rgba(197, 216, 244, 0.76);
-    font-size: clamp(0.78rem, 2.8vw, 0.9rem);
+    font-size: clamp(0.7rem, 2.4vw, 0.82rem);
     line-height: 1.9;
     text-shadow: 0 0.12rem 0.55rem rgba(0, 0, 0, 0.46);
   }

@@ -51,6 +51,11 @@ describe("about page", () => {
     expect(markup).toContain("A NOTE");
     expect(markup).toContain("about-note");
     expect(markup).toContain("about-note__media");
+    expect(markup).toContain("about-night-profile-card");
+    expect(markup).toContain("Brou");
+    expect(markup).toContain("ei yo wo cao");
+    expect(markup).toContain("少年听雨歌楼上，");
+    expect(markup).toContain("而今听雨僧庐下。");
     expect(markup).toContain('src="/images/aboutme.png"');
     expect(markup).toContain('alt="About me"');
     expect(markup).toContain('class="about-note-layout__media about-note__media"><figure class="about-hero-wrap"');
@@ -98,12 +103,13 @@ describe("about page", () => {
   it("uses a dedicated mobile night about layout with bottom tabs", () => {
     const css = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
+    expect(fs.existsSync(path.join(process.cwd(), "public/images/backgrounds/about-mobile-profile-card.png"))).toBe(true);
     expect(css).toContain('image-set(url("/images/backgrounds/about-mobile-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/about-mobile-night-ink-bg.png") type("image/png")) center top / cover no-repeat');
     expect(css).toMatch(/body\.dark:has\(\.about-note-layout--ink\)\s+#menu\s*\{[^}]*position:\s*fixed;[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\);/s);
     expect(css).toMatch(/body\.dark:has\(\.about-note-layout--ink\)\s+#menu\s+\.site-nav-icon\s*\{[^}]*display:\s*block;/s);
     expect(css).toMatch(/body\.dark:has\(\.about-note-layout--ink\)\s+\.about-note__map-rail--side\s*\{[^}]*display:\s*none;/s);
     expect(css).toMatch(/body\.dark:has\(\.about-note-layout--ink\)\s+\.about-note__map-rail--mobile\s*\{[^}]*display:\s*block;/s);
-    expect(css).toMatch(/body\.dark:has\(\.about-note-layout--ink\)\s+\.about-note__media\s+\.about-hero\s*\{[^}]*background:\s*url\("\/pics\/about\/tx\.jpg"\)\s+center\s*\/\s*cover\s+no-repeat;/s);
-    expect(css).toMatch(/body\.dark:has\(\.about-note-layout--ink\)\s+\.about-note__media\s+\.about-hero img\s*\{[^}]*opacity:\s*0;/s);
+    expect(css).toMatch(/body\.dark:has\(\.about-note-layout--ink\)\s+\.about-night-profile-card\s*\{[^}]*display:\s*grid;[^}]*about-mobile-profile-card\.png[^}]*center\s*\/\s*cover\s+no-repeat;/s);
+    expect(css).toMatch(/body\.dark:has\(\.about-note-layout--ink\)\s+\.about-note-layout__side\s*\{[^}]*display:\s*none;/s);
   });
 });

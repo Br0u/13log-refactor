@@ -51,6 +51,24 @@ function AboutLocationCard({ modifier = "", titleId = "about-location-title" }) 
   );
 }
 
+function AboutNightProfileCard() {
+  return (
+    <section className="about-night-profile-card" aria-label="Brou profile">
+      <div className="about-night-profile-card__avatar">
+        <img src="/pics/about/tx.jpg" alt="" aria-hidden="true" />
+      </div>
+      <div className="about-night-profile-card__copy">
+        <div className="about-night-profile-card__name">Brou</div>
+        <p className="about-night-profile-card__motto">ei yo wo cao</p>
+        <p className="about-night-profile-card__verse">
+          <span>少年听雨歌楼上，</span>
+          <span>而今听雨僧庐下。</span>
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export default async function AboutPage() {
   const about = getAboutPage();
   const cleanedContent = stripLegacyMapSection(about.content || "");
@@ -72,6 +90,7 @@ export default async function AboutPage() {
       <div className="about-note-layout__article">
         <article className="post-single about-note">
           <header className="post-header about-note__header">
+            <AboutNightProfileCard />
             <div className="about-note__intro-copy">
               <p className="about-note__eyebrow">A NOTE</p>
               {about.description ? <p className="post-description about-note__dek">{about.description}</p> : null}
