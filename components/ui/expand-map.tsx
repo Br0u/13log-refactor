@@ -115,7 +115,7 @@ export function LocationMap({
       onMouseLeave={() => setIsHovered(false)}
     >
       <motion.div
-        className="relative h-[336px] w-full overflow-hidden rounded-xl border"
+        className="location-map__surface relative h-[336px] w-full overflow-hidden rounded-xl border"
         style={{
           borderColor: "hsl(var(--border-hsl) / 0.85)",
           backgroundColor: "hsl(var(--theme-hsl) / 0.45)",
@@ -132,20 +132,20 @@ export function LocationMap({
         transition={{ duration: 0.24, ease: "easeOut" }}
       >
         <div
-          className="absolute inset-0 z-[1]"
+          className="location-map__basemap absolute inset-0 z-[1]"
           style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
         >
           <div ref={mapContainerRef} className="h-full w-full" />
         </div>
 
         <motion.div
-          className="absolute inset-0 z-[2]"
+          className="location-map__shade absolute inset-0 z-[2]"
           animate={{ opacity: isHovered ? 0.14 : 0.2 }}
           transition={{ duration: 0.2 }}
           style={{ background: "linear-gradient(to top, hsl(var(--theme-hsl) / 0.88), transparent 60%)" }}
         />
 
-        <div className="pointer-events-none absolute inset-0 z-[3] flex flex-col justify-between p-4 md:p-5">
+        <div className="location-map__overlay pointer-events-none absolute inset-0 z-[3] flex flex-col justify-between p-4 md:p-5">
           <div className="flex items-start justify-between">
             <motion.div animate={{ opacity: isHovered ? 1 : 0.5 }} transition={{ duration: 0.2 }}>
               <Map size={18} className="text-[hsl(var(--secondary-hsl))]" />
@@ -164,14 +164,14 @@ export function LocationMap({
 
           <div className="space-y-1.5">
             <motion.h3
-              className="text-sm font-medium leading-tight text-[hsl(var(--primary-hsl))]"
+              className="location-map__label text-sm font-medium leading-tight text-[hsl(var(--primary-hsl))]"
               animate={{ x: isHovered ? 2 : 0 }}
               transition={{ type: "spring", stiffness: 320, damping: 26 }}
             >
               {location}
             </motion.h3>
 
-            <p className="text-xs leading-tight text-[hsl(var(--secondary-hsl))]">{coordinates}</p>
+            <p className="location-map__coordinates text-xs leading-tight text-[hsl(var(--secondary-hsl))]">{coordinates}</p>
 
             <motion.div
               className="h-px bg-gradient-to-r from-neutral-700/60 via-neutral-500/30 to-transparent"

@@ -5,6 +5,7 @@ const DEFAULT_NAV_ITEMS = [
   { href: "/posts/", label: "/ POSTS", section: "posts" },
   { href: "/about/", label: "/ ABOUT", section: "about" },
   { href: "/link/", label: "/ LINK", section: "link" },
+  { href: "/playzone/", label: "/ PLAYZONE", section: "playzone" },
   { href: "/photos/", label: "/ PHOTOS", section: "photos" },
 ];
 
