@@ -51,13 +51,13 @@ describe("mobile surface styles", () => {
     expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+#menu\s*\{[^}]*position:\s*fixed;[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\);/s);
     expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+#menu\s+\.site-nav-icon\s*\{[^}]*display:\s*block;/s);
     expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__nav\s*\{[^}]*display:\s*none;/s);
-    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__brand\s*\{[^}]*min-height:\s*clamp\(13\.2rem,\s*30vw,\s*15\.2rem\);[^}]*posts-mobile-night-rail-bg\.png[^}]*center\s*\/\s*106%\s+106%\s+no-repeat,/s);
-    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail\s*\{[^}]*--posts-mobile-intro-width:\s*clamp\(10rem,\s*31%,\s*13\.2rem\);/s);
-    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__brand-home\s*\{[^}]*width:\s*calc\(100%\s*-\s*var\(--posts-mobile-intro-width\)\s*-\s*0\.85rem\);/s);
-    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__section--intro\s*\{[^}]*position:\s*absolute;[^}]*top:\s*1\.18rem;[^}]*right:\s*clamp\(5\.8rem,\s*18vw,\s*8\.8rem\);[^}]*bottom:\s*1\.18rem;[^}]*width:\s*var\(--posts-mobile-intro-width\);/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*430px\)\s*\{[\s\S]*body:has\(\.blog-layout--posts-index\)\s+\.blog-rail__section--intro,[\s\S]*body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__section--intro\s*\{[^}]*left:\s*5\.9rem;[^}]*width:\s*calc\(100%\s*-\s*7rem\);/s);
-    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__intro-text\s*\{[^}]*font-size:\s*clamp\(0\.7rem,\s*2\.4vw,\s*0\.82rem\);[^}]*line-height:\s*1\.9;/s);
-    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__intro-text\s+span\s*\{[^}]*display:\s*block;[^}]*min-height:\s*1\.9em;/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail\s*\{[^}]*grid-template-columns:\s*minmax\(10\.4rem,\s*0\.82fr\)\s+minmax\(0,\s*1\.18fr\);[^}]*posts-mobile-night-rail-bg\.png[^}]*center\s*\/\s*106%\s+106%\s+no-repeat,/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__brand\s*\{[^}]*min-height:\s*0;[^}]*border:\s*none;/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__brand-home\s*\{[^}]*width:\s*100%;[^}]*min-height:\s*0;/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__section--intro\s*\{[^}]*position:\s*relative;[^}]*min-width:\s*0;[^}]*width:\s*100%;/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*540px\)\s*\{[\s\S]*body:has\(\.blog-layout--posts-index\)\s+\.blog-rail,[\s\S]*body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail\s*\{[^}]*grid-template-columns:\s*1fr;[^}]*min-height:\s*0;/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__intro-text\s*\{[^}]*font-size:\s*clamp\(0\.78rem,\s*1\.8vw,\s*0\.94rem\);[^}]*overflow-wrap:\s*anywhere;/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--posts-index\)\s+\.blog-rail__intro-text\s+span\s*\{[^}]*display:\s*block;[^}]*white-space:\s*normal;/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*body\.dark:has\(\.blog-layout--posts-index\)\s+\.posts-masonry--posts-list\s+\.post-preview-card--post,[\s\S]*\.post-preview-card__micro-surface\s*\{[^}]*backdrop-filter:\s*blur\(10px\);/s);
   });
 
@@ -65,11 +65,11 @@ describe("mobile surface styles", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--posts-index\)\s+#menu\s*\{[^}]*position:\s*fixed;[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\);/s);
-    expect(stylesheet).toMatch(/body:has\(\.blog-layout--posts-index\)\s+\.blog-rail\s*\{[^}]*--posts-mobile-intro-width:\s*clamp\(10rem,\s*31%,\s*13\.2rem\);/s);
-    expect(stylesheet).toMatch(/body:has\(\.blog-layout--posts-index\)\s+\.blog-rail__brand\s*\{[^}]*min-height:\s*clamp\(13\.2rem,\s*30vw,\s*15\.2rem\);[^}]*posts-mobile-rail-bg\.png[^}]*center\s*\/\s*106%\s+106%\s+no-repeat,/s);
-    expect(stylesheet).toMatch(/body:has\(\.blog-layout--posts-index\)\s+\.blog-rail__brand-home\s*\{[^}]*width:\s*calc\(100%\s*-\s*var\(--posts-mobile-intro-width\)\s*-\s*0\.85rem\);/s);
-    expect(stylesheet).toMatch(/body:has\(\.blog-layout--posts-index\)\s+\.blog-rail__intro-text\s*\{[^}]*font-size:\s*clamp\(0\.7rem,\s*2\.4vw,\s*0\.82rem\);[^}]*line-height:\s*1\.9;/s);
-    expect(stylesheet).toMatch(/body:has\(\.blog-layout--posts-index\)\s+\.blog-rail__intro-text\s+span\s*\{[^}]*display:\s*block;[^}]*min-height:\s*1\.9em;/s);
+    expect(stylesheet).toMatch(/body:has\(\.blog-layout--posts-index\)\s+\.blog-rail\s*\{[^}]*grid-template-columns:\s*minmax\(10\.4rem,\s*0\.82fr\)\s+minmax\(0,\s*1\.18fr\);[^}]*posts-mobile-rail-bg\.png[^}]*center\s*\/\s*106%\s+106%\s+no-repeat,/s);
+    expect(stylesheet).toMatch(/body:has\(\.blog-layout--posts-index\)\s+\.blog-rail__brand\s*\{[^}]*min-height:\s*0;[^}]*border:\s*none;/s);
+    expect(stylesheet).toMatch(/body:has\(\.blog-layout--posts-index\)\s+\.blog-rail__brand-home\s*\{[^}]*width:\s*100%;[^}]*min-height:\s*0;/s);
+    expect(stylesheet).toMatch(/body:has\(\.blog-layout--posts-index\)\s+\.blog-rail__intro-text\s*\{[^}]*font-size:\s*clamp\(0\.78rem,\s*1\.8vw,\s*0\.94rem\);[^}]*overflow-wrap:\s*anywhere;/s);
+    expect(stylesheet).toMatch(/body:has\(\.blog-layout--posts-index\)\s+\.blog-rail__intro-text\s+span\s*\{[^}]*display:\s*block;[^}]*white-space:\s*normal;/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--photos-index\)\s+#menu,[\s\S]*\{[^}]*position:\s*fixed;[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\);/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--photos-index\)\s+#menu\s+\.site-nav-icon,[\s\S]*\{[^}]*display:\s*block;/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--posts-index\)\s+\.blog-rail__nav\s*\{[^}]*display:\s*none;/s);
