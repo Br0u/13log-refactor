@@ -110,19 +110,30 @@ describe("photos index page", () => {
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.dark:has\(\.blog-layout--photos-index\),\s*body\.dark:has\(\.blog-layout--photo-album\)\s*\{[^}]*photos-mobile-night-ink-bg\.png[^}]*no-repeat,/s);
   });
 
-  it("uses a dedicated mobile night photos layout without adding filter chips or album meta", () => {
+  it("keeps the mobile night photos layout close to the daytime layout without adding filter chips or album meta", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toContain('image-set(url("/images/backgrounds/photos-mobile-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/photos-mobile-night-ink-bg.png") type("image/png")) center top / cover no-repeat');
+    expect(stylesheet).toContain('url("/images/backgrounds/photos-mobile-night-ink-bg.png") center -4.25rem / 100% auto no-repeat');
     expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+#menu\s*\{[^}]*position:\s*fixed;[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\);/s);
     expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+#menu\s+\.site-nav-icon\s*\{[^}]*display:\s*block;/s);
     expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-mobile-intro\s*\{[^}]*display:\s*block;/s);
     expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.page-header\s+\.post-description\s*\{[^}]*color:\s*rgba\(224,\s*237,\s*255,\s*0\.92\);/s);
-    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-mobile-intro\s*\{[^}]*color:\s*rgba\(224,\s*237,\s*255,\s*0\.94\);/s);
-    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1\.1fr\)\s+minmax\(0,\s*0\.9fr\);/s);
-    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__annotation\s*\{[^}]*display:\s*none;/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-mobile-intro\s*\{[^}]*color:\s*rgba\(224,\s*237,\s*255,\s*0\.94\);[^}]*font-size:\s*16\.4px;[^}]*line-height:\s*32px;/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-grid\s*\{[^}]*gap:\s*1\.85rem;/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card\s*\{[^}]*gap:\s*1\.85rem;[^}]*padding-bottom:\s*2\.45rem;/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card::after\s*\{[^}]*display:\s*block;[^}]*border-bottom-color:\s*rgba\(126,\s*174,\s*238,\s*0\.22\);/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__cover\s*\{[^}]*max-width:\s*min\(100%,\s*18rem\);[^}]*border:\s*none;[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__annotation\s*\{[^}]*color:\s*rgba\(166,\s*197,\s*238,\s*0\.72\);/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__title,\s*body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__title\s+a\s*\{[^}]*border-left-color:\s*rgba\(126,\s*174,\s*238,\s*0\.46\);/s);
     expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__description\s*\{[^}]*color:\s*rgba\(224,\s*237,\s*255,\s*0\.88\);/s);
-    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-page-note\s*\{[^}]*display:\s*block;[^}]*border-left:\s*1px\s+solid\s+rgba\(126,\s*174,\s*238,\s*0\.18\);[^}]*color:\s*rgba\(224,\s*237,\s*255,\s*0\.88\);/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card\s*\{[^}]*grid-template-columns:\s*1fr;[^}]*gap:\s*1rem;[^}]*padding-bottom:\s*1\.8rem;/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__cover\s*\{[^}]*max-width:\s*min\(100%,\s*18rem\);[^}]*box-shadow:\s*none;/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__title,\s*body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__title\s+a\s*\{[^}]*width:\s*min\(100%,\s*18rem\);[^}]*padding-left:\s*32px;[^}]*font-size:\s*24px;[^}]*line-height:\s*36px;/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__description\s*\{[^}]*padding-left:\s*32px;[^}]*font-size:\s*16\.4px;[^}]*line-height:\s*32px;/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*480px\)\s*\{[\s\S]*body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__cover\s*\{[^}]*width:\s*100%;[^}]*max-width:\s*none;/s);
+    expect(stylesheet).not.toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1\.1fr\)\s+minmax\(0,\s*0\.9fr\);/s);
+    expect(stylesheet).not.toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-album-card__annotation\s*\{[^}]*display:\s*none;/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-page-note\s*\{[^}]*display:\s*block;[^}]*margin-top:\s*3\.6rem;[^}]*padding:\s*1\.6rem\s+0\s+0;[^}]*border-left:\s*none;[^}]*color:\s*rgba\(224,\s*237,\s*255,\s*0\.88\);[^}]*font-size:\s*16\.2px;[^}]*line-height:\s*31px;/s);
     expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-page-note\s*\{[^}]*border-radius:\s*0;[^}]*box-shadow:\s*none;[^}]*backdrop-filter:\s*none;/s);
     expect(stylesheet).not.toContain(".photo-filter");
     expect(stylesheet).not.toContain(".photo-category-chip");
