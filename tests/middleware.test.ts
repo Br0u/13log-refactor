@@ -6,6 +6,7 @@ import { middleware } from "../middleware";
 describe("risk middleware", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
   });
 
   it("skips static assets", async () => {
@@ -57,6 +58,24 @@ describe("risk middleware", () => {
         "sec-fetch-mode": "cors",
       },
     }));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("skips local development requests so local blacklists do not block previews", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(JSON.stringify({
+      action: "block",
+      status: 403,
+      reason: "blacklist",
+    }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    }));
+
+    const response = await middleware(new NextRequest("http://localhost:3001/"));
 
     expect(response.status).toBe(200);
     expect(response.headers.get("x-middleware-next")).toBe("1");

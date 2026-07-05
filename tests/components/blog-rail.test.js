@@ -8,6 +8,7 @@ describe("BlogRail", () => {
 
     expect(source).toContain('{ href: "/posts/", label: "/ POSTS", section: "posts" }');
     expect(source).toContain('{ href: "/link/", label: "/ LINK", section: "link" }');
+    expect(source).toContain('{ href: "/playzone/", label: "/ PLAYZONE", section: "playzone" }');
     expect(source).toContain('{ href: "/photos/", label: "/ PHOTOS", section: "photos" }');
     expect(source).toMatch(/function\s+resolveActiveSection\(variant\)\s*\{[^}]*variant\s*===\s*"detail"[^}]*return\s+"posts";/s);
   });

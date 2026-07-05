@@ -15,6 +15,7 @@ describe("link page", () => {
     expect(source).toContain('className="link-essay-list"');
     expect(source).toContain('className="link-essay-entry__eyebrow"');
     expect(source).toContain('className="link-essay-entry__body"');
+    expect(source).toContain('className="link-mobile-quote"');
     expect(source).not.toContain('className="posts-masonry"');
   });
 

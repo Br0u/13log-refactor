@@ -30,6 +30,27 @@ function extractLeadHero(html = "") {
   };
 }
 
+function AboutLocationCard({ modifier = "", titleId = "about-location-title" }) {
+  return (
+    <section className={`about-note__map-rail ${modifier}`}>
+      <section className="about-map about-note__location about-note__location--wide" aria-labelledby={titleId}>
+        <div className="about-note__location-header">
+          <p className="about-note__location-kicker">From</p>
+          <h2 id={titleId} className="about-note__location-title">Current Location</h2>
+        </div>
+
+        <div className="about-note__map-shell about-note__map-shell--banner">
+          <LocationMap
+            className="about-note__map-frame"
+            location="Toronto, Ontario"
+            coordinates="43.6532° N, 79.3832° W"
+          />
+        </div>
+      </section>
+    </section>
+  );
+}
+
 export default async function AboutPage() {
   const about = getAboutPage();
   const cleanedContent = stripLegacyMapSection(about.content || "");
@@ -45,22 +66,7 @@ export default async function AboutPage() {
           />
         ) : null}
 
-        <section className="about-note__map-rail about-note__map-rail--side">
-          <section className="about-map about-note__location about-note__location--wide" aria-labelledby="about-location-title">
-            <div className="about-note__location-header">
-              <p className="about-note__location-kicker">From</p>
-              <h2 id="about-location-title" className="about-note__location-title">Current Location</h2>
-            </div>
-
-            <div className="about-note__map-shell about-note__map-shell--banner">
-              <LocationMap
-                className="about-note__map-frame"
-                location="Toronto, Ontario"
-                coordinates="43.6532° N, 79.3832° W"
-              />
-            </div>
-          </section>
-        </section>
+        <AboutLocationCard modifier="about-note__map-rail--side" titleId="about-location-title-side" />
       </aside>
 
       <div className="about-note-layout__article">
@@ -71,6 +77,8 @@ export default async function AboutPage() {
               {about.description ? <p className="post-description about-note__dek">{about.description}</p> : null}
             </div>
           </header>
+
+          <AboutLocationCard modifier="about-note__map-rail--mobile" titleId="about-location-title-mobile" />
 
           <div className="about-note__body">
             <HtmlContent html={bodyHtml} className="post-content about-note__content" />

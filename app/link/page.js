@@ -107,6 +107,11 @@ export default async function LinkPage() {
             {idx < arr.length - 1 ? <div className="ink-divider" aria-hidden="true" /> : null}
           </section>
         ))}
+
+        <aside className="link-mobile-quote" aria-label="Link note">
+          <span className="link-mobile-quote__mark" aria-hidden="true">“</span>
+          <p>链接是记忆的锚点，<br />也是通往远方的路。</p>
+        </aside>
       </section>
     </div>
   );

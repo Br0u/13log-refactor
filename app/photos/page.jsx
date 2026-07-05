@@ -31,8 +31,13 @@ export default async function PhotosPage() {
       <BlogRail variant="photos" />
       <section className="blog-layout__main">
         <header className="page-header page-header--photos">
-          <h1>杂乱无章的册子</h1>
+          <h1>Photos</h1>
+          <div className="post-description">杂乱无章的册子</div>
         </header>
+
+        <div className="photo-mobile-intro">
+          <p>用镜头记录一些无意义的瞬间。</p>
+        </div>
 
         <div className="photo-album-grid">
           {albums.map((album) => (

@@ -11,4 +11,11 @@ describe("header nav styles", () => {
     expect(stylesheet).toMatch(/#menu\s+a\.active::after,\s*#menu\s+a\[aria-current="page"\]::after\s*\{[^}]*opacity:\s*1;[^}]*transform:\s*translateX\(-50%\)\s+scale\(1\);/s);
     expect(stylesheet).not.toMatch(/#menu\s+a::before\s*\{[^}]*content:\s*"\/";/s);
   });
+
+  it("keeps the dark mode header transparent so page artwork reaches the top edge", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.dark\s+\.header\s*\{[^}]*background:\s*transparent;/s);
+    expect(stylesheet).not.toMatch(/\.dark\s+\.header\s*\{[^}]*linear-gradient\(to bottom,/s);
+  });
 });

@@ -16,6 +16,14 @@ type RiskApiDecision = {
   status?: number;
 };
 
+function isLocalDevelopmentRequest(request: NextRequest) {
+  if (process.env.NODE_ENV !== "development") {
+    return false;
+  }
+
+  return ["localhost", "127.0.0.1", "::1", "[::1]"].includes(request.nextUrl.hostname);
+}
+
 async function evaluateRisk(request: NextRequest) {
   const geo = getRequestGeo(request);
   const referer = request.headers.get("referer") || "";
@@ -64,6 +72,10 @@ async function evaluateRisk(request: NextRequest) {
 
 export async function middleware(request: NextRequest) {
   if (!isProtectedPath(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
+  if (isLocalDevelopmentRequest(request)) {
     return NextResponse.next();
   }
 

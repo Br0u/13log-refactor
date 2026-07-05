@@ -21,6 +21,16 @@ describe("link page styles", () => {
     expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--link-index:not\(\.playzone-layout\)\)\s+\.link-essay-entry__preview\s*\{[^}]*border-color:\s*rgba\(105,\s*157,\s*226,\s*0\.22\);[^}]*opacity:\s*0\.72;[^}]*filter:\s*brightness\(0\.68\)\s+saturate\(0\.74\)\s+contrast\(1\.08\);/s);
   });
 
+  it("uses a dedicated mobile night link layout with bottom tabs", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toContain('image-set(url("/images/backgrounds/link-mobile-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/link-mobile-night-ink-bg.png") type("image/png")) center top / cover no-repeat');
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--link-index:not\(\.playzone-layout\)\)\s+#menu\s*\{[^}]*position:\s*fixed;[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\);/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--link-index:not\(\.playzone-layout\)\)\s+#menu\s+\.site-nav-icon\s*\{[^}]*display:\s*block;/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--link-index:not\(\.playzone-layout\)\)\s+\.link-essay-entry__layout\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(5\.4rem,\s*8\.7rem\);/s);
+    expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--link-index:not\(\.playzone-layout\)\)\s+\.link-mobile-quote\s*\{[^}]*display:\s*grid;/s);
+  });
+
   it("turns the link page into a quiet single-column reading flow", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
