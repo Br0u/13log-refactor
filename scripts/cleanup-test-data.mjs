@@ -47,6 +47,7 @@ export const TEST_TAG_SLUGS = [
   "test-13log-tag-match",
   "test-13log-tag-other",
   "test-13log-tag-cleanup",
+  "test-13log-transaction-rollback",
 ];
 
 export const TEST_MICRO_POST_CONTENTS = [
