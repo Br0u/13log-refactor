@@ -29,6 +29,7 @@ describe("mobile surface styles", () => {
   it("tightens the home hero controls for narrow screens", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
+    expect(stylesheet).toMatch(/\.profile-avatar-scene\s*\{[^}]*touch-action:\s*pan-y;/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*\.profile-avatar-scene\s*\{[^}]*width:\s*min\(16\.8rem,\s*72vw\);/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*\.profile\s+\.buttons\s*\{[^}]*display:\s*grid;[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*\.profile\s+\.button--playzone\s*\{[^}]*grid-column:\s*1\s*\/\s*-1;/s);
