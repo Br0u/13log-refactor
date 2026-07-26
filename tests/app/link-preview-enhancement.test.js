@@ -4,17 +4,66 @@ import { initLinkPreview } from "../../app/components/client-enhancements/linkPr
 
 afterEach(() => {
   document.body.innerHTML = "";
-  localStorage.clear();
+  window.localStorage?.clear();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
   if (window.IntersectionObserver) {
     delete window.IntersectionObserver;
-  }
-  if (globalThis.fetch) {
-    delete globalThis.fetch;
   }
 });
 
 describe("link preview enhancement", () => {
+  it("provides browser localStorage for cache behavior", () => {
+    expect(window.localStorage).toBeDefined();
+  });
+
+  it("applies a fresh cached preview without fetching", () => {
+    let observerCallback;
+    const unobserve = vi.fn();
+
+    window.IntersectionObserver = class IntersectionObserver {
+      constructor(callback) {
+        observerCallback = callback;
+      }
+
+      observe() {}
+      unobserve = unobserve;
+      disconnect() {}
+    };
+    vi.stubGlobal("fetch", vi.fn());
+
+    const url = "https://example.com/cached";
+    window.localStorage.setItem(
+      "link-preview-cache-v1",
+      JSON.stringify({
+        [url]: {
+          ts: Date.now(),
+          data: {
+            title: "Cached title",
+            description: "Cached description",
+            image: "",
+          },
+        },
+      })
+    );
+    document.body.innerHTML = `
+      <article data-link-card data-preview-enabled="true" data-preview-url="${url}">
+        <div data-preview-container class="is-empty"></div>
+        <div data-preview-title></div>
+        <div data-preview-desc class="is-empty"></div>
+      </article>
+    `;
+
+    const card = document.querySelector("[data-link-card]");
+    initLinkPreview();
+    observerCallback([{ isIntersecting: true, target: card }], { unobserve });
+
+    expect(document.querySelector("[data-preview-title]")?.textContent).toBe("Cached title");
+    expect(document.querySelector("[data-preview-desc]")?.textContent).toBe("Cached description");
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+    expect(unobserve).toHaveBeenCalledWith(card);
+  });
+
   it("returns a cleanup that disconnects the observer on route teardown", () => {
     const disconnect = vi.fn();
     const observe = vi.fn();
@@ -62,22 +111,25 @@ describe("link preview enhancement", () => {
     };
 
     let resolveFetch;
-    globalThis.fetch = vi.fn(
-      () =>
-        new Promise((resolve) => {
-          resolveFetch = () =>
-            resolve({
-              ok: true,
-              json: async () => ({
-                status: "success",
-                data: {
-                  title: "Fetched title",
-                  description: "Fetched description",
-                  image: { url: "https://example.com/preview.png" },
-                },
-              }),
-            });
-        })
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        () =>
+          new Promise((resolve) => {
+            resolveFetch = () =>
+              resolve({
+                ok: true,
+                json: async () => ({
+                  status: "success",
+                  data: {
+                    title: "Fetched title",
+                    description: "Fetched description",
+                    image: { url: "https://example.com/preview.png" },
+                  },
+                }),
+              });
+          })
+      )
     );
 
     document.body.innerHTML = `
