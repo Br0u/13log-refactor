@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { verifyInternalRiskBody } from "../../../../lib/internal-risk-auth";
 import {
   countBotAccessLogs,
   countRecentAccessLogs,
@@ -41,11 +42,18 @@ function json(body: unknown, status = 200) {
 }
 
 export async function POST(request: Request) {
-  if (request.headers.get("x-risk-internal") !== "1") {
+  const body = await request.text();
+  const isVerified = await verifyInternalRiskBody(
+    body,
+    request.headers.get("x-risk-timestamp"),
+    request.headers.get("x-risk-signature"),
+    Date.now(),
+  );
+  if (!isVerified) {
     return json({ error: "forbidden" }, 403);
   }
 
-  const payload = riskPayloadSchema.parse(await request.json());
+  const payload = riskPayloadSchema.parse(JSON.parse(body));
 
   const baseLog = {
     ipHash: payload.ipHash,

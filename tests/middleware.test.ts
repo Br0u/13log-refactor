@@ -1,12 +1,23 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 import { middleware } from "../middleware";
+import { verifyInternalRiskBody } from "../lib/internal-risk-auth";
+
+const RISK_SECRET = "risk-secret-that-is-at-least-32-characters";
+const SESSION_SECRET = "session-secret-that-is-at-least-32-characters";
+const INTERNAL_RISK_DEADLINE_MS = 2_000;
 
 describe("risk middleware", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllEnvs();
+    vi.stubEnv("RISK_INTERNAL_SECRET", RISK_SECRET);
+    vi.stubEnv("SESSION_SECRET", SESSION_SECRET);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("skips static assets", async () => {
@@ -108,7 +119,16 @@ describe("risk middleware", () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
 
     const [, init] = fetchSpy.mock.calls[0];
-    const payload = JSON.parse(String(init?.body));
+    const body = String(init?.body);
+    const headers = new Headers(init?.headers);
+    const payload = JSON.parse(body);
+    await expect(verifyInternalRiskBody(
+      body,
+      headers.get("x-risk-timestamp"),
+      headers.get("x-risk-signature"),
+      Number(headers.get("x-risk-timestamp")),
+    )).resolves.toBe(true);
+    expect(headers.has("x-risk-internal")).toBe(false);
     expect(payload.path).toBe("/posts");
     expect(payload.country).toBe("CA");
     expect(payload.riskScore).toBe(0);
@@ -165,5 +185,107 @@ describe("risk middleware", () => {
     const response = await middleware(request);
 
     expect(response.status).toBe(429);
+  });
+
+  it("fails open when the internal risk fetch rejects", async () => {
+    vi.spyOn(globalThis, "fetch").mockRejectedValueOnce(new Error("network unavailable"));
+
+    const response = await middleware(new NextRequest("http://localhost:3000/posts"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it("fails open when the internal risk service returns a non-2xx response", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response("forbidden", {
+      status: 403,
+    }));
+
+    const response = await middleware(new NextRequest("http://localhost:3000/posts"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it("fails open when the internal risk response is not valid JSON", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response("not-json", {
+      status: 200,
+    }));
+
+    const response = await middleware(new NextRequest("http://localhost:3000/posts"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it.each([
+    ["block with an out-of-range status", { action: "block", status: 999 }],
+    ["block without a status", { action: "block" }],
+    ["an unknown action", { action: "deny", status: 403 }],
+  ])("fails open for a 2xx decision containing %s", async (_label, decision) => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(
+      JSON.stringify(decision),
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      },
+    ));
+
+    const response = await middleware(new NextRequest("http://localhost:3000/posts"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it("aborts a hanging internal risk request and fails open at the deadline", async () => {
+    vi.useFakeTimers();
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementationOnce((
+      _input,
+      init,
+    ) => new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => {
+        reject(new DOMException("The operation was aborted", "AbortError"));
+      }, { once: true });
+    }));
+
+    const responsePromise = middleware(new NextRequest("http://localhost:3000/posts"));
+    await vi.waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+    });
+    const [, init] = fetchSpy.mock.calls[0];
+    expect(init?.signal).toBeInstanceOf(AbortSignal);
+
+    await vi.advanceTimersByTimeAsync(INTERNAL_RISK_DEADLINE_MS);
+    const response = await responsePromise;
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it.each([
+    ["missing", undefined, SESSION_SECRET],
+    ["short", "too-short", SESSION_SECRET],
+    ["same as SESSION_SECRET", SESSION_SECRET, SESSION_SECRET],
+  ])("fails open without fetching when RISK_INTERNAL_SECRET is %s", async (
+    _label,
+    riskSecret,
+    sessionSecret,
+  ) => {
+    vi.stubEnv("RISK_INTERNAL_SECRET", riskSecret);
+    vi.stubEnv("SESSION_SECRET", sessionSecret);
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(
+      JSON.stringify({ action: "block", status: 403 }),
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      },
+    ));
+
+    const response = await middleware(new NextRequest("http://localhost:3000/posts"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

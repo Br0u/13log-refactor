@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { signInternalRiskBody } from "./lib/internal-risk-auth";
 import {
   computeRiskAssessment,
   getClientIp,
@@ -11,10 +12,29 @@ import {
   summarizeIpAddress,
 } from "./lib/risk-control";
 
-type RiskApiDecision = {
-  action?: "allow" | "block";
-  status?: number;
-};
+type RiskApiDecision =
+  | { action: "allow" }
+  | { action: "block"; status: 403 | 429 };
+
+const INTERNAL_RISK_DEADLINE_MS = 2_000;
+
+function normalizeRiskApiDecision(value: unknown): RiskApiDecision {
+  if (
+    typeof value === "object"
+    && value !== null
+    && "action" in value
+    && value.action === "block"
+    && "status" in value
+    && (value.status === 403 || value.status === 429)
+  ) {
+    return {
+      action: "block",
+      status: value.status,
+    };
+  }
+
+  return { action: "allow" };
+}
 
 function isLocalDevelopmentRequest(request: NextRequest) {
   if (process.env.NODE_ENV !== "development") {
@@ -24,7 +44,7 @@ function isLocalDevelopmentRequest(request: NextRequest) {
   return ["localhost", "127.0.0.1", "::1", "[::1]"].includes(request.nextUrl.hostname);
 }
 
-async function evaluateRisk(request: NextRequest) {
+async function evaluateRisk(request: NextRequest): Promise<RiskApiDecision> {
   const geo = getRequestGeo(request);
   const referer = request.headers.get("referer") || "";
   const userAgent = request.headers.get("user-agent") || "";
@@ -38,36 +58,45 @@ async function evaluateRisk(request: NextRequest) {
     isDataCenter: isDataCenterRequest(request),
   });
 
-  const response = await fetch(new URL("/api/internal/risk", request.url), {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-risk-internal": "1",
-    },
-    body: JSON.stringify({
-      ipHash,
-      ipSummary,
-      path: request.nextUrl.pathname,
-      country: geo.country,
-      region: geo.region,
-      city: geo.city,
-      userAgent,
-      referer,
-      riskScore: assessment.riskScore,
-      riskLabel: assessment.riskLabel,
-      method: request.method,
-    }),
+  const body = JSON.stringify({
+    ipHash,
+    ipSummary,
+    path: request.nextUrl.pathname,
+    country: geo.country,
+    region: geo.region,
+    city: geo.city,
+    userAgent,
+    referer,
+    riskScore: assessment.riskScore,
+    riskLabel: assessment.riskLabel,
+    method: request.method,
   });
+  const signed = await signInternalRiskBody(body, Date.now());
+  const controller = new AbortController();
+  const deadline = setTimeout(() => {
+    controller.abort();
+  }, INTERNAL_RISK_DEADLINE_MS);
 
-  if (!response.ok) {
-    return { action: "allow" } satisfies RiskApiDecision;
+  try {
+    const response = await fetch(new URL("/api/internal/risk", request.url), {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-risk-timestamp": signed.timestamp,
+        "x-risk-signature": signed.signature,
+      },
+      body,
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      return { action: "allow" };
+    }
+
+    return normalizeRiskApiDecision(await response.json());
+  } finally {
+    clearTimeout(deadline);
   }
-
-  const decision = await response.json() as RiskApiDecision;
-  return {
-    action: decision.action || "allow",
-    status: decision.status,
-  };
 }
 
 export async function middleware(request: NextRequest) {
@@ -83,10 +112,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const decision = await evaluateRisk(request);
+  let decision: RiskApiDecision;
+  try {
+    decision = await evaluateRisk(request);
+  } catch {
+    return NextResponse.next();
+  }
   if (decision.action === "block") {
     return new NextResponse("Forbidden", {
-      status: decision.status || 403,
+      status: decision.status,
     });
   }
 
