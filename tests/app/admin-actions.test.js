@@ -1,8 +1,13 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { redirectMock, revalidatePathMock } = vi.hoisted(() => ({
+const { redirectMock, revalidatePathMock, requireAdminSessionMock } = vi.hoisted(() => ({
   redirectMock: vi.fn(),
   revalidatePathMock: vi.fn(),
+  requireAdminSessionMock: vi.fn(),
+}));
+
+vi.mock("../../lib/admin-session", () => ({
+  requireAdminSession: requireAdminSessionMock,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -35,6 +40,7 @@ describe("admin actions", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    requireAdminSessionMock.mockResolvedValue({ username: "admin" });
 
     await db.comment.deleteMany({
       where: {

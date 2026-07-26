@@ -13,6 +13,7 @@ const {
   removeCommentMock,
   approveGuestbookEntryMock,
   removeGuestbookEntryMock,
+  requireAdminSessionMock,
 } = vi.hoisted(() => ({
   redirectMock: vi.fn(),
   revalidatePathMock: vi.fn(),
@@ -26,6 +27,11 @@ const {
   removeCommentMock: vi.fn(),
   approveGuestbookEntryMock: vi.fn(),
   removeGuestbookEntryMock: vi.fn(),
+  requireAdminSessionMock: vi.fn(),
+}));
+
+vi.mock("../../lib/admin-session", () => ({
+  requireAdminSession: requireAdminSessionMock,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -104,6 +110,7 @@ import { db } from "../../lib/db";
 describe("admin action cache behavior", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    requireAdminSessionMock.mockResolvedValue({ username: "admin" });
   });
 
   it("updates a post without relying on next/cache.refresh and invalidates related routes", async () => {

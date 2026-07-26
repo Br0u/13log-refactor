@@ -6,6 +6,7 @@ import { deletePhotoAction } from "../../../actions";
 import AdminConfirmSubmitButton from "../../../../../components/admin/AdminConfirmSubmitButton";
 import AdminPhotoCategoryForm from "../../../../../components/admin/AdminPhotoCategoryForm";
 import AdminPhotoForm from "../../../../../components/admin/AdminPhotoForm";
+import { requireAdminSession } from "../../../../../lib/admin-session";
 import { getPhotoAlbumCopy } from "../../../../../lib/photo-album-copy";
 import { getPhotoCategoryById, listPhotoCategories, updatePhotoCategory } from "../../../../../lib/repositories/photo-categories";
 import { listAdminPhotos } from "../../../../../lib/repositories/photos";
@@ -86,6 +87,7 @@ export default async function AdminPhotoAlbumPage({ params, searchParams }) {
 
   async function updatePhotoCategoryAction(_previousState, formData) {
     "use server";
+    await requireAdminSession();
 
     try {
       const name = String(formData.get("name") || "").trim();

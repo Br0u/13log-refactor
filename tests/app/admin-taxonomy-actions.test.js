@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { revalidatePathMock } = vi.hoisted(() => ({
+const { revalidatePathMock, requireAdminSessionMock } = vi.hoisted(() => ({
   revalidatePathMock: vi.fn(),
+  requireAdminSessionMock: vi.fn(),
+}));
+
+vi.mock("../../lib/admin-session", () => ({
+  requireAdminSession: requireAdminSessionMock,
 }));
 
 vi.mock("next/cache", () => ({
@@ -14,6 +19,7 @@ import { deleteCategoryAction, deleteTagAction } from "../../app/admin/actions";
 describe("admin taxonomy actions", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    requireAdminSessionMock.mockResolvedValue({ username: "admin" });
 
     await db.tag.deleteMany({
       where: {

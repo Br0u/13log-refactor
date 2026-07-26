@@ -3,12 +3,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 const TEST_SESSION_SECRET = "test-session-secret-that-is-at-least-32-characters";
 
-const { redirectMock, cookiesMock, readAdminSessionMock } = vi.hoisted(() => ({
+const { redirectMock, requireAdminSessionMock } = vi.hoisted(() => ({
   redirectMock: vi.fn(() => {
     throw new Error("NEXT_REDIRECT");
   }),
-  cookiesMock: vi.fn(),
-  readAdminSessionMock: vi.fn(),
+  requireAdminSessionMock: vi.fn(),
 }));
 
 vi.mock("../../lib/auth", async () => {
@@ -28,17 +27,9 @@ vi.mock("next/navigation", () => ({
   redirect: redirectMock,
 }));
 
-vi.mock("next/headers", () => ({
-  cookies: cookiesMock,
+vi.mock("../../lib/admin-session", () => ({
+  requireAdminSession: requireAdminSessionMock,
 }));
-
-vi.mock("../../lib/session", async () => {
-  const actual = await vi.importActual("../../lib/session");
-  return {
-    ...actual,
-    readAdminSession: readAdminSessionMock,
-  };
-});
 
 import ProtectedAdminLayout from "../../app/admin/(protected)/layout";
 import { POST as loginRoute } from "../../app/api/admin/login/route";
@@ -50,11 +41,7 @@ describe("admin auth", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
     vi.clearAllMocks();
-    cookiesMock.mockResolvedValue({
-      get() {
-        return undefined;
-      },
-    });
+    requireAdminSessionMock.mockImplementation(async () => redirectMock("/admin/login"));
   });
 
   afterEach(() => {
@@ -63,18 +50,14 @@ describe("admin auth", () => {
     vi.restoreAllMocks();
   });
 
-  it("redirects unauthenticated admin layout requests to the login page", async () => {
+  it("requires an admin session before rendering the protected layout", async () => {
     await expect(ProtectedAdminLayout({ children: null })).rejects.toThrow("NEXT_REDIRECT");
+    expect(requireAdminSessionMock).toHaveBeenCalledOnce();
     expect(redirectMock).toHaveBeenCalledWith("/admin/login");
   });
 
   it("includes a Photos navigation item in the protected admin shell", async () => {
-    cookiesMock.mockResolvedValue({
-      get() {
-        return { value: "admin-session-token" };
-      },
-    });
-    readAdminSessionMock.mockResolvedValue({
+    requireAdminSessionMock.mockResolvedValue({
       username: "admin",
     });
 

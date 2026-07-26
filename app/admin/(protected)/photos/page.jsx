@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import AdminAutoSubmitSelect from "../../../../components/admin/AdminAutoSubmitSelect";
 import AdminPhotoCategoryForm from "../../../../components/admin/AdminPhotoCategoryForm";
+import { requireAdminSession } from "../../../../lib/admin-session";
 import { createPhotoCategory, getPhotoCategoryById, listPhotoCategories, updatePhotoCategory } from "../../../../lib/repositories/photo-categories";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +15,7 @@ export const metadata = {
 
 async function createPhotoCategoryAction(_previousState, formData) {
   "use server";
+  await requireAdminSession();
 
   try {
     const name = String(formData.get("name") || "").trim();
@@ -42,6 +44,7 @@ async function createPhotoCategoryAction(_previousState, formData) {
 
 async function updatePhotoCategoryStatusAction(categoryId, formData) {
   "use server";
+  await requireAdminSession();
 
   const category = await getPhotoCategoryById(categoryId);
   if (!category) {
