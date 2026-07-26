@@ -1011,67 +1011,165 @@ body.dark::before {
   justify-content: center;
   margin-bottom: -0.22rem;
   outline: none;
+  perspective: 48rem;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .profile-avatar-scene {
+  --avatar-parallax-x: 0;
+  --avatar-parallax-y: 0;
   position: relative;
   width: min(21.5rem, 80vw);
   aspect-ratio: 1;
   overflow: hidden;
   border-radius: 50%;
   background: transparent;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s ease;
+  touch-action: pan-y;
+  transform:
+    rotateX(calc(var(--avatar-parallax-y) * -6deg))
+    rotateY(calc(var(--avatar-parallax-x) * 6deg));
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
-.profile-avatar-image {
+.profile-avatar-viewport,
+.profile-avatar-state,
+.profile-avatar-layer {
   position: absolute;
   inset: 0;
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.profile-avatar-viewport {
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.profile-avatar-state {
+  opacity: 0;
+  transition: opacity 0.42s ease;
+}
+
+.profile-avatar-state--base {
+  opacity: 1;
+  --avatar-middle-mask: radial-gradient(ellipse 43% 34% at 62% 58%, #000 46%, rgba(0, 0, 0, 0.94) 58%, transparent 76%);
+  --avatar-front-mask: radial-gradient(ellipse 30% 25% at 66% 26%, #000 44%, rgba(0, 0, 0, 0.94) 58%, transparent 76%);
+  --avatar-middle-cutout: radial-gradient(ellipse 45% 36% at 62% 58%, transparent 48%, #000 74%);
+  --avatar-front-cutout: radial-gradient(ellipse 32% 27% at 66% 26%, transparent 46%, #000 74%);
+}
+
+.profile-avatar-state--hover {
+  --avatar-middle-mask: radial-gradient(ellipse 45% 35% at 62% 60%, #000 46%, rgba(0, 0, 0, 0.94) 58%, transparent 76%);
+  --avatar-front-mask: radial-gradient(ellipse 31% 28% at 78% 27%, #000 44%, rgba(0, 0, 0, 0.94) 58%, transparent 77%);
+  --avatar-middle-cutout: radial-gradient(ellipse 47% 37% at 62% 60%, transparent 48%, #000 74%);
+  --avatar-front-cutout: radial-gradient(ellipse 33% 30% at 78% 27%, transparent 46%, #000 75%);
+}
+
+.profile-avatar-state--night {
+  --avatar-middle-mask: radial-gradient(ellipse 46% 38% at 65% 61%, #000 46%, rgba(0, 0, 0, 0.95) 59%, transparent 77%);
+  --avatar-front-mask: radial-gradient(ellipse 28% 23% at 63% 66%, #000 43%, rgba(0, 0, 0, 0.95) 58%, transparent 76%);
+  --avatar-middle-cutout: radial-gradient(ellipse 48% 40% at 65% 61%, transparent 48%, #000 75%);
+  --avatar-front-cutout: radial-gradient(ellipse 30% 25% at 63% 66%, transparent 46%, #000 74%);
+}
+
+.profile-avatar-layer {
   object-fit: cover;
   user-select: none;
   pointer-events: none;
-  transition:
-    opacity 0.42s ease,
-    transform 0.52s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.52s ease;
+  backface-visibility: hidden;
 }
 
-.profile-avatar-image--base {
+.profile-avatar-layer--fallback {
   opacity: 1;
-  transform: scale(1);
+  transform: scale(1.02);
 }
 
-.profile-avatar-image--hover {
+.profile-avatar-layer--background,
+.profile-avatar-layer--middle,
+.profile-avatar-layer--front {
   opacity: 0;
-  transform: scale(1.035) translateY(0.08rem);
-  filter: brightness(1.03) contrast(1.03) saturate(1.06);
 }
 
-.profile-avatar-image--night {
-  opacity: 0;
-  transform: scale(1.018);
-  filter: brightness(0.98) contrast(1.06) saturate(0.95);
+@supports ((mask-image: radial-gradient(circle, #000, transparent)) or (-webkit-mask-image: radial-gradient(circle, #000, transparent))) {
+  .profile-avatar-layer--fallback {
+    filter: blur(0.42rem);
+    transform: scale(1.08);
+  }
+
+  .profile-avatar-layer--background,
+  .profile-avatar-layer--middle,
+  .profile-avatar-layer--front {
+    opacity: 1;
+  }
+
+  .profile-avatar-layer--background {
+    -webkit-mask-image: var(--avatar-middle-cutout), var(--avatar-front-cutout);
+    -webkit-mask-composite: source-in;
+    mask-image: var(--avatar-middle-cutout), var(--avatar-front-cutout);
+    mask-composite: intersect;
+    transform:
+      translate3d(
+        calc(var(--avatar-parallax-x) * -2.5px),
+        calc(var(--avatar-parallax-y) * -2px),
+        0
+      )
+      scale(1.055);
+  }
+
+  .profile-avatar-layer--middle {
+    -webkit-mask-image: var(--avatar-middle-mask);
+    mask-image: var(--avatar-middle-mask);
+    transform:
+      translate3d(
+        calc(var(--avatar-parallax-x) * 5px),
+        calc(var(--avatar-parallax-y) * 4px),
+        1rem
+      )
+      scale(1.035);
+  }
+
+  .profile-avatar-layer--front {
+    -webkit-mask-image: var(--avatar-front-mask);
+    mask-image: var(--avatar-front-mask);
+    transform:
+      translate3d(
+        calc(var(--avatar-parallax-x) * 9px),
+        calc(var(--avatar-parallax-y) * 8px),
+        2rem
+      )
+      scale(1.045);
+  }
 }
 
-.profile-avatar-card:hover .profile-avatar-scene,
-.profile-avatar-card:focus-within .profile-avatar-scene {
-  transform: translateY(-0.08rem);
+@media (hover: hover) and (pointer: fine) {
+  .profile-avatar-card:hover,
+  .profile-avatar-card:focus-visible {
+    transform: translateY(-0.08rem);
+  }
+
+  .profile-avatar-card:hover .profile-avatar-state--base,
+  .profile-avatar-card:focus-visible .profile-avatar-state--base {
+    opacity: 0;
+  }
+
+  .profile-avatar-card:hover .profile-avatar-state--hover,
+  .profile-avatar-card:focus-visible .profile-avatar-state--hover {
+    opacity: 1;
+  }
 }
 
-.profile-avatar-card:hover .profile-avatar-image--base,
-.profile-avatar-card:focus-within .profile-avatar-image--base {
-  opacity: 0;
-  filter: brightness(1.02) contrast(1.02);
-  transform: scale(0.985);
-}
+@media (hover: none) and (pointer: coarse) and (prefers-reduced-motion: no-preference) {
+  .profile-avatar-scene[data-parallax-active="false"] .profile-avatar-viewport {
+    animation: profileAvatarBreath 5.6s ease-in-out infinite;
+  }
 
-.profile-avatar-card:hover .profile-avatar-image--hover,
-.profile-avatar-card:focus-within .profile-avatar-image--hover {
-  opacity: 1;
-  filter: brightness(1.04) contrast(1.02);
-  transform: scale(1) translateY(0);
+  @keyframes profileAvatarBreath {
+    0%,
+    100% { transform: scale(1); }
+    50% { transform: scale(1.004); }
+  }
 }
 
 body.dark.list:has(.profile--rainy-mask) .main .profile.profile--rainy-mask {
@@ -1101,28 +1199,13 @@ body.dark.list:has(.profile--rainy-mask) .profile-avatar-scene {
   filter: none;
 }
 
-body.dark.list:has(.profile--rainy-mask) .profile-avatar-image--base,
-body.dark.list:has(.profile--rainy-mask) .profile-avatar-image--hover {
+body.dark.list:has(.profile--rainy-mask) .profile-avatar-state--base,
+body.dark.list:has(.profile--rainy-mask) .profile-avatar-state--hover {
   opacity: 0;
 }
 
-body.dark.list:has(.profile--rainy-mask) .profile-avatar-image--night {
+body.dark.list:has(.profile--rainy-mask) .profile-avatar-state--night {
   opacity: 1;
-  transform: scale(1);
-}
-
-body.dark.list:has(.profile--rainy-mask) .profile-avatar-card:hover .profile-avatar-image--base,
-body.dark.list:has(.profile--rainy-mask) .profile-avatar-card:focus-within .profile-avatar-image--base,
-body.dark.list:has(.profile--rainy-mask) .profile-avatar-card:hover .profile-avatar-image--hover,
-body.dark.list:has(.profile--rainy-mask) .profile-avatar-card:focus-within .profile-avatar-image--hover {
-  opacity: 0;
-}
-
-body.dark.list:has(.profile--rainy-mask) .profile-avatar-card:hover .profile-avatar-image--night,
-body.dark.list:has(.profile--rainy-mask) .profile-avatar-card:focus-within .profile-avatar-image--night {
-  opacity: 1;
-  transform: scale(1.018);
-  filter: brightness(1.04) contrast(1.05) saturate(1.02);
 }
 
 body.dark.list:has(.profile--rainy-mask) .profile h1 {
@@ -1460,9 +1543,28 @@ body.dark.list:has(.profile--rainy-mask) .profile .button-icon {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .profile-avatar-card,
   .profile-avatar-scene,
-  .profile-avatar-image {
+  .profile-avatar-viewport,
+  .profile-avatar-state,
+  .profile-avatar-layer {
+    animation: none;
     transition: none;
+  }
+
+  .profile-avatar-scene {
+    transform: none;
+  }
+
+  .profile-avatar-layer--fallback {
+    filter: none;
+    transform: none;
+  }
+
+  .profile-avatar-layer--background,
+  .profile-avatar-layer--middle,
+  .profile-avatar-layer--front {
+    opacity: 0;
   }
 
   .main .profile.profile--rainy-mask::after {
