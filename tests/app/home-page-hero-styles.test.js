@@ -40,6 +40,8 @@ describe("home page hero styles", () => {
     expect(stylesheet).toMatch(/\.profile h1\s*\{[^}]*margin-top:\s*0;/s);
     expect(stylesheet).not.toContain(".profile-avatar-note");
     expect(stylesheet).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*\.profile-avatar-layer--fallback[\s\S]*filter:\s*none;/s);
+    expect(stylesheet).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*\.profile-avatar-card:hover,[\s\S]*\.profile-avatar-card:focus-visible\s*\{[^}]*transform:\s*none;/s);
+    expect(stylesheet).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*\.profile-avatar-layer--background,[\s\S]*\.profile-avatar-layer--middle,[\s\S]*\.profile-avatar-layer--front\s*\{[^}]*opacity:\s*0;/s);
     expect(stylesheet).toMatch(/@media\s*\(hover:\s*none\)\s+and\s+\(pointer:\s*coarse\)[\s\S]*\.profile-avatar-scene\[data-parallax-active="false"\][\s\S]*@keyframes\s+profileAvatarBreath/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*480px\)[\s\S]*\.profile-avatar-scene\s*\{[^}]*width:\s*min\(14\.6rem,\s*70vw\);/s);
   });

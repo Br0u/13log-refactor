@@ -1125,7 +1125,7 @@ body.dark::before {
       translate3d(
         calc(var(--avatar-parallax-x) * 5px),
         calc(var(--avatar-parallax-y) * 4px),
-        1rem
+        0
       )
       scale(1.035);
   }
@@ -1137,7 +1137,7 @@ body.dark::before {
       translate3d(
         calc(var(--avatar-parallax-x) * 9px),
         calc(var(--avatar-parallax-y) * 8px),
-        2rem
+        0
       )
       scale(1.045);
   }
@@ -1553,6 +1553,11 @@ body.dark.list:has(.profile--rainy-mask) .profile .button-icon {
   }
 
   .profile-avatar-scene {
+    transform: none;
+  }
+
+  .profile-avatar-card:hover,
+  .profile-avatar-card:focus-visible {
     transform: none;
   }
 
