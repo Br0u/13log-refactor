@@ -85,11 +85,30 @@ Import existing Markdown posts into the database:
 node --env-file=.env scripts/migrate-markdown-to-db.mjs
 ```
 
-Clean integration-test data from the database:
+Integration tests and their cleanup must use a dedicated test database. Copy
+`.env.test.example` to `.env.test`, set `TEST_DATABASE_URL` to that isolated
+database, and leave `TEST_DATABASE_GUARD=13log-test-only` unchanged. The test
+URL must not identify the same host, effective port, and database name as
+`DATABASE_URL`.
+
+Prepare and run the isolated database suite:
+
+```bash
+npm run db:test:migrate
+npm run test:db
+```
+
+Clean only the exact allowlisted `test-13log-` fixtures from the isolated test
+database:
 
 ```bash
 npm run db:cleanup:test-data
 ```
+
+The migration, integration-test, and cleanup commands refuse to run when the
+test URL or exact guard token is missing, or when the test database matches the
+normal database. Never bypass that refusal and never point `.env.test` at a
+development, staging, or production database.
 
 ### Testing
 

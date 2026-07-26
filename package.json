@@ -13,7 +13,7 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "node --env-file=.env prisma/seed.mjs",
     "db:test:migrate": "node --env-file=.env --env-file=.env.test scripts/prepare-test-database.mjs",
-    "db:cleanup:test-data": "node --env-file=.env scripts/cleanup-test-data.mjs",
+    "db:cleanup:test-data": "node --env-file=.env --env-file=.env.test scripts/cleanup-test-data.mjs",
     "db:import:legacy-photos": "node --experimental-default-type=module --env-file=.env scripts/import-legacy-photos.mjs"
   },
   "dependencies": {

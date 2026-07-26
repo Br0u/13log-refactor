@@ -28,11 +28,11 @@ describe("admin actions", () => {
 
   beforeAll(async () => {
     const category = await db.category.upsert({
-      where: { slug: "admin-actions-test" },
+      where: { slug: "test-13log-admin-category" },
       update: {},
       create: {
-        name: "Admin Actions Test",
-        slug: "admin-actions-test",
+        name: "test-13log-admin-category",
+        slug: "test-13log-admin-category",
       },
     });
     categoryId = category.id;
@@ -46,7 +46,7 @@ describe("admin actions", () => {
       where: {
         post: {
           slug: {
-            in: ["admin-actions-post", "admin-actions-comment-post"],
+            in: ["test-13log-admin-post", "test-13log-admin-comment-post"],
           },
         },
       },
@@ -55,7 +55,7 @@ describe("admin actions", () => {
       where: {
         post: {
           slug: {
-            in: ["admin-actions-post", "admin-actions-comment-post"],
+            in: ["test-13log-admin-post", "test-13log-admin-comment-post"],
           },
         },
       },
@@ -64,7 +64,7 @@ describe("admin actions", () => {
       where: {
         post: {
           slug: {
-            in: ["admin-actions-post", "admin-actions-comment-post"],
+            in: ["test-13log-admin-post", "test-13log-admin-comment-post"],
           },
         },
       },
@@ -72,7 +72,7 @@ describe("admin actions", () => {
     await db.post.deleteMany({
       where: {
         slug: {
-          in: ["admin-actions-post", "admin-actions-comment-post"],
+          in: ["test-13log-admin-post", "test-13log-admin-comment-post"],
         },
       },
     });
@@ -81,11 +81,11 @@ describe("admin actions", () => {
   it("deletes a post from the admin action", async () => {
     const post = await createPost({
       title: "Admin Actions Post",
-      slug: "admin-actions-post",
+      slug: "test-13log-admin-post",
       markdown: "# delete",
       status: "PUBLISHED",
       categoryId,
-      tags: ["admin"],
+      tags: ["test-13log-tag-admin"],
     });
 
     await deletePostAction(post.id);
@@ -101,15 +101,15 @@ describe("admin actions", () => {
   it("deletes a comment from the admin action", async () => {
     await createPost({
       title: "Admin Comment Post",
-      slug: "admin-actions-comment-post",
+      slug: "test-13log-admin-comment-post",
       markdown: "# comments",
       status: "PUBLISHED",
       categoryId,
-      tags: ["admin"],
+      tags: ["test-13log-tag-admin"],
     });
 
     const comment = await createComment({
-      slug: "admin-actions-comment-post",
+      slug: "test-13log-admin-comment-post",
       nickname: "tester",
       content: "remove this",
     });

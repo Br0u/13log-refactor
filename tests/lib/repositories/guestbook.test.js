@@ -12,14 +12,14 @@ describe("guestbook repository", () => {
     await db.guestbookEntry.deleteMany({
       where: {
         nickname: {
-          startsWith: "guestbook-test-",
+          startsWith: "test-13log-guestbook-repository-",
         },
       },
     });
   });
 
   it("creates pending entries and only returns them after approval", async () => {
-    const nickname = "guestbook-test-user";
+    const nickname = "test-13log-guestbook-repository-user";
     const created = await createGuestbookEntry({
       nickname,
       content: "hello from guestbook",
@@ -36,7 +36,7 @@ describe("guestbook repository", () => {
 
   it("removes a guestbook entry", async () => {
     const created = await createGuestbookEntry({
-      nickname: "guestbook-test-delete",
+      nickname: "test-13log-guestbook-repository-delete",
       content: "delete me",
     });
 

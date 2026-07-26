@@ -8,11 +8,11 @@ describe("post like api", () => {
 
   beforeAll(async () => {
     const category = await db.category.upsert({
-      where: { slug: "likes-api-test" },
+      where: { slug: "test-13log-likes-api-category" },
       update: {},
       create: {
-        name: "Likes API Test",
-        slug: "likes-api-test",
+        name: "test-13log-likes-api-category",
+        slug: "test-13log-likes-api-category",
       },
     });
     categoryId = category.id;
@@ -21,33 +21,36 @@ describe("post like api", () => {
   beforeEach(async () => {
     await db.postLike.deleteMany({
       where: {
-        post: { slug: "likes-api-post" },
+        post: { slug: "test-13log-likes-api-post" },
       },
     });
     await db.post.deleteMany({
-      where: { slug: "likes-api-post" },
+      where: { slug: "test-13log-likes-api-post" },
     });
 
     await createPost({
       title: "Likes API Post",
-      slug: "likes-api-post",
+      slug: "test-13log-likes-api-post",
       markdown: "# like route",
       status: "PUBLISHED",
       categoryId,
-      tags: ["api"],
+      tags: ["test-13log-tag-api"],
     });
   });
 
   it("returns the current count after a like request", async () => {
-    const request = new Request("http://localhost:3000/api/posts/likes-api-post/like", {
-      method: "POST",
-      headers: {
-        cookie: "visitor_key=api-visitor",
-      },
-    });
+    const request = new Request(
+      "http://localhost:3000/api/posts/test-13log-likes-api-post/like",
+      {
+        method: "POST",
+        headers: {
+          cookie: "visitor_key=api-visitor",
+        },
+      }
+    );
 
     const response = await likeRoute(request, {
-      params: Promise.resolve({ slug: "likes-api-post" }),
+      params: Promise.resolve({ slug: "test-13log-likes-api-post" }),
     });
     const body = await response.json();
 

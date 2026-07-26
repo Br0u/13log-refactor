@@ -9,17 +9,17 @@ describe("micro post like api", () => {
   beforeEach(async () => {
     await db.microPostLike.deleteMany({
       where: {
-        microPost: { content: "likes-api-micro-post" },
+        microPost: { content: "[test-13log] likes-api" },
       },
     });
     await db.microPost.deleteMany({
-      where: { content: "likes-api-micro-post" },
+      where: { content: "[test-13log] likes-api" },
     });
 
     const microPost = await createMicroPost({
-      content: "likes-api-micro-post",
+      content: "[test-13log] likes-api",
       status: "PUBLISHED",
-      tags: ["api"],
+      tags: ["test-13log-tag-api"],
     });
     microPostId = microPost.id;
   });

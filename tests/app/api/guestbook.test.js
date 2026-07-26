@@ -7,14 +7,14 @@ describe("guestbook api", () => {
     await db.guestbookEntry.deleteMany({
       where: {
         nickname: {
-          startsWith: "guestbook-api-",
+          startsWith: "test-13log-guestbook-api-",
         },
       },
     });
   });
 
   it("submits pending entries and lists only approved ones", async () => {
-    const nickname = "guestbook-api-user";
+    const nickname = "test-13log-guestbook-api-user";
     const postRequest = new Request("http://localhost:3000/api/guestbook", {
       method: "POST",
       headers: {

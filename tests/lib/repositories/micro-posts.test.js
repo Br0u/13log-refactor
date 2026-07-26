@@ -23,7 +23,11 @@ describe("micro post repository", () => {
     await db.microPost.deleteMany({
       where: {
         content: {
-          in: ["micro draft", "micro published", "micro updated"],
+          in: [
+            "[test-13log] repository-draft",
+            "[test-13log] repository-published",
+            "[test-13log] repository-updated",
+          ],
         },
       },
     });
@@ -31,33 +35,36 @@ describe("micro post repository", () => {
 
   it("creates and updates a tagged micro post", async () => {
     const created = await createMicroPost({
-      content: "micro draft",
+      content: "[test-13log] repository-draft",
       status: "DRAFT",
-      tags: ["mood"],
+      tags: ["test-13log-tag-mood"],
     });
     ids.push(created.id);
 
     const updated = await updateMicroPost(created.id, {
-      content: "micro updated",
+      content: "[test-13log] repository-updated",
       status: "PUBLISHED",
-      tags: ["mood", "timeline"],
+      tags: ["test-13log-tag-mood", "test-13log-tag-timeline"],
     });
 
-    expect(updated.content).toBe("micro updated");
+    expect(updated.content).toBe("[test-13log] repository-updated");
     expect(updated.status).toBe("PUBLISHED");
-    expect(updated.tags.map((item) => item.tag.slug).sort()).toEqual(["mood", "timeline"]);
+    expect(updated.tags.map((item) => item.tag.slug).sort()).toEqual([
+      "test-13log-tag-mood",
+      "test-13log-tag-timeline",
+    ]);
   });
 
   it("lists only published micro posts for public queries", async () => {
     const draft = await createMicroPost({
-      content: "micro draft",
+      content: "[test-13log] repository-draft",
       status: "DRAFT",
-      tags: ["draft"],
+      tags: ["test-13log-tag-draft"],
     });
     const published = await createMicroPost({
-      content: "micro published",
+      content: "[test-13log] repository-published",
       status: "PUBLISHED",
-      tags: ["published"],
+      tags: ["test-13log-tag-published"],
     });
 
     ids.push(draft.id, published.id);
@@ -70,18 +77,18 @@ describe("micro post repository", () => {
 
   it("keeps an explicit publishedAt when editing a published micro post", async () => {
     const created = await createMicroPost({
-      content: "micro draft",
+      content: "[test-13log] repository-draft",
       status: "PUBLISHED",
-      tags: ["mood"],
+      tags: ["test-13log-tag-mood"],
     });
     ids.push(created.id);
     const expectedPublishedAt = new Date("2026-03-01T15:45:00.000Z");
 
     const updated = await updateMicroPost(created.id, {
-      content: "micro updated",
+      content: "[test-13log] repository-updated",
       status: "PUBLISHED",
       publishedAt: expectedPublishedAt,
-      tags: ["mood", "timeline"],
+      tags: ["test-13log-tag-mood", "test-13log-tag-timeline"],
     });
 
     expect(updated.publishedAt?.toISOString()).toBe(expectedPublishedAt.toISOString());
@@ -89,17 +96,17 @@ describe("micro post repository", () => {
 
   it("drops publishedAt when a micro post is saved as draft", async () => {
     const created = await createMicroPost({
-      content: "micro published",
+      content: "[test-13log] repository-published",
       status: "PUBLISHED",
-      tags: ["mood"],
+      tags: ["test-13log-tag-mood"],
     });
     ids.push(created.id);
 
     const updated = await updateMicroPost(created.id, {
-      content: "micro updated",
+      content: "[test-13log] repository-updated",
       status: "DRAFT",
       publishedAt: new Date("2026-03-01T15:45:00.000Z"),
-      tags: ["draft"],
+      tags: ["test-13log-tag-draft"],
     });
 
     expect(updated.publishedAt).toBeNull();

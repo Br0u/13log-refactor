@@ -24,7 +24,7 @@ describe("admin taxonomy actions", () => {
     await db.tag.deleteMany({
       where: {
         slug: {
-          in: ["unused-tag"],
+          in: ["test-13log-tag-unused"],
         },
       },
     });
@@ -32,7 +32,7 @@ describe("admin taxonomy actions", () => {
     await db.category.deleteMany({
       where: {
         slug: {
-          in: ["empty-category"],
+          in: ["test-13log-admin-empty-category"],
         },
       },
     });
@@ -41,8 +41,8 @@ describe("admin taxonomy actions", () => {
   it("deletes an unused tag", async () => {
     const tag = await db.tag.create({
       data: {
-        name: "Unused Tag",
-        slug: "unused-tag",
+        name: "test-13log-tag-unused",
+        slug: "test-13log-tag-unused",
       },
     });
 
@@ -58,8 +58,8 @@ describe("admin taxonomy actions", () => {
   it("deletes an empty category", async () => {
     const category = await db.category.create({
       data: {
-        name: "Empty Category",
-        slug: "empty-category",
+        name: "test-13log-admin-empty-category",
+        slug: "test-13log-admin-empty-category",
       },
     });
 
