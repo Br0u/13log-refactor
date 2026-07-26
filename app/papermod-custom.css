@@ -1018,6 +1018,7 @@ body.dark::before {
 .profile-avatar-scene {
   --avatar-parallax-x: 0;
   --avatar-parallax-y: 0;
+  --avatar-layer-scale: 1.045;
   position: relative;
   width: min(21.5rem, 80vw);
   aspect-ratio: 1;
@@ -1056,22 +1057,16 @@ body.dark::before {
   opacity: 1;
   --avatar-middle-mask: radial-gradient(ellipse 43% 34% at 62% 58%, #000 46%, rgba(0, 0, 0, 0.94) 58%, transparent 76%);
   --avatar-front-mask: radial-gradient(ellipse 30% 25% at 66% 26%, #000 44%, rgba(0, 0, 0, 0.94) 58%, transparent 76%);
-  --avatar-middle-cutout: radial-gradient(ellipse 45% 36% at 62% 58%, transparent 48%, #000 74%);
-  --avatar-front-cutout: radial-gradient(ellipse 32% 27% at 66% 26%, transparent 46%, #000 74%);
 }
 
 .profile-avatar-state--hover {
   --avatar-middle-mask: radial-gradient(ellipse 45% 35% at 62% 60%, #000 46%, rgba(0, 0, 0, 0.94) 58%, transparent 76%);
   --avatar-front-mask: radial-gradient(ellipse 31% 28% at 78% 27%, #000 44%, rgba(0, 0, 0, 0.94) 58%, transparent 77%);
-  --avatar-middle-cutout: radial-gradient(ellipse 47% 37% at 62% 60%, transparent 48%, #000 74%);
-  --avatar-front-cutout: radial-gradient(ellipse 33% 30% at 78% 27%, transparent 46%, #000 75%);
 }
 
 .profile-avatar-state--night {
   --avatar-middle-mask: radial-gradient(ellipse 46% 38% at 65% 61%, #000 46%, rgba(0, 0, 0, 0.95) 59%, transparent 77%);
   --avatar-front-mask: radial-gradient(ellipse 28% 23% at 63% 66%, #000 43%, rgba(0, 0, 0, 0.95) 58%, transparent 76%);
-  --avatar-middle-cutout: radial-gradient(ellipse 48% 40% at 65% 61%, transparent 48%, #000 75%);
-  --avatar-front-cutout: radial-gradient(ellipse 30% 25% at 63% 66%, transparent 46%, #000 74%);
 }
 
 .profile-avatar-layer {
@@ -1083,7 +1078,7 @@ body.dark::before {
 
 .profile-avatar-layer--fallback {
   opacity: 1;
-  transform: scale(1.02);
+  transform: scale(var(--avatar-layer-scale));
 }
 
 .profile-avatar-layer--background,
@@ -1094,8 +1089,7 @@ body.dark::before {
 
 @supports ((mask-image: radial-gradient(circle, #000, transparent)) or (-webkit-mask-image: radial-gradient(circle, #000, transparent))) {
   .profile-avatar-layer--fallback {
-    filter: blur(0.42rem);
-    transform: scale(1.08);
+    opacity: 0;
   }
 
   .profile-avatar-layer--background,
@@ -1105,17 +1099,13 @@ body.dark::before {
   }
 
   .profile-avatar-layer--background {
-    -webkit-mask-image: var(--avatar-middle-cutout), var(--avatar-front-cutout);
-    -webkit-mask-composite: source-in;
-    mask-image: var(--avatar-middle-cutout), var(--avatar-front-cutout);
-    mask-composite: intersect;
     transform:
       translate3d(
         calc(var(--avatar-parallax-x) * -2.5px),
         calc(var(--avatar-parallax-y) * -2px),
         0
       )
-      scale(1.055);
+      scale(var(--avatar-layer-scale));
   }
 
   .profile-avatar-layer--middle {
@@ -1127,7 +1117,7 @@ body.dark::before {
         calc(var(--avatar-parallax-y) * 4px),
         0
       )
-      scale(1.035);
+      scale(var(--avatar-layer-scale));
   }
 
   .profile-avatar-layer--front {
@@ -1139,7 +1129,7 @@ body.dark::before {
         calc(var(--avatar-parallax-y) * 8px),
         0
       )
-      scale(1.045);
+      scale(var(--avatar-layer-scale));
   }
 }
 
@@ -1562,6 +1552,7 @@ body.dark.list:has(.profile--rainy-mask) .profile .button-icon {
   }
 
   .profile-avatar-layer--fallback {
+    opacity: 1;
     filter: none;
     transform: none;
   }

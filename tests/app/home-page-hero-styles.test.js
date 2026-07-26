@@ -28,7 +28,6 @@ describe("home page hero styles", () => {
     expect(stylesheet).toMatch(/\.profile-avatar-scene\s*\{[^}]*rotateX\(calc\(var\(--avatar-parallax-y\)\s*\*\s*-6deg\)\)[^}]*rotateY\(calc\(var\(--avatar-parallax-x\)\s*\*\s*6deg\)\)/s);
     expect(stylesheet).toMatch(/\.profile-avatar-layer\s*\{[^}]*object-fit:\s*cover;/s);
     expect(stylesheet).toMatch(/\.profile-avatar-layer\s*\{[^}]*pointer-events:\s*none;/s);
-    expect(stylesheet).toMatch(/\.profile-avatar-layer--background\s*\{[^}]*mask-image:/s);
     expect(stylesheet).toMatch(/\.profile-avatar-layer--middle\s*\{[^}]*var\(--avatar-middle-mask\)/s);
     expect(stylesheet).toMatch(/\.profile-avatar-layer--front\s*\{[^}]*var\(--avatar-front-mask\)/s);
     expect(stylesheet).toMatch(/\.profile-avatar-state\s*\{[^}]*opacity:\s*0;/s);
@@ -40,10 +39,28 @@ describe("home page hero styles", () => {
     expect(stylesheet).toMatch(/\.profile h1\s*\{[^}]*margin-top:\s*0;/s);
     expect(stylesheet).not.toContain(".profile-avatar-note");
     expect(stylesheet).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*\.profile-avatar-layer--fallback[\s\S]*filter:\s*none;/s);
+    expect(stylesheet).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*\.profile-avatar-layer--fallback\s*\{[^}]*opacity:\s*1;/s);
     expect(stylesheet).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*\.profile-avatar-card:hover,[\s\S]*\.profile-avatar-card:focus-visible\s*\{[^}]*transform:\s*none;/s);
     expect(stylesheet).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*\.profile-avatar-layer--background,[\s\S]*\.profile-avatar-layer--middle,[\s\S]*\.profile-avatar-layer--front\s*\{[^}]*opacity:\s*0;/s);
     expect(stylesheet).toMatch(/@media\s*\(hover:\s*none\)\s+and\s+\(pointer:\s*coarse\)[\s\S]*\.profile-avatar-scene\[data-parallax-active="false"\][\s\S]*@keyframes\s+profileAvatarBreath/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*480px\)[\s\S]*\.profile-avatar-scene\s*\{[^}]*width:\s*min\(14\.6rem,\s*70vw\);/s);
+  });
+
+  it("keeps the parallax layers pixel-aligned at rest without composite cutouts", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+    const supportsStart = stylesheet.indexOf("@supports ((mask-image:");
+    const supportsEnd = stylesheet.indexOf("@media (hover: hover)", supportsStart);
+    const maskStyles = stylesheet.slice(supportsStart, supportsEnd);
+
+    expect(supportsStart).toBeGreaterThan(-1);
+    expect(supportsEnd).toBeGreaterThan(supportsStart);
+    expect(stylesheet).toMatch(/\.profile-avatar-scene\s*\{[^}]*--avatar-layer-scale:\s*1\.045;/s);
+    expect(stylesheet).not.toContain("--avatar-middle-cutout");
+    expect(stylesheet).not.toContain("--avatar-front-cutout");
+    expect(maskStyles).not.toContain("mask-composite");
+    expect(maskStyles).not.toMatch(/\.profile-avatar-layer--background\s*\{[^}]*mask-image:/s);
+    expect(maskStyles).toMatch(/\.profile-avatar-layer--fallback\s*\{[^}]*opacity:\s*0;/s);
+    expect(maskStyles.match(/scale\(var\(--avatar-layer-scale\)\)/g)).toHaveLength(3);
   });
 
   it("uses the night artwork and warm glow treatment for dark home mode", () => {
