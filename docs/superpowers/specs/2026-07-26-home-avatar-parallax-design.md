@@ -25,7 +25,7 @@
 
 ## 组件结构
 
-新增客户端组件 `app/components/HomeAvatarParallax.jsx`，由首页服务端组件负责渲染。
+新增客户端组件 `app/components/HomeAvatarParallax.tsx`，由首页服务端组件负责渲染。使用受 TypeScript 检查的文件类型，避免交互运行时代码落在现有类型检查范围之外。
 
 组件保持现有可聚焦头像容器和无障碍名称，内部包含三个视觉状态：
 
