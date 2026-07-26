@@ -1,4 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const TEST_SESSION_SECRET = "test-session-secret-that-is-at-least-32-characters";
 
 const { cookiesMock, createPhotoMock } = vi.hoisted(() => ({
   cookiesMock: vi.fn(),
@@ -22,7 +24,12 @@ import { POST as adminPhotosRoute } from "../../../app/api/admin/photos/route";
 
 describe("admin photos api", () => {
   beforeEach(() => {
+    vi.stubEnv("SESSION_SECRET", TEST_SESSION_SECRET);
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("rejects unauthenticated photo creation requests", async () => {

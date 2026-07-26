@@ -2,9 +2,20 @@ import { createAdminSession, buildSessionCookie, verifyAdminLogin } from "../../
 
 export async function POST(request) {
   const body = await request.json();
+  let sessionUser;
 
   try {
-    const sessionUser = await verifyAdminLogin(body.username || "", body.password || "");
+    sessionUser = await verifyAdminLogin(body.username || "", body.password || "");
+  } catch {
+    return new Response(JSON.stringify({ message: "Invalid credentials" }), {
+      status: 401,
+      headers: {
+        "content-type": "application/json",
+      },
+    });
+  }
+
+  try {
     const token = await createAdminSession(sessionUser);
 
     return new Response(JSON.stringify({ ok: true }), {
@@ -15,8 +26,9 @@ export async function POST(request) {
       },
     });
   } catch {
-    return new Response(JSON.stringify({ message: "Invalid credentials" }), {
-      status: 401,
+    console.error("Failed to create admin session");
+    return new Response(JSON.stringify({ message: "Unable to create session" }), {
+      status: 500,
       headers: {
         "content-type": "application/json",
       },

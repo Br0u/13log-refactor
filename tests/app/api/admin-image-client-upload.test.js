@@ -1,4 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const TEST_SESSION_SECRET = "test-session-secret-that-is-at-least-32-characters";
 
 const { cookiesMock, handleUploadMock } = vi.hoisted(() => ({
   cookiesMock: vi.fn(),
@@ -18,7 +20,12 @@ import { POST as clientUploadRoute } from "../../../app/api/admin/uploads/image/
 
 describe("admin image client upload token api", () => {
   beforeEach(() => {
+    vi.stubEnv("SESSION_SECRET", TEST_SESSION_SECRET);
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("rejects token requests without a valid admin session", async () => {

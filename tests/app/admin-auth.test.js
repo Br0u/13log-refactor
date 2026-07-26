@@ -1,5 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
+
+const TEST_SESSION_SECRET = "test-session-secret-that-is-at-least-32-characters";
 
 const { redirectMock, cookiesMock, readAdminSessionMock } = vi.hoisted(() => ({
   redirectMock: vi.fn(() => {
@@ -44,12 +46,21 @@ import { POST as logoutRoute } from "../../app/api/admin/logout/route";
 
 describe("admin auth", () => {
   beforeEach(() => {
+    vi.stubEnv("SESSION_SECRET", TEST_SESSION_SECRET);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
     vi.clearAllMocks();
     cookiesMock.mockResolvedValue({
       get() {
         return undefined;
       },
     });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
   });
 
   it("redirects unauthenticated admin layout requests to the login page", async () => {
@@ -89,6 +100,49 @@ describe("admin auth", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("set-cookie")).toContain("admin_session=");
+    expect(response.headers.get("set-cookie")).toContain("Max-Age=28800");
+  });
+
+  it("keeps invalid credentials as a 401 without a session cookie", async () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const request = new Request("http://localhost:3000/api/admin/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        username: "admin",
+        password: "wrong-password",
+      }),
+    });
+
+    const response = await loginRoute(request);
+
+    expect(response.status).toBe(401);
+    expect(response.headers.get("set-cookie")).toBeNull();
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["missing", ""],
+    ["short", "short-session-secret"],
+  ])("returns 500 without a cookie when valid credentials use a %s SESSION_SECRET", async (_label, secret) => {
+    vi.stubEnv("SESSION_SECRET", secret);
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const request = new Request("http://localhost:3000/api/admin/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        username: "admin",
+        password: "0hqlP1LSARqnUKdH",
+      }),
+    });
+
+    const response = await loginRoute(request);
+
+    expect(response.status).toBe(500);
+    expect(response.headers.get("set-cookie")).toBeNull();
+    expect(consoleErrorSpy.mock.calls).toEqual([
+      ["Failed to create admin session"],
+    ]);
   });
 
   it("clears the session cookie on logout and redirects to the site home page", async () => {
