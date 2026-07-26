@@ -352,6 +352,38 @@ describe("HomeAvatarParallax", () => {
     expect(scene.style.getPropertyValue("--avatar-parallax-y")).toBe("0.0000");
   });
 
+  it("recalibrates orientation after page visibility suspension", () => {
+    mockMatchMedia({ coarse: true });
+    const { container } = render(<HomeAvatarParallax />);
+    const scene = container.querySelector(".profile-avatar-scene");
+
+    act(() => {
+      dispatchOrientation(40, 5);
+      dispatchOrientation(46, 11);
+      flushAnimationFrames();
+    });
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-x"))).toBeGreaterThan(0);
+
+    Object.defineProperty(document, "hidden", { configurable: true, value: true });
+    act(() => document.dispatchEvent(new Event("visibilitychange")));
+    Object.defineProperty(document, "hidden", { configurable: true, value: false });
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+      dispatchOrientation(70, 20);
+      flushAnimationFrames();
+    });
+
+    expect(scene.style.getPropertyValue("--avatar-parallax-x")).toBe("0.0000");
+    expect(scene.style.getPropertyValue("--avatar-parallax-y")).toBe("0.0000");
+
+    act(() => {
+      dispatchOrientation(76, 26);
+      flushAnimationFrames();
+    });
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-x"))).toBeGreaterThan(0);
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-y"))).toBeGreaterThan(0);
+  });
+
   it("clears interrupted touches so orientation can resume after page visibility returns", () => {
     mockMatchMedia({ coarse: true });
     const { container } = render(<HomeAvatarParallax />);
@@ -394,14 +426,34 @@ describe("HomeAvatarParallax", () => {
     const scene = container.querySelector(".profile-avatar-scene");
 
     act(() => {
-      observerCallback([{ isIntersecting: false }]);
       dispatchOrientation(40, 5);
       dispatchOrientation(46, 11);
       flushAnimationFrames();
     });
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-x"))).toBeGreaterThan(0);
 
+    act(() => {
+      observerCallback([{ isIntersecting: false }]);
+      dispatchOrientation(70, 20);
+      flushAnimationFrames();
+    });
     expect(scene.style.getPropertyValue("--avatar-parallax-x")).toBe("0.0000");
     expect(scene.style.getPropertyValue("--avatar-parallax-y")).toBe("0.0000");
+
+    act(() => {
+      observerCallback([{ isIntersecting: true }]);
+      dispatchOrientation(70, 20);
+      flushAnimationFrames();
+    });
+    expect(scene.style.getPropertyValue("--avatar-parallax-x")).toBe("0.0000");
+    expect(scene.style.getPropertyValue("--avatar-parallax-y")).toBe("0.0000");
+
+    act(() => {
+      dispatchOrientation(76, 26);
+      flushAnimationFrames();
+    });
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-x"))).toBeGreaterThan(0);
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-y"))).toBeGreaterThan(0);
   });
 
   it("accepts new input after intersection suspension clears a pending frame", () => {

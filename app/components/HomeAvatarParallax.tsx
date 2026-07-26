@@ -222,6 +222,7 @@ export default function HomeAvatarParallax() {
 
     const suspendInput = (): void => {
       activeTouchPointersRef.current.clear();
+      orientationBaselineRef.current = null;
       resetPoint(true);
     };
 
