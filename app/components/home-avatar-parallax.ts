@@ -17,6 +17,10 @@ type RectGeometry = {
 
 export const PARALLAX_CENTER = Object.freeze({ x: 0, y: 0 });
 
+function finiteOrZero(value: number): number {
+  return Number.isFinite(value) ? value : 0;
+}
+
 export function clampUnit(value: number): number {
   if (!Number.isFinite(value)) {
     return 0;
@@ -40,7 +44,7 @@ export function pointerToParallax(
     rect.width <= 0 ||
     rect.height <= 0
   ) {
-    return PARALLAX_CENTER;
+    return { ...PARALLAX_CENTER };
   }
 
   return {
@@ -67,7 +71,7 @@ export function orientationToParallax(
     !Number.isFinite(range) ||
     range <= 0
   ) {
-    return PARALLAX_CENTER;
+    return { ...PARALLAX_CENTER };
   }
 
   const horizontal = (gamma - baseline.gamma) / range;
@@ -97,10 +101,19 @@ export function smoothParallax(
   target: ParallaxPoint,
   amount = 0.18,
 ): ParallaxPoint {
-  const clampedAmount = Math.max(0, Math.min(1, amount));
+  const normalizedCurrent = {
+    x: finiteOrZero(current.x),
+    y: finiteOrZero(current.y),
+  };
+  const normalizedTarget = {
+    x: finiteOrZero(target.x),
+    y: finiteOrZero(target.y),
+  };
+  const normalizedAmount = Number.isFinite(amount) ? amount : 0.18;
+  const clampedAmount = Math.max(0, Math.min(1, normalizedAmount));
 
   return {
-    x: current.x + (target.x - current.x) * clampedAmount,
-    y: current.y + (target.y - current.y) * clampedAmount,
+    x: normalizedCurrent.x + (normalizedTarget.x - normalizedCurrent.x) * clampedAmount,
+    y: normalizedCurrent.y + (normalizedTarget.y - normalizedCurrent.y) * clampedAmount,
   };
 }
