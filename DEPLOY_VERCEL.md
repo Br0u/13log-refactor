@@ -21,12 +21,7 @@
 - Neon PostgreSQL 数据库
 - 本项目的环境变量
 
-当前后台管理员账号默认为：
-
-- 用户名：`admin`
-- 密码：`0315`
-
-建议部署上线后尽快修改密码，并同步更新数据库。
+管理员用户名和密码必须由部署者自行设置。不要把真实凭据写入仓库或部署文档。
 
 ## 3. 推送到 GitHub
 
@@ -68,9 +63,8 @@ git push origin main
 ```bash
 DATABASE_URL=你的 Neon 运行时连接串
 DIRECT_URL=你的 Neon 直连连接串
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=0315
-SESSION_SECRET=一个足够长的随机字符串
+SESSION_SECRET=
+RISK_INTERNAL_SECRET=
 BLOB_READ_WRITE_TOKEN=你的 Vercel Blob 读写 Token
 NEXT_PUBLIC_SITE_URL=https://你的正式域名
 ```
@@ -79,9 +73,31 @@ NEXT_PUBLIC_SITE_URL=https://你的正式域名
 
 - `DATABASE_URL`：应用运行时使用
 - `DIRECT_URL`：Prisma migration 使用
-- `SESSION_SECRET`：用于后台登录 session 签名，必须设置为随机长字符串
+- `SESSION_SECRET`：用于后台登录 session 签名，必填，必须是至少 32 字符的随机值
+- `RISK_INTERNAL_SECRET`：用于内部风险评估请求签名，必填，必须是至少 32 字符的随机值，并且必须与 `SESSION_SECRET` 不同
 - `BLOB_READ_WRITE_TOKEN`：用于后台粘贴图片时把文件上传到 Vercel Blob
 - `NEXT_PUBLIC_SITE_URL`：用于 RSS、index.json、站点链接输出
+
+分别执行两次以下命令生成两个不同的 secret，不要复用同一次输出：
+
+```bash
+openssl rand -base64 48
+openssl rand -base64 48
+```
+
+上方两个空值故意保持无效，直接复制会 fail closed。必须把第一次命令输出
+粘贴为 `SESSION_SECRET`，把第二次独立生成的输出粘贴为
+`RISK_INTERNAL_SECRET`，不能把空值部署到任何环境。
+
+在 Vercel 中按实际发布范围为 Preview 和 Production 环境分别配置以上
+变量；生产值不要复制到不受同等保护的环境。缺失、过短或相同的 secret
+会导致后台 session 创建或内部风险请求签名失败。风险中间件在内部评估或
+配置不可用时会 fail open，但这是安全能力降级：访问日志、黑名单执行、
+机器人阻止和 API 限流评估都会被禁用，绝不能作为可接受的发布配置。
+
+此文档不表示当前 Vercel 项目已经完成配置。发布前必须在 Vercel 中落实
+上述环境变量并重新部署。若更换 `SESSION_SECRET`，现有管理员 session 会
+立即失效，管理员需要重新登录；将其作为密钥轮换和发布验证的一部分。
 
 ## 6. 首次数据库初始化
 
@@ -92,10 +108,22 @@ NEXT_PUBLIC_SITE_URL=https://你的正式域名
 ```bash
 npm run db:generate
 npx prisma migrate dev --name init_backend --skip-generate
-npm run db:seed
 ```
 
 如果你希望数据库完全由线上环境管理，也可以在本地先把 migration 跑完，再让 Vercel 只负责应用部署。
+
+`ADMIN_USERNAME` 和 `ADMIN_PASSWORD` 不是 Vercel 运行时变量，只是
+`npm run db:seed` 从本地 `.env` 读取的一次性 seed 输入。创建管理员或轮换
+管理员密码时，必须执行以下流程：
+
+1. 在受保护的本地 `.env` 中设置目标数据库的 `DATABASE_URL`、
+   `ADMIN_USERNAME` 和高强度、唯一的 `ADMIN_PASSWORD`
+2. 确认 `DATABASE_URL` 指向预期数据库，然后执行 `npm run db:seed`
+3. seed 成功后，从本地环境中移除这些管理员凭据，或继续按敏感凭据保护
+   `.env`，禁止提交到仓库
+
+对同一 `ADMIN_USERNAME` 再次运行 seed 会更新其密码哈希。仅修改 Vercel
+环境变量或重新部署不会创建管理员，也不会更新数据库中的管理员密码。
 
 ## 7. 导入真实文章
 
@@ -190,9 +218,12 @@ npm run db:cleanup:test-data
 
 ## 11. 建议
 
-上线前建议再做两件事：
+上线前必须完成以下事项：
 
-1. 把 `ADMIN_PASSWORD=0315` 改成你自己的强密码
-2. 把 `SESSION_SECRET` 换成高强度随机值
+1. 分别生成至少 32 字符且互不相同的 `SESSION_SECRET` 与 `RISK_INTERNAL_SECRET`，替换 Vercel 中的空值
+2. 在目标 Preview/Production 环境中配置所需运行时变量并重新部署
+3. 使用受保护的本地 `.env` 和 `npm run db:seed` 创建管理员或轮换密码，然后移除或妥善保护本地管理员凭据
+4. 确认风险评估已启用，访问日志、黑名单、机器人阻止和 API 限流评估均正常
+5. 确认 `SESSION_SECRET` 轮换后旧管理员 session 已失效且可重新登录
 
-否则后台安全性不够。
+这些是实际发布动作；仅修改仓库文档不会更新 Vercel 环境。
