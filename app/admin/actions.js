@@ -8,6 +8,8 @@ import { createPhoto, updatePhoto } from "../../lib/repositories/photos";
 import { db } from "../../lib/db";
 import { approveComment, removeComment } from "../../lib/repositories/comments";
 import { approveGuestbookEntry, removeGuestbookEntry } from "../../lib/repositories/guestbook";
+import { requireAdminSession } from "../../lib/admin-session";
+import { normalizePublishedAt } from "../../components/admin/publication-utils";
 
 function parseTags(value) {
   return String(value || "")
@@ -17,10 +19,8 @@ function parseTags(value) {
 }
 
 function parsePublishedAt(value) {
-  const raw = String(value || "").trim();
-  if (!raw) return null;
-  const parsed = new Date(raw);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  const normalized = normalizePublishedAt(value);
+  return normalized ? new Date(normalized) : null;
 }
 
 function parsePostFormData(formData) {
@@ -109,6 +109,7 @@ function revalidatePhotoAlbumPaths(albumId, photoId) {
   revalidatePhotosPaths();
 }
 export async function createPostAction(_previousState, formData) {
+  await requireAdminSession();
   try {
     const post = await createPost(parsePostFormData(formData));
     revalidateAdminPostsPaths(post.id);
@@ -125,6 +126,7 @@ export async function createPostAction(_previousState, formData) {
 }
 
 export async function updatePostAction(postId, formData) {
+  await requireAdminSession();
   const post = await updatePost(postId, parsePostFormData(formData));
   revalidateAdminPostsPaths(postId);
   revalidatePostTimelinePaths();
@@ -134,6 +136,7 @@ export async function updatePostAction(postId, formData) {
 }
 
 export async function createMicroPostAction(formData) {
+  await requireAdminSession();
   const microPost = await createMicroPost(parseMicroPostFormData(formData));
   revalidateAdminMicroPostsPaths(microPost.id);
   revalidatePostTimelinePaths();
@@ -141,6 +144,7 @@ export async function createMicroPostAction(formData) {
 }
 
 export async function createPhotoAction(_previousState, formData) {
+  await requireAdminSession();
   try {
     await createPhoto(parsePhotoFormData(formData));
     revalidateAdminPhotosPaths();
@@ -154,17 +158,20 @@ export async function createPhotoAction(_previousState, formData) {
 }
 
 export async function updateMicroPostAction(microPostId, formData) {
+  await requireAdminSession();
   await updateMicroPost(microPostId, parseMicroPostFormData(formData));
   revalidateAdminMicroPostsPaths(microPostId);
   revalidatePostTimelinePaths();
 }
 
 export async function updatePhotoAction(photoId, albumId, formData) {
+  await requireAdminSession();
   await updatePhoto(photoId, parsePhotoFormData(formData));
   revalidatePhotoAlbumPaths(albumId, photoId);
 }
 
 export async function createCategoryAction(formData) {
+  await requireAdminSession();
   const name = String(formData.get("name") || "").trim();
   const slug = String(formData.get("slug") || "").trim();
   const description = String(formData.get("description") || "").trim();
@@ -185,6 +192,7 @@ export async function createCategoryAction(formData) {
 }
 
 export async function createTagAction(formData) {
+  await requireAdminSession();
   const name = String(formData.get("name") || "").trim();
   const slug = String(formData.get("slug") || "").trim();
 
@@ -204,6 +212,7 @@ export async function createTagAction(formData) {
 }
 
 export async function createPhotoCategoryAction(formData) {
+  await requireAdminSession();
   const name = String(formData.get("name") || "").trim();
   const slug = String(formData.get("slug") || "").trim();
   const description = String(formData.get("description") || "").trim();
@@ -251,6 +260,7 @@ export async function createPhotoCategoryAction(formData) {
 }
 
 export async function deletePostAction(postId) {
+  await requireAdminSession();
   const deletedPost = await db.post.delete({
     where: { id: postId },
   });
@@ -263,6 +273,7 @@ export async function deletePostAction(postId) {
 }
 
 export async function deleteMicroPostAction(microPostId) {
+  await requireAdminSession();
   await db.microPost.delete({
     where: { id: microPostId },
   });
@@ -272,6 +283,7 @@ export async function deleteMicroPostAction(microPostId) {
 }
 
 export async function deletePhotoAction(photoId, albumId) {
+  await requireAdminSession();
   await db.photo.delete({
     where: { id: photoId },
   });
@@ -280,18 +292,21 @@ export async function deletePhotoAction(photoId, albumId) {
 }
 
 export async function deleteCommentAction(commentId) {
+  await requireAdminSession();
   await removeComment(commentId);
   revalidateSharedAdminPaths();
   revalidatePath("/admin/comments");
 }
 
 export async function approveCommentAction(commentId) {
+  await requireAdminSession();
   await approveComment(commentId);
   revalidateSharedAdminPaths();
   revalidatePath("/admin/comments");
 }
 
 export async function approveGuestbookEntryAction(entryId) {
+  await requireAdminSession();
   await approveGuestbookEntry(entryId);
   revalidateSharedAdminPaths();
   revalidatePath("/admin/comments");
@@ -299,6 +314,7 @@ export async function approveGuestbookEntryAction(entryId) {
 }
 
 export async function deleteGuestbookEntryAction(entryId) {
+  await requireAdminSession();
   await removeGuestbookEntry(entryId);
   revalidateSharedAdminPaths();
   revalidatePath("/admin/comments");
@@ -306,6 +322,7 @@ export async function deleteGuestbookEntryAction(entryId) {
 }
 
 export async function deleteCategoryAction(categoryId) {
+  await requireAdminSession();
   const postsCount = await db.post.count({
     where: { categoryId },
   });
@@ -323,6 +340,7 @@ export async function deleteCategoryAction(categoryId) {
 }
 
 export async function deleteTagAction(tagId) {
+  await requireAdminSession();
   await db.tag.delete({
     where: { id: tagId },
   });

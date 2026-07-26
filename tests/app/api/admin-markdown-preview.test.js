@@ -1,4 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const TEST_SESSION_SECRET = "test-session-secret-that-is-at-least-32-characters";
 
 const { cookiesMock } = vi.hoisted(() => ({
   cookiesMock: vi.fn(),
@@ -13,7 +15,12 @@ import { POST as markdownPreviewRoute } from "../../../app/api/admin/markdown-pr
 
 describe("admin markdown preview api", () => {
   beforeEach(() => {
+    vi.stubEnv("SESSION_SECRET", TEST_SESSION_SECRET);
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("rejects requests without a valid admin session", async () => {

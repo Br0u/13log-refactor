@@ -7,13 +7,13 @@ import { GET as rssRoute } from "../../app/rss.xml/route";
 
 describe("public content routes", () => {
   it("resolves post metadata from the database-backed content layer", async () => {
-    const slug = "public-route-test-post";
+    const slug = "test-13log-public-route-post";
     const category = await db.category.upsert({
-      where: { slug: "public-route-test" },
+      where: { slug: "test-13log-public-route-category" },
       update: {},
       create: {
-        name: "Public Route Test",
-        slug: "public-route-test",
+        name: "test-13log-public-route-category",
+        slug: "test-13log-public-route-category",
       },
     });
 
@@ -36,7 +36,7 @@ describe("public content routes", () => {
       markdown: "# route",
       status: "PUBLISHED",
       categoryId: category.id,
-      tags: ["route"],
+      tags: ["test-13log-tag-route"],
     });
 
     const metadata = await generateMetadata({

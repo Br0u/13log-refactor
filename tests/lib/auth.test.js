@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearAdminSession,
   createAdminSession,
@@ -9,7 +9,20 @@ import {
   verifyPassword,
 } from "../../lib/auth";
 
+const TEST_SESSION_SECRET = "test-session-secret-that-is-at-least-32-characters";
+
 describe("auth helpers", () => {
+  beforeEach(() => {
+    vi.stubEnv("SESSION_SECRET", TEST_SESSION_SECRET);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllEnvs();
+  });
+
   it("hashes and verifies the admin password", async () => {
     const password = "s3cret-pass";
     const passwordHash = await hashPassword(password);

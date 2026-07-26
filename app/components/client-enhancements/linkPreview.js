@@ -8,7 +8,7 @@ export function initLinkPreview() {
   let isActive = true;
 
   try {
-    cache = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}") || {};
+    cache = JSON.parse(window.localStorage.getItem(CACHE_KEY) || "{}") || {};
   } catch {
     cache = {};
   }
@@ -20,7 +20,7 @@ export function initLinkPreview() {
 
   const persist = () => {
     try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+      window.localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
     } catch {}
   };
 

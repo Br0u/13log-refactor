@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import fs from "node:fs";
 
-import {
-  importLegacyPhotos,
-  LEGACY_PHOTO_ALBUMS,
-} from "../../lib/legacy-photo-import";
+import { LEGACY_PHOTO_ALBUMS } from "../../lib/legacy-photo-data";
+import { importLegacyPhotos } from "../../lib/legacy-photo-import";
 
 describe("legacy photo import", () => {
   let createPhotoCategory;
@@ -18,6 +17,20 @@ describe("legacy photo import", () => {
     listPhotoCategories = vi.fn();
     listAdminPhotos = vi.fn();
     updatePhotoCategory = vi.fn();
+  });
+
+  it("keeps static album data independent from Prisma repositories", () => {
+    const source = fs.readFileSync(
+      new URL("../../lib/legacy-photo-data.js", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).not.toMatch(/repositories|prisma/i);
+    expect(LEGACY_PHOTO_ALBUMS.map((album) => album.slug)).toEqual([
+      "random",
+      "april",
+      "again",
+    ]);
   });
 
   it("creates the legacy albums in the original order and imports their photos", async () => {

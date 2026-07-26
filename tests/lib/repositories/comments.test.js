@@ -12,11 +12,11 @@ describe("comments repository", () => {
 
   beforeAll(async () => {
     const category = await db.category.upsert({
-      where: { slug: "comments-test" },
+      where: { slug: "test-13log-comments-category" },
       update: {},
       create: {
-        name: "Comments Test",
-        slug: "comments-test",
+        name: "test-13log-comments-category",
+        slug: "test-13log-comments-category",
       },
     });
     categoryId = category.id;
@@ -25,33 +25,33 @@ describe("comments repository", () => {
   beforeEach(async () => {
     await db.comment.deleteMany({
       where: {
-        post: { slug: "comments-test-post" },
+        post: { slug: "test-13log-comments-post" },
       },
     });
     await db.post.deleteMany({
-      where: { slug: "comments-test-post" },
+      where: { slug: "test-13log-comments-post" },
     });
 
     await createPost({
       title: "Comments Test Post",
-      slug: "comments-test-post",
+      slug: "test-13log-comments-post",
       markdown: "# comments",
       status: "PUBLISHED",
       categoryId,
-      tags: ["comments"],
+      tags: ["test-13log-tag-comments"],
     });
   });
 
   it("creates an approved comment and increments the counter", async () => {
     await createComment({
-      slug: "comments-test-post",
+      slug: "test-13log-comments-post",
       nickname: "brou",
       content: "first comment",
     });
 
-    const comments = await getApprovedCommentsBySlug("comments-test-post");
+    const comments = await getApprovedCommentsBySlug("test-13log-comments-post");
     const post = await db.post.findUnique({
-      where: { slug: "comments-test-post" },
+      where: { slug: "test-13log-comments-post" },
     });
 
     expect(comments).toHaveLength(1);
@@ -61,16 +61,16 @@ describe("comments repository", () => {
 
   it("removes a comment and decrements the counter", async () => {
     const comment = await createComment({
-      slug: "comments-test-post",
+      slug: "test-13log-comments-post",
       nickname: "brou",
       content: "delete me",
     });
 
     await removeComment(comment.id);
 
-    const comments = await getApprovedCommentsBySlug("comments-test-post");
+    const comments = await getApprovedCommentsBySlug("test-13log-comments-post");
     const post = await db.post.findUnique({
-      where: { slug: "comments-test-post" },
+      where: { slug: "test-13log-comments-post" },
     });
 
     expect(comments).toHaveLength(0);

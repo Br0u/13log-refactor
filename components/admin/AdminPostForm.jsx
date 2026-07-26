@@ -1,7 +1,7 @@
 import React from "react";
 import MarkdownEditorField from "./MarkdownEditorField";
 import AdminSubmitButton from "./AdminSubmitButton";
-import { formatDateTimeLocal } from "./publication-utils";
+import AdminPublishedAtField from "./AdminPublishedAtField";
 
 export default function AdminPostForm({
   action,
@@ -67,16 +67,7 @@ export default function AdminPostForm({
         </select>
       </label>
       {initialValue.status === "PUBLISHED" ? (
-        <label>
-          <span>Published At</span>
-          <input
-            name="publishedAt"
-            type="datetime-local"
-            defaultValue={formatDateTimeLocal(initialValue.publishedAt || "")}
-            step="60"
-          />
-          <small className="admin-form-hint">Edit using your local time.</small>
-        </label>
+        <AdminPublishedAtField initialValue={initialValue.publishedAt || ""} />
       ) : (
         <p className="admin-form-hint">Publication time becomes editable after the post is published.</p>
       )}

@@ -2,7 +2,7 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 
-vi.mock("../../app/components/HtmlContent.jsx", () => ({
+vi.mock("../../app/components/HtmlContent", () => ({
   default: function HtmlContent({ html, className }) {
     return <div className={className} dangerouslySetInnerHTML={{ __html: html }} />;
   },

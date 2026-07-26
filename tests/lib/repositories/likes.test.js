@@ -15,11 +15,11 @@ describe("likes repository", () => {
 
   beforeAll(async () => {
     const category = await db.category.upsert({
-      where: { slug: "likes-test" },
+      where: { slug: "test-13log-likes-category" },
       update: {},
       create: {
-        name: "Likes Test",
-        slug: "likes-test",
+        name: "test-13log-likes-category",
+        slug: "test-13log-likes-category",
       },
     });
     categoryId = category.id;
@@ -28,43 +28,43 @@ describe("likes repository", () => {
   beforeEach(async () => {
     await db.postLike.deleteMany({
       where: {
-        post: { slug: "likes-test-post" },
+        post: { slug: "test-13log-likes-post" },
       },
     });
     await db.post.deleteMany({
-      where: { slug: "likes-test-post" },
+      where: { slug: "test-13log-likes-post" },
     });
     await db.microPostLike.deleteMany({
       where: {
-        microPost: { content: "likes-test-micro-post" },
+        microPost: { content: "[test-13log] likes-repository" },
       },
     });
     await db.microPost.deleteMany({
-      where: { content: "likes-test-micro-post" },
+      where: { content: "[test-13log] likes-repository" },
     });
 
     await createPost({
       title: "Likes Test Post",
-      slug: "likes-test-post",
+      slug: "test-13log-likes-post",
       markdown: "# like me",
       status: "PUBLISHED",
       categoryId,
-      tags: ["likes"],
+      tags: ["test-13log-tag-likes"],
     });
 
     const microPost = await createMicroPost({
-      content: "likes-test-micro-post",
+      content: "[test-13log] likes-repository",
       status: "PUBLISHED",
-      tags: ["likes"],
+      tags: ["test-13log-tag-likes"],
     });
     microPostId = microPost.id;
   });
 
   it("creates only one like per visitor key", async () => {
-    await createPostLike({ slug: "likes-test-post", visitorKey: "visitor-1" });
-    await createPostLike({ slug: "likes-test-post", visitorKey: "visitor-1" });
+    await createPostLike({ slug: "test-13log-likes-post", visitorKey: "visitor-1" });
+    await createPostLike({ slug: "test-13log-likes-post", visitorKey: "visitor-1" });
 
-    await expect(getPostLikeCount("likes-test-post")).resolves.toBe(1);
+    await expect(getPostLikeCount("test-13log-likes-post")).resolves.toBe(1);
   });
 
   it("creates only one micropost like per visitor key", async () => {

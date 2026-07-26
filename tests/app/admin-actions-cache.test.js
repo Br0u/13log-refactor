@@ -13,6 +13,7 @@ const {
   removeCommentMock,
   approveGuestbookEntryMock,
   removeGuestbookEntryMock,
+  requireAdminSessionMock,
 } = vi.hoisted(() => ({
   redirectMock: vi.fn(),
   revalidatePathMock: vi.fn(),
@@ -26,6 +27,11 @@ const {
   removeCommentMock: vi.fn(),
   approveGuestbookEntryMock: vi.fn(),
   removeGuestbookEntryMock: vi.fn(),
+  requireAdminSessionMock: vi.fn(),
+}));
+
+vi.mock("../../lib/admin-session", () => ({
+  requireAdminSession: requireAdminSessionMock,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -92,6 +98,7 @@ import {
   createPhotoAction,
   createPhotoCategoryAction,
   createCategoryAction,
+  createMicroPostAction,
   createPostAction,
   deletePhotoAction,
   deletePostAction,
@@ -104,6 +111,7 @@ import { db } from "../../lib/db";
 describe("admin action cache behavior", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    requireAdminSessionMock.mockResolvedValue({ username: "admin" });
   });
 
   it("updates a post without relying on next/cache.refresh and invalidates related routes", async () => {
@@ -192,6 +200,38 @@ describe("admin action cache behavior", () => {
     expect(revalidatePathMock).toHaveBeenCalledWith("/posts/page/[page]", "page");
     expect(revalidatePathMock).toHaveBeenCalledWith("/index.json");
     expect(revalidatePathMock).toHaveBeenCalledWith("/rss.xml");
+  });
+
+  it.each([
+    ["post", "2026-03-16T09:30:00.000Z", "2026-03-16T09:30:00.000Z"],
+    ["post", "2026-03-16T05:30:00-04:00", "2026-03-16T09:30:00.000Z"],
+    ["post", "2026-03-16T05:30", null],
+    ["post", "2026-03-16", null],
+    ["post", "2026-02-30T09:30:00Z", null],
+    ["post", "invalid", null],
+    ["micro", "2026-03-16T09:30:00.000Z", "2026-03-16T09:30:00.000Z"],
+    ["micro", "2026-03-16T05:30:00-04:00", "2026-03-16T09:30:00.000Z"],
+    ["micro", "2026-03-16T05:30", null],
+    ["micro", "2026-03-16", null],
+    ["micro", "2026-02-30T09:30:00Z", null],
+    ["micro", "invalid", null],
+  ])("parses %s publishedAt %s only when it has an explicit timezone", async (kind, input, expected) => {
+    const formData = new FormData();
+    formData.set("status", "PUBLISHED");
+    formData.set("publishedAt", input);
+
+    if (kind === "post") {
+      updatePostMock.mockResolvedValueOnce({ id: "post-1", slug: "post", status: "PUBLISHED" });
+      await updatePostAction("post-1", formData);
+      const publishedAt = updatePostMock.mock.calls.at(-1)[1].publishedAt;
+      expect(publishedAt?.toISOString() ?? null).toBe(expected);
+      return;
+    }
+
+    createMicroPostMock.mockResolvedValueOnce({ id: "micro-1", status: "PUBLISHED" });
+    await createMicroPostAction(formData);
+    const publishedAt = createMicroPostMock.mock.calls.at(-1)[0].publishedAt;
+    expect(publishedAt?.toISOString() ?? null).toBe(expected);
   });
 
   it("returns a form error instead of throwing when creating a post with a duplicate slug", async () => {

@@ -4253,7 +4253,10 @@ body.dark:has(.about-note-layout--ink) .about-guestbook__form button {
     border-radius: 1.05rem;
     background:
       linear-gradient(90deg, rgba(2, 8, 18, 0.54), rgba(3, 11, 24, 0.14) 58%, rgba(3, 11, 24, 0.08)),
-      url("/images/backgrounds/about-mobile-profile-card.png") center / cover no-repeat;
+      url("/images/backgrounds/about-mobile-profile-card.webp") center / cover no-repeat;
+    background:
+      linear-gradient(90deg, rgba(2, 8, 18, 0.54), rgba(3, 11, 24, 0.14) 58%, rgba(3, 11, 24, 0.08)),
+      image-set(url("/images/backgrounds/about-mobile-profile-card.webp") type("image/webp"), url("/images/backgrounds/about-mobile-profile-card.png") type("image/png")) center / cover no-repeat;
     box-shadow:
       0 0.7rem 1.65rem rgba(0, 0, 0, 0.38),
       0 0 1.2rem rgba(78, 129, 196, 0.16),
@@ -5636,7 +5639,11 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
   body.dark:has(.blog-layout--photo-album) {
     background:
       linear-gradient(180deg, rgba(1, 6, 15, 0) 0%, rgba(1, 6, 15, 0.06) 42%, rgba(1, 6, 15, 0.36) 100%),
-      url("/images/backgrounds/photos-mobile-night-ink-bg.png") center -4.25rem / 100% auto no-repeat,
+      url("/images/backgrounds/photos-mobile-night-ink-bg.webp") center -4.25rem / 100% auto no-repeat,
+      #050b15;
+    background:
+      linear-gradient(180deg, rgba(1, 6, 15, 0) 0%, rgba(1, 6, 15, 0.06) 42%, rgba(1, 6, 15, 0.36) 100%),
+      image-set(url("/images/backgrounds/photos-mobile-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/photos-mobile-night-ink-bg.png") type("image/png")) center -4.25rem / 100% auto no-repeat,
       #050b15;
   }
 
@@ -5826,7 +5833,11 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
     border-radius: 1.18rem;
     background:
       linear-gradient(90deg, rgba(255, 253, 246, 0.58), rgba(255, 253, 246, 0.24)),
-      url("/images/backgrounds/posts-mobile-rail-bg.png") center / 106% 106% no-repeat,
+      url("/images/backgrounds/posts-mobile-rail-bg.webp") center / 106% 106% no-repeat,
+      rgba(255, 253, 246, 0.64);
+    background:
+      linear-gradient(90deg, rgba(255, 253, 246, 0.58), rgba(255, 253, 246, 0.24)),
+      image-set(url("/images/backgrounds/posts-mobile-rail-bg.webp") type("image/webp"), url("/images/backgrounds/posts-mobile-rail-bg.png") type("image/png")) center / 106% 106% no-repeat,
       rgba(255, 253, 246, 0.64);
     box-shadow:
       0 0.6rem 1.4rem rgba(55, 48, 38, 0.12),
@@ -6045,7 +6056,11 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
     border-radius: 1.18rem;
     background:
       linear-gradient(90deg, rgba(4, 13, 28, 0.62), rgba(4, 13, 28, 0.22)),
-      url("/images/backgrounds/posts-mobile-night-rail-bg.png") center / 106% 106% no-repeat,
+      url("/images/backgrounds/posts-mobile-night-rail-bg.webp") center / 106% 106% no-repeat,
+      rgba(2, 8, 18, 0.62);
+    background:
+      linear-gradient(90deg, rgba(4, 13, 28, 0.62), rgba(4, 13, 28, 0.22)),
+      image-set(url("/images/backgrounds/posts-mobile-night-rail-bg.webp") type("image/webp"), url("/images/backgrounds/posts-mobile-night-rail-bg.png") type("image/png")) center / 106% 106% no-repeat,
       rgba(2, 8, 18, 0.62);
     box-shadow:
       0 0.6rem 1.6rem rgba(0, 0, 0, 0.34),

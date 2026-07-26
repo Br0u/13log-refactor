@@ -1,6 +1,6 @@
 ﻿import React from "react";
 import { notFound } from "next/navigation";
-import HtmlContent from "../../components/HtmlContent.jsx";
+import HtmlContent from "../../components/HtmlContent";
 import PostComments from "../../../components/blog/PostComments";
 import PostLikeButton from "../../../components/blog/PostLikeButton";
 import BlogRail from "../../../components/blog/BlogRail";

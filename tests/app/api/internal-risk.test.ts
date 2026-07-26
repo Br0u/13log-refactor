@@ -23,10 +23,40 @@ vi.mock("../../../lib/repositories/access-logs", () => ({
 }));
 
 import { POST as riskPostRoute } from "../../../app/api/internal/risk/route";
+import { signInternalRiskBody } from "../../../lib/internal-risk-auth";
+
+const RISK_SECRET = "risk-secret-that-is-at-least-32-characters";
+const SESSION_SECRET = "session-secret-that-is-at-least-32-characters";
+
+async function signedRiskRequest(payload: unknown) {
+  const body = JSON.stringify(payload);
+  const signed = await signInternalRiskBody(body, Date.now());
+
+  return new Request("http://localhost:3000/api/internal/risk", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-risk-timestamp": signed.timestamp,
+      "x-risk-signature": signed.signature,
+    },
+    body,
+  });
+}
+
+function expectNoRepositoryCalls() {
+  expect(findBlacklistByIpHashMock).not.toHaveBeenCalled();
+  expect(countRecentAccessLogsMock).not.toHaveBeenCalled();
+  expect(createAccessLogMock).not.toHaveBeenCalled();
+  expect(countBotAccessLogsMock).not.toHaveBeenCalled();
+  expect(upsertBlacklistMock).not.toHaveBeenCalled();
+}
 
 describe("internal risk api", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.unstubAllEnvs();
+    vi.stubEnv("RISK_INTERNAL_SECRET", RISK_SECRET);
+    vi.stubEnv("SESSION_SECRET", SESSION_SECRET);
     findBlacklistByIpHashMock.mockResolvedValue(null);
     countRecentAccessLogsMock.mockResolvedValue(0);
     createAccessLogMock.mockResolvedValue({ id: "log-1" });
@@ -37,13 +67,7 @@ describe("internal risk api", () => {
   it("blocks blacklisted traffic before anything else", async () => {
     findBlacklistByIpHashMock.mockResolvedValueOnce({ id: "blacklist-1", ipHash: "abc" });
 
-    const response = await riskPostRoute(new Request("http://localhost:3000/api/internal/risk", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-risk-internal": "1",
-      },
-      body: JSON.stringify({
+    const response = await riskPostRoute(await signedRiskRequest({
         ipHash: "abc",
         path: "/admin",
         country: "CA",
@@ -54,8 +78,7 @@ describe("internal risk api", () => {
         riskScore: 0,
         riskLabel: "normal",
         ipSummary: "203.0.113.x",
-      }),
-    }));
+      }));
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
@@ -75,13 +98,7 @@ describe("internal risk api", () => {
   it("blocks rate-limited traffic with 429", async () => {
     countRecentAccessLogsMock.mockResolvedValueOnce(20);
 
-    const response = await riskPostRoute(new Request("http://localhost:3000/api/internal/risk", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-risk-internal": "1",
-      },
-      body: JSON.stringify({
+    const response = await riskPostRoute(await signedRiskRequest({
         ipHash: "rate-limit",
         path: "/api/comments",
         country: "CA",
@@ -92,8 +109,7 @@ describe("internal risk api", () => {
         riskScore: 10,
         riskLabel: "normal",
         ipSummary: "203.0.113.x",
-      }),
-    }));
+      }));
 
     expect(await response.json()).toEqual({
       action: "block",
@@ -111,13 +127,7 @@ describe("internal risk api", () => {
   it("does not apply rate limiting to public page traffic", async () => {
     countRecentAccessLogsMock.mockResolvedValueOnce(999);
 
-    const response = await riskPostRoute(new Request("http://localhost:3000/api/internal/risk", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-risk-internal": "1",
-      },
-      body: JSON.stringify({
+    const response = await riskPostRoute(await signedRiskRequest({
         ipHash: "public-page",
         path: "/posts",
         country: "CA",
@@ -128,8 +138,7 @@ describe("internal risk api", () => {
         riskScore: 0,
         riskLabel: "normal",
         ipSummary: "203.0.113.x",
-      }),
-    }));
+      }));
 
     expect(await response.json()).toEqual({
       action: "allow",
@@ -149,13 +158,7 @@ describe("internal risk api", () => {
   it("does not apply rate limiting to admin pages", async () => {
     countRecentAccessLogsMock.mockResolvedValueOnce(999);
 
-    const response = await riskPostRoute(new Request("http://localhost:3000/api/internal/risk", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-risk-internal": "1",
-      },
-      body: JSON.stringify({
+    const response = await riskPostRoute(await signedRiskRequest({
         ipHash: "admin-page",
         path: "/admin/visits",
         country: "CA",
@@ -166,8 +169,7 @@ describe("internal risk api", () => {
         riskScore: 0,
         riskLabel: "normal",
         ipSummary: "203.0.113.x",
-      }),
-    }));
+      }));
 
     expect(await response.json()).toEqual({
       action: "allow",
@@ -187,13 +189,7 @@ describe("internal risk api", () => {
   it("blocks bot traffic and escalates repeat offenders into the blacklist", async () => {
     countBotAccessLogsMock.mockResolvedValueOnce(3);
 
-    const response = await riskPostRoute(new Request("http://localhost:3000/api/internal/risk", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-risk-internal": "1",
-      },
-      body: JSON.stringify({
+    const response = await riskPostRoute(await signedRiskRequest({
         ipHash: "bot-ip",
         path: "/posts",
         country: "CN",
@@ -204,8 +200,7 @@ describe("internal risk api", () => {
         riskScore: 85,
         riskLabel: "bot",
         ipSummary: "203.0.113.x",
-      }),
-    }));
+      }));
 
     expect(await response.json()).toEqual({
       action: "block",
@@ -223,13 +218,7 @@ describe("internal risk api", () => {
   });
 
   it("allows suspicious traffic after logging it", async () => {
-    const response = await riskPostRoute(new Request("http://localhost:3000/api/internal/risk", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-risk-internal": "1",
-      },
-      body: JSON.stringify({
+    const response = await riskPostRoute(await signedRiskRequest({
         ipHash: "suspicious-ip",
         path: "/posts",
         country: "CA",
@@ -240,8 +229,7 @@ describe("internal risk api", () => {
         riskScore: 35,
         riskLabel: "suspicious",
         ipSummary: "203.0.113.x",
-      }),
-    }));
+      }));
 
     expect(await response.json()).toEqual({
       action: "allow",
@@ -258,13 +246,7 @@ describe("internal risk api", () => {
   });
 
   it("allows ordinary browser traffic from any country when no other risk signals exist", async () => {
-    const response = await riskPostRoute(new Request("http://localhost:3000/api/internal/risk", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-risk-internal": "1",
-      },
-      body: JSON.stringify({
+    const response = await riskPostRoute(await signedRiskRequest({
         ipHash: "cn-human",
         path: "/posts",
         country: "CN",
@@ -275,8 +257,7 @@ describe("internal risk api", () => {
         riskScore: 5,
         riskLabel: "normal",
         ipSummary: "203.0.113.x",
-      }),
-    }));
+      }));
 
     expect(await response.json()).toEqual({
       action: "allow",
@@ -290,5 +271,89 @@ describe("internal risk api", () => {
       isBlocked: false,
       blockReason: null,
     }));
+  });
+
+  it.each([
+    ["missing signature", { timestamp: String(Date.now()) }],
+    ["missing timestamp", { signature: "a".repeat(64) }],
+    ["malformed timestamp", { timestamp: "not-a-number", signature: "a".repeat(64) }],
+    ["invalid hex", { timestamp: String(Date.now()), signature: "not-hex" }],
+  ])("returns 403 with zero repository calls for %s", async (_label, auth) => {
+    const body = JSON.stringify({
+      ipHash: "unauthenticated",
+      ipSummary: "203.0.113.x",
+      path: "/posts",
+      riskScore: 0,
+      riskLabel: "normal",
+    });
+    const response = await riskPostRoute(new Request("http://localhost:3000/api/internal/risk", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        ...("timestamp" in auth && auth.timestamp
+          ? { "x-risk-timestamp": auth.timestamp }
+          : {}),
+        ...("signature" in auth && auth.signature
+          ? { "x-risk-signature": auth.signature }
+          : {}),
+      },
+      body,
+    }));
+
+    expect(response.status).toBe(403);
+    expectNoRepositoryCalls();
+  });
+
+  it("verifies the raw body before parsing JSON", async () => {
+    const body = "{not-json";
+    const signed = await signInternalRiskBody(body, Date.now());
+    const changedSignature = `${signed.signature[0] === "0" ? "1" : "0"}${signed.signature.slice(1)}`;
+    const response = await riskPostRoute(new Request("http://localhost:3000/api/internal/risk", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-risk-timestamp": signed.timestamp,
+        "x-risk-signature": changedSignature,
+      },
+      body,
+    }));
+
+    expect(response.status).toBe(403);
+    expectNoRepositoryCalls();
+  });
+
+  it.each([
+    ["missing", undefined, SESSION_SECRET],
+    ["short", "too-short", SESSION_SECRET],
+    ["same as SESSION_SECRET", SESSION_SECRET, SESSION_SECRET],
+  ])("returns 403 with zero repository calls when risk secret is %s", async (
+    _label,
+    riskSecret,
+    sessionSecret,
+  ) => {
+    vi.stubEnv("RISK_INTERNAL_SECRET", RISK_SECRET);
+    const body = JSON.stringify({
+      ipHash: "bad-config",
+      ipSummary: "203.0.113.x",
+      path: "/posts",
+      riskScore: 0,
+      riskLabel: "normal",
+    });
+    const signed = await signInternalRiskBody(body, Date.now());
+    vi.stubEnv("RISK_INTERNAL_SECRET", riskSecret);
+    vi.stubEnv("SESSION_SECRET", sessionSecret);
+
+    const response = await riskPostRoute(new Request("http://localhost:3000/api/internal/risk", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-risk-timestamp": signed.timestamp,
+        "x-risk-signature": signed.signature,
+      },
+      body,
+    }));
+
+    expect(response.status).toBe(403);
+    expectNoRepositoryCalls();
   });
 });

@@ -8,13 +8,13 @@ import { getPublicPostBySlug, getPublicPosts, getPublicTimelineEntries } from ".
 
 describe("public content facade", () => {
   it("returns published database content by slug", async () => {
-    const slug = "public-facade-test-post";
+    const slug = "test-13log-public-facade-post";
     const category = await db.category.upsert({
-      where: { slug: "public-test" },
+      where: { slug: "test-13log-public-category" },
       update: {},
       create: {
-        name: "Public Test",
-        slug: "public-test",
+        name: "test-13log-public-category",
+        slug: "test-13log-public-category",
       },
     });
 
@@ -37,7 +37,7 @@ describe("public content facade", () => {
       markdown: "# hello",
       status: "PUBLISHED",
       categoryId: category.id,
-      tags: ["backend"],
+      tags: ["test-13log-tag-backend"],
     });
 
     const post = await getPublicPostBySlug(slug);
@@ -54,13 +54,13 @@ describe("public content facade", () => {
   });
 
   it("merges published posts and micro posts into one timeline", async () => {
-    const slug = "public-facade-timeline-post";
+    const slug = "test-13log-public-timeline-post";
     const category = await db.category.upsert({
-      where: { slug: "public-timeline-test" },
+      where: { slug: "test-13log-public-timeline-category" },
       update: {},
       create: {
-        name: "Public Timeline Test",
-        slug: "public-timeline-test",
+        name: "test-13log-public-timeline-category",
+        slug: "test-13log-public-timeline-category",
       },
     });
 
@@ -76,7 +76,10 @@ describe("public content facade", () => {
       where: {
         microPost: {
           content: {
-            in: ["timeline micro published", "timeline micro draft"],
+            in: [
+              "[test-13log] public-timeline-published",
+              "[test-13log] public-timeline-draft",
+            ],
           },
         },
       },
@@ -84,7 +87,10 @@ describe("public content facade", () => {
     await db.microPost.deleteMany({
       where: {
         content: {
-          in: ["timeline micro published", "timeline micro draft"],
+          in: [
+            "[test-13log] public-timeline-published",
+            "[test-13log] public-timeline-draft",
+          ],
         },
       },
     });
@@ -96,40 +102,44 @@ describe("public content facade", () => {
       status: "PUBLISHED",
       publishedAt: new Date("2026-03-14T10:00:00.000Z"),
       categoryId: category.id,
-      tags: ["timeline"],
+      tags: ["test-13log-tag-timeline"],
     });
 
     await createMicroPost({
-      content: "timeline micro published",
+      content: "[test-13log] public-timeline-published",
       status: "PUBLISHED",
       publishedAt: new Date("2026-03-15T10:00:00.000Z"),
-      tags: ["timeline"],
+      tags: ["test-13log-tag-timeline"],
     });
 
     await createMicroPost({
-      content: "timeline micro draft",
+      content: "[test-13log] public-timeline-draft",
       status: "DRAFT",
-      tags: ["timeline"],
+      tags: ["test-13log-tag-timeline"],
     });
 
     const publishedMicroPost = await db.microPost.findFirst({
       where: {
-        content: "timeline micro published",
+        content: "[test-13log] public-timeline-published",
       },
     });
     await createMicroPostLike({ id: publishedMicroPost.id, visitorKey: "timeline-visitor" });
 
     const entries = await getPublicTimelineEntries();
     const timelineEntries = entries.filter((item) => (
-      item.slug === slug || item.summary === "timeline micro published" || item.summary === "timeline micro draft"
+      item.slug === slug ||
+      item.summary === "[test-13log] public-timeline-published" ||
+      item.summary === "[test-13log] public-timeline-draft"
     ));
 
     expect(timelineEntries.map((item) => item.type)).toEqual(["micro", "post"]);
-    expect(timelineEntries[0].summary).toBe("timeline micro published");
+    expect(timelineEntries[0].summary).toBe("[test-13log] public-timeline-published");
     expect(timelineEntries[0].likeCount).toBe(1);
     expect(timelineEntries[0].hasImage).toBe(false);
     expect(timelineEntries[0].renderedContentHtml).toBe("");
-    expect(timelineEntries.every((item) => item.summary !== "timeline micro draft")).toBe(true);
+    expect(
+      timelineEntries.every((item) => item.summary !== "[test-13log] public-timeline-draft")
+    ).toBe(true);
   });
 
   it("marks image micros in the public timeline payload", async () => {
@@ -137,7 +147,7 @@ describe("public content facade", () => {
       where: {
         microPost: {
           content: {
-            in: ["timeline image micro"],
+            in: ["[test-13log] public-timeline-image\n\n![alt](/images/test.jpg)"],
           },
         },
       },
@@ -145,20 +155,22 @@ describe("public content facade", () => {
     await db.microPost.deleteMany({
       where: {
         content: {
-          in: ["timeline image micro"],
+          in: ["[test-13log] public-timeline-image\n\n![alt](/images/test.jpg)"],
         },
       },
     });
 
     await createMicroPost({
-      content: "![alt](/images/test.jpg)\n\ntimeline image micro",
+      content: "[test-13log] public-timeline-image\n\n![alt](/images/test.jpg)",
       status: "PUBLISHED",
       publishedAt: new Date("2026-03-16T10:00:00.000Z"),
-      tags: ["timeline"],
+      tags: ["test-13log-tag-timeline"],
     });
 
     const entries = await getPublicTimelineEntries();
-    const imageEntry = entries.find((item) => item.type === "micro" && item.summary.includes("timeline image micro"));
+    const imageEntry = entries.find(
+      (item) => item.type === "micro" && item.summary.includes("public-timeline-image")
+    );
 
     expect(imageEntry?.hasImage).toBe(true);
     expect(imageEntry?.renderedContentHtml).toContain("<img");
@@ -169,7 +181,7 @@ describe("public content facade", () => {
       where: {
         microPost: {
           content: {
-            in: ["第一行\n第二行\n\n- 列表项"],
+            in: ["[test-13log] public-rich\n\n第一行\n第二行\n\n- 列表项"],
           },
         },
       },
@@ -177,16 +189,16 @@ describe("public content facade", () => {
     await db.microPost.deleteMany({
       where: {
         content: {
-          in: ["第一行\n第二行\n\n- 列表项"],
+          in: ["[test-13log] public-rich\n\n第一行\n第二行\n\n- 列表项"],
         },
       },
     });
 
     await createMicroPost({
-      content: "第一行\n第二行\n\n- 列表项",
+      content: "[test-13log] public-rich\n\n第一行\n第二行\n\n- 列表项",
       status: "PUBLISHED",
       publishedAt: new Date("2026-03-17T10:00:00.000Z"),
-      tags: ["timeline"],
+      tags: ["test-13log-tag-timeline"],
     });
 
     const entries = await getPublicTimelineEntries();
@@ -202,7 +214,10 @@ describe("public content facade", () => {
       where: {
         microPost: {
           content: {
-            in: ["筛选命中的 rich micro", "筛选外的 rich micro"],
+            in: [
+              "[test-13log] public-filter-match\n\n筛选命中的 rich micro\n\n- 列表项",
+              "[test-13log] public-filter-other\n\n筛选外的 rich micro\n\n- 列表项",
+            ],
           },
         },
       },
@@ -210,26 +225,29 @@ describe("public content facade", () => {
     await db.microPost.deleteMany({
       where: {
         content: {
-          in: ["筛选命中的 rich micro", "筛选外的 rich micro"],
+          in: [
+            "[test-13log] public-filter-match\n\n筛选命中的 rich micro\n\n- 列表项",
+            "[test-13log] public-filter-other\n\n筛选外的 rich micro\n\n- 列表项",
+          ],
         },
       },
     });
 
     await createMicroPost({
-      content: "筛选命中的 rich micro\n\n- 列表项",
+      content: "[test-13log] public-filter-match\n\n筛选命中的 rich micro\n\n- 列表项",
       status: "PUBLISHED",
       publishedAt: new Date("2026-03-18T10:00:00.000Z"),
-      tags: ["match-tag"],
+      tags: ["test-13log-tag-match"],
     });
 
     await createMicroPost({
-      content: "筛选外的 rich micro\n\n- 列表项",
+      content: "[test-13log] public-filter-other\n\n筛选外的 rich micro\n\n- 列表项",
       status: "PUBLISHED",
       publishedAt: new Date("2026-03-18T09:00:00.000Z"),
-      tags: ["other-tag"],
+      tags: ["test-13log-tag-other"],
     });
 
-    const entries = await getPublicTimelineEntries({ tag: "match-tag" });
+    const entries = await getPublicTimelineEntries({ tag: "test-13log-tag-match" });
 
     expect(entries.some((item) => item.type === "micro" && item.summary.includes("筛选命中的 rich micro"))).toBe(true);
     expect(entries.some((item) => item.type === "micro" && item.summary.includes("筛选外的 rich micro"))).toBe(false);

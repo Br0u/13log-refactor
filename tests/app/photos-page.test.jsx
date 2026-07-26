@@ -113,7 +113,7 @@ describe("photos index page", () => {
   it("keeps the mobile night photos layout close to the daytime layout without adding filter chips or album meta", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toContain('url("/images/backgrounds/photos-mobile-night-ink-bg.png") center -4.25rem / 100% auto no-repeat');
+    expect(stylesheet).toContain('url("/images/backgrounds/photos-mobile-night-ink-bg.webp") center -4.25rem / 100% auto no-repeat');
     expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+#menu\s*\{[^}]*position:\s*fixed;[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\);/s);
     expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+#menu\s+\.site-nav-icon\s*\{[^}]*display:\s*block;/s);
     expect(stylesheet).toMatch(/body\.dark:has\(\.blog-layout--photos-index\)\s+\.photo-mobile-intro\s*\{[^}]*display:\s*block;/s);

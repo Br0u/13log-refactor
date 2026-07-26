@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "incremental": false
+  },
+  "include": [
+    "app/admin/actions.js",
+    "app/api/admin/**/*.js",
+    "lib/session.js",
+    "lib/admin-session.js",
+    "lib/auth.js",
+    "lib/env.js"
+  ]
+}
