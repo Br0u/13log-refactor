@@ -1,6 +1,10 @@
+// @vitest-environment jsdom
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
-import { renderToStaticMarkup } from "react-dom/server";
+import { act } from "react";
+import { fireEvent } from "@testing-library/react";
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { renderToString, renderToStaticMarkup } from "react-dom/server";
+import { hydrateRoot } from "react-dom/client";
 import AdminPostForm from "../../components/admin/AdminPostForm";
 
 const { submitButtonMock } = vi.hoisted(() => ({
@@ -14,6 +18,19 @@ vi.mock("../../components/admin/AdminSubmitButton", () => ({
 }));
 
 describe("admin post form", () => {
+  beforeAll(() => {
+    globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  });
+
+  afterAll(() => {
+    delete globalThis.IS_REACT_ACT_ENVIRONMENT;
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = "";
+    vi.restoreAllMocks();
+  });
+
   it("renders the required article fields and status options", () => {
     const markup = renderToStaticMarkup(
       <AdminPostForm
@@ -45,28 +62,70 @@ describe("admin post form", () => {
     expect(markup).toContain("Save post");
   });
 
-  it("server-renders the published option as selected for published posts", () => {
-    const markup = renderToStaticMarkup(
-      <AdminPostForm
-        categories={[]}
-        initialValue={{
-          title: "Published post",
-          slug: "published-post",
-          summary: "",
-          markdown: "body",
-          status: "PUBLISHED",
-          publishedAt: "2026-03-16T09:30:00.000Z",
-          categoryId: "",
-          tags: [],
-        }}
-      />
+  it.each([
+    ["ISO string", "2026-03-16T09:30:00.000Z"],
+    ["Date", new Date("2026-03-16T09:30:00.000Z")],
+  ])("round-trips a published post timestamp from SSR through hydration for a %s", async (_kind, publishedAt) => {
+    const props = {
+      categories: [],
+      initialValue: {
+        title: "Published post",
+        slug: "published-post",
+        summary: "",
+        markdown: "body",
+        status: "PUBLISHED",
+        publishedAt,
+        categoryId: "",
+        tags: [],
+      },
+    };
+    const element = <AdminPostForm {...props} />;
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const markup = renderToString(element);
+    const container = document.createElement("div");
+    container.innerHTML = markup;
+    document.body.append(container);
+
+    const visibleBeforeHydration = container.querySelector('input[type="datetime-local"]');
+    const hiddenBeforeHydration = container.querySelector('input[type="hidden"][name="publishedAt"]');
+    expect(visibleBeforeHydration?.getAttribute("name")).toBeNull();
+    expect(visibleBeforeHydration?.value).toBe("");
+    expect(hiddenBeforeHydration?.value).toBe("2026-03-16T09:30:00.000Z");
+
+    let root;
+    await act(async () => {
+      root = hydrateRoot(container, element);
+    });
+
+    const expectedLocal = new Date("2026-03-16T09:30:00.000Z");
+    const pad = (part) => String(part).padStart(2, "0");
+    const visibleAfterHydration = container.querySelector('input[type="datetime-local"]');
+    expect(visibleAfterHydration.value).toBe(
+      `${expectedLocal.getFullYear()}-${pad(expectedLocal.getMonth() + 1)}-${pad(expectedLocal.getDate())}`
+      + `T${pad(expectedLocal.getHours())}:${pad(expectedLocal.getMinutes())}`
     );
 
-    expect(markup).toContain('<option value="PUBLISHED" selected="">Published</option>');
-    expect(markup).toContain('name="publishedAt"');
-    expect(markup).toContain('type="datetime-local"');
-    expect(markup).toContain('value="2026-03-16T05:30"');
-    expect(markup).toContain("Edit using your local time.");
+    await act(async () => {
+      fireEvent.change(visibleAfterHydration, { target: { value: "2026-06-17T14:45" } });
+    });
+    const submittedUtc = container.querySelector('input[type="hidden"][name="publishedAt"]').value;
+    expect(submittedUtc.endsWith("Z")).toBe(true);
+    expect(new Date(submittedUtc).getTime()).toBe(new Date(2026, 5, 17, 14, 45).getTime());
+
+    expect(() => {
+      fireEvent.change(visibleAfterHydration, { target: { value: "" } });
+    }).not.toThrow();
+    expect(container.querySelector('input[type="hidden"][name="publishedAt"]').value).toBe("");
+
+    expect(() => {
+      fireEvent.change(visibleAfterHydration, { target: { value: "not-a-date" } });
+    }).not.toThrow();
+    expect(container.querySelector('input[type="hidden"][name="publishedAt"]').value).toBe("");
+    expect(container.textContent).toContain("Edit using your local time.");
+    expect(consoleError).not.toHaveBeenCalled();
+
+    await act(async () => root.unmount());
+    consoleError.mockRestore();
   });
 
   it("renders a success notice and pending submit label when configured", () => {

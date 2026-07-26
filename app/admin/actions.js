@@ -9,6 +9,7 @@ import { db } from "../../lib/db";
 import { approveComment, removeComment } from "../../lib/repositories/comments";
 import { approveGuestbookEntry, removeGuestbookEntry } from "../../lib/repositories/guestbook";
 import { requireAdminSession } from "../../lib/admin-session";
+import { normalizePublishedAt } from "../../components/admin/publication-utils";
 
 function parseTags(value) {
   return String(value || "")
@@ -18,10 +19,8 @@ function parseTags(value) {
 }
 
 function parsePublishedAt(value) {
-  const raw = String(value || "").trim();
-  if (!raw) return null;
-  const parsed = new Date(raw);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  const normalized = normalizePublishedAt(value);
+  return normalized ? new Date(normalized) : null;
 }
 
 function parsePostFormData(formData) {
