@@ -1,4 +1,5 @@
 import { defineConfig } from "vitest/config";
+import { DATABASE_INTEGRATION_TESTS } from "./vitest.db.config.mjs";
 
 export default defineConfig({
   resolve: {
@@ -15,6 +16,7 @@ export default defineConfig({
       "**/.superpowers/**",
       "**/.worktrees/**",
       "**/node_modules/**",
+      ...DATABASE_INTEGRATION_TESTS,
     ],
   },
 });

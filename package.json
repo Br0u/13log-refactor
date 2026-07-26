@@ -7,10 +7,12 @@
     "build": "node -e \"require('node:fs').rmSync('.next-prod', { recursive: true, force: true })\" && prisma generate && next build",
     "start": "next start",
     "test": "vitest run",
+    "test:db": "vitest run --config vitest.db.config.mjs",
     "test:watch": "vitest",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "node --env-file=.env prisma/seed.mjs",
+    "db:test:migrate": "node --env-file=.env --env-file=.env.test scripts/prepare-test-database.mjs",
     "db:cleanup:test-data": "node --env-file=.env scripts/cleanup-test-data.mjs",
     "db:import:legacy-photos": "node --experimental-default-type=module --env-file=.env scripts/import-legacy-photos.mjs"
   },
