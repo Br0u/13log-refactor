@@ -1,4 +1,5 @@
 ﻿import Link from "next/link";
+import HomeAvatarParallax from "./components/HomeAvatarParallax";
 import HomeRainLayer from "./components/HomeRainLayer";
 import {
   FileText,
@@ -16,34 +17,7 @@ export default function HomePage() {
     <section className="profile profile--rainy-mask">
       <HomeRainLayer />
       <div className="profile_inner">
-        <div className="profile-avatar-card" tabIndex={0} aria-label="头像">
-          <div className="profile-avatar-scene" aria-hidden="true">
-            <img
-              className="profile-avatar-image profile-avatar-image--base"
-              draggable="false"
-              src="/images/home/avatar-cats-ink.png"
-              alt=""
-              height="1024"
-              width="1536"
-            />
-            <img
-              className="profile-avatar-image profile-avatar-image--hover"
-              draggable="false"
-              src="/images/home/avatar-cats-ink-hover.png"
-              alt=""
-              height="1024"
-              width="1536"
-            />
-            <img
-              className="profile-avatar-image profile-avatar-image--night"
-              draggable="false"
-              src="/images/home/avatar-cats-ink-night.png"
-              alt=""
-              height="1254"
-              width="1254"
-            />
-          </div>
-        </div>
+        <HomeAvatarParallax />
         <h1>花似伊，柳似伊</h1>
         <span className="profile-kicker">Books · Life</span>
         <div className="profile-links">

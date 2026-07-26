@@ -5,17 +5,17 @@ import { describe, expect, it } from "vitest";
 describe("home page rain overlay markup", () => {
   it("adds the rainy mask hook without changing the existing homepage content labels", () => {
     const source = fs.readFileSync(path.join(process.cwd(), "app/page.js"), "utf8");
+    const avatarSource = fs.readFileSync(
+      path.join(process.cwd(), "app/components/HomeAvatarParallax.tsx"),
+      "utf8",
+    );
 
     expect(source).toContain('className="profile profile--rainy-mask"');
-    expect(source).toContain('className="profile-avatar-card"');
-    expect(source).toContain('className="profile-avatar-scene"');
+    expect(source).toContain('import HomeAvatarParallax from "./components/HomeAvatarParallax";');
+    expect(source).toContain("<HomeAvatarParallax />");
+    expect(source).not.toContain('className="profile-avatar-card"');
     expect(source).toContain("<HomeRainLayer />");
-    expect(source).toContain('className="profile-avatar-image profile-avatar-image--base"');
-    expect(source).toContain('className="profile-avatar-image profile-avatar-image--hover"');
     expect(source).not.toContain('className="profile-avatar-note"');
-    expect(source).toContain('/images/home/avatar-cats-ink.png');
-    expect(source).toContain('/images/home/avatar-cats-ink-hover.png');
-    expect(source).toContain('/images/home/avatar-cats-ink-night.png');
     expect(source).not.toContain('/images/home/curious-cats-fallen-flower-base.png');
     expect(source).not.toContain('/images/home/curious-cats-fallen-flower-cat.png');
     expect(source).not.toContain('/images/home/curious-cats-wilted-flower-cat.png');
@@ -25,6 +25,14 @@ describe("home page rain overlay markup", () => {
     expect(source).toContain("button-inner\">About");
     expect(source).toContain("button-inner\">Photos");
     expect(source).toContain("button-inner\">Link");
+
+    expect(avatarSource).toContain('className="profile-avatar-card"');
+    expect(avatarSource).toContain('className="profile-avatar-scene"');
+    expect(avatarSource).toContain("profile-avatar-state--");
+    expect(avatarSource).toContain('/images/home/avatar-cats-ink.png');
+    expect(avatarSource).toContain('/images/home/avatar-cats-ink-hover.png');
+    expect(avatarSource).toContain('/images/home/avatar-cats-ink-night.png');
+    expect(avatarSource).not.toContain("requestPermission");
   });
 
   it("uses the new cat ink avatar artwork", () => {
