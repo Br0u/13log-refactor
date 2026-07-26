@@ -23,6 +23,8 @@ type LegacyOrientationWindow = Window & {
   orientation?: number;
 };
 
+type MediaQueryChangeListener = (event: MediaQueryListEvent) => void;
+
 const AVATAR_STATES: AvatarStateConfig[] = [
   {
     name: "base",
@@ -76,6 +78,25 @@ function readScreenAngle(): number {
   return Number.isFinite(legacyAngle) ? legacyAngle as number : 0;
 }
 
+function subscribeMediaQuery(
+  query: MediaQueryList | null,
+  listener: MediaQueryChangeListener,
+): () => void {
+  if (!query) return () => {};
+
+  if (typeof query.addEventListener === "function") {
+    query.addEventListener("change", listener);
+    return () => query.removeEventListener("change", listener);
+  }
+
+  if (typeof query.addListener === "function") {
+    query.addListener(listener);
+    return () => query.removeListener(listener);
+  }
+
+  return () => {};
+}
+
 export default function HomeAvatarParallax() {
   const sceneRef = useRef<HTMLDivElement | null>(null);
   const frameRef = useRef<number | null>(null);
@@ -85,7 +106,7 @@ export default function HomeAvatarParallax() {
   const reducedMotionRef = useRef<boolean>(false);
   const coarsePointerRef = useRef<boolean>(false);
   const finePointerRef = useRef<boolean>(false);
-  const touchingRef = useRef<boolean>(false);
+  const activeTouchPointersRef = useRef<Set<number>>(new Set());
   const pageVisibleRef = useRef<boolean>(true);
   const componentVisibleRef = useRef<boolean>(true);
 
@@ -176,7 +197,7 @@ export default function HomeAvatarParallax() {
         || !pageVisibleRef.current
         || !componentVisibleRef.current
         || !coarsePointerRef.current
-        || touchingRef.current
+        || activeTouchPointersRef.current.size > 0
         || !Number.isFinite(event.beta)
         || !Number.isFinite(event.gamma)
       ) {
@@ -199,15 +220,25 @@ export default function HomeAvatarParallax() {
       ));
     };
 
+    const suspendInput = (): void => {
+      activeTouchPointersRef.current.clear();
+      resetPoint(true);
+    };
+
     const onVisibilityChange = (): void => {
       pageVisibleRef.current = !document.hidden;
-      if (!pageVisibleRef.current) resetPoint(true);
+      if (!pageVisibleRef.current) suspendInput();
+    };
+
+    const onScreenOrientationChange = (): void => {
+      orientationBaselineRef.current = null;
+      resetPoint(true);
     };
 
     const observer = typeof IntersectionObserver === "function" && sceneRef.current
       ? new IntersectionObserver(([entry]) => {
           componentVisibleRef.current = entry?.isIntersecting ?? true;
-          if (!componentVisibleRef.current) resetPoint(true);
+          if (!componentVisibleRef.current) suspendInput();
         })
       : null;
 
@@ -215,16 +246,28 @@ export default function HomeAvatarParallax() {
     applyPoint(PARALLAX_CENTER);
     syncPreferences();
     if (sceneRef.current) observer?.observe(sceneRef.current);
-    reducedQuery?.addEventListener?.("change", syncPreferences);
-    coarseQuery?.addEventListener?.("change", syncPreferences);
-    fineQuery?.addEventListener?.("change", syncPreferences);
+    const unsubscribeReduced = subscribeMediaQuery(reducedQuery, syncPreferences);
+    const unsubscribeCoarse = subscribeMediaQuery(coarseQuery, syncPreferences);
+    const unsubscribeFine = subscribeMediaQuery(fineQuery, syncPreferences);
+    const screenOrientation = window.screen?.orientation;
+    const usesScreenOrientation = typeof screenOrientation?.addEventListener === "function";
+    if (usesScreenOrientation) {
+      screenOrientation.addEventListener("change", onScreenOrientationChange);
+    } else {
+      window.addEventListener("orientationchange", onScreenOrientationChange);
+    }
     window.addEventListener("deviceorientation", onOrientation);
     document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
-      reducedQuery?.removeEventListener?.("change", syncPreferences);
-      coarseQuery?.removeEventListener?.("change", syncPreferences);
-      fineQuery?.removeEventListener?.("change", syncPreferences);
+      unsubscribeReduced();
+      unsubscribeCoarse();
+      unsubscribeFine();
+      if (usesScreenOrientation) {
+        screenOrientation.removeEventListener("change", onScreenOrientationChange);
+      } else {
+        window.removeEventListener("orientationchange", onScreenOrientationChange);
+      }
       window.removeEventListener("deviceorientation", onOrientation);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       observer?.disconnect();
@@ -241,7 +284,10 @@ export default function HomeAvatarParallax() {
       || !pageVisibleRef.current
       || !componentVisibleRef.current
       || (event.pointerType === "mouse" && !finePointerRef.current)
-      || (event.pointerType === "touch" && !touchingRef.current)
+      || (
+        event.pointerType === "touch"
+        && !activeTouchPointersRef.current.has(event.pointerId)
+      )
       || (event.pointerType !== "mouse" && event.pointerType !== "touch")
       || !sceneRef.current
     ) {
@@ -258,15 +304,17 @@ export default function HomeAvatarParallax() {
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>): void => {
     if (event.pointerType !== "touch") return;
 
-    touchingRef.current = true;
+    activeTouchPointersRef.current.add(event.pointerId);
     onPointerMove(event);
   };
 
   const onPointerEnd = (event: React.PointerEvent<HTMLDivElement>): void => {
     if (event.pointerType !== "touch") return;
 
-    touchingRef.current = false;
-    resetPoint();
+    const endedActiveTouch = activeTouchPointersRef.current.delete(event.pointerId);
+    if (endedActiveTouch && activeTouchPointersRef.current.size === 0) {
+      resetPoint();
+    }
   };
 
   const onPointerLeave = (event: React.PointerEvent<HTMLDivElement>): void => {

@@ -23,6 +23,45 @@ function mockMatchMedia({ reduced = false, coarse = false, fine = !coarse } = {}
   })));
 }
 
+function mockLegacyMatchMedia() {
+  const queries = [];
+  vi.stubGlobal("matchMedia", vi.fn((query) => {
+    const mediaQuery = {
+      matches: false,
+      media: query,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    };
+    queries.push(mediaQuery);
+    return mediaQuery;
+  }));
+  return queries;
+}
+
+function mockScreenOrientation(initialAngle = 0) {
+  let angle = initialAngle;
+  const orientation = new EventTarget();
+  Object.defineProperty(orientation, "angle", {
+    configurable: true,
+    get: () => angle,
+  });
+  const addEventListener = vi.spyOn(orientation, "addEventListener");
+  const removeEventListener = vi.spyOn(orientation, "removeEventListener");
+  Object.defineProperty(window.screen, "orientation", {
+    configurable: true,
+    value: orientation,
+  });
+
+  return {
+    addEventListener,
+    removeEventListener,
+    rotate(nextAngle) {
+      angle = nextAngle;
+      orientation.dispatchEvent(new Event("change"));
+    },
+  };
+}
+
 function flushAnimationFrames(limit = 120) {
   let count = 0;
   while (animationFrames.size && count < limit) {
@@ -67,6 +106,9 @@ describe("HomeAvatarParallax", () => {
         Object.defineProperty(this, "pointerType", {
           value: init.pointerType ?? "",
         });
+        Object.defineProperty(this, "pointerId", {
+          value: init.pointerId ?? 0,
+        });
       }
     });
     vi.stubGlobal("requestAnimationFrame", vi.fn((callback) => {
@@ -86,6 +128,7 @@ describe("HomeAvatarParallax", () => {
 
   afterEach(() => {
     cleanup();
+    delete window.screen.orientation;
     vi.unstubAllGlobals();
   });
 
@@ -143,6 +186,48 @@ describe("HomeAvatarParallax", () => {
     expect(Number(scene.style.getPropertyValue("--avatar-parallax-y"))).toBeGreaterThan(0);
   });
 
+  it("recalibrates orientation and recenters after screen rotation", () => {
+    mockMatchMedia({ coarse: true });
+    const screenOrientation = mockScreenOrientation();
+    const { container, unmount } = render(<HomeAvatarParallax />);
+    const scene = container.querySelector(".profile-avatar-scene");
+
+    act(() => {
+      dispatchOrientation(40, 5);
+      dispatchOrientation(46, 11);
+      flushAnimationFrames();
+    });
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-x"))).toBeGreaterThan(0);
+
+    act(() => screenOrientation.rotate(90));
+    expect(scene.style.getPropertyValue("--avatar-parallax-x")).toBe("0.0000");
+    expect(scene.style.getPropertyValue("--avatar-parallax-y")).toBe("0.0000");
+
+    act(() => {
+      dispatchOrientation(60, 20);
+      flushAnimationFrames();
+    });
+    expect(scene.style.getPropertyValue("--avatar-parallax-x")).toBe("0.0000");
+    expect(scene.style.getPropertyValue("--avatar-parallax-y")).toBe("0.0000");
+
+    act(() => {
+      dispatchOrientation(66, 26);
+      flushAnimationFrames();
+    });
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-x"))).toBeGreaterThan(0);
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-y"))).toBeLessThan(0);
+
+    unmount();
+    expect(screenOrientation.addEventListener).toHaveBeenCalledWith(
+      "change",
+      expect.any(Function),
+    );
+    expect(screenOrientation.removeEventListener).toHaveBeenCalledWith(
+      "change",
+      expect.any(Function),
+    );
+  });
+
   it("uses touch movement when orientation is unavailable and returns on pointer up", () => {
     mockMatchMedia({ coarse: true });
     vi.stubGlobal("DeviceOrientationEvent", undefined);
@@ -176,6 +261,48 @@ describe("HomeAvatarParallax", () => {
     act(() => flushAnimationFrames());
 
     expect(Math.abs(Number(scene.style.getPropertyValue("--avatar-parallax-x")))).toBeLessThan(0.02);
+  });
+
+  it("keeps touch priority until the last active touch ends", () => {
+    mockMatchMedia({ coarse: true });
+    const { container } = render(<HomeAvatarParallax />);
+    const scene = container.querySelector(".profile-avatar-scene");
+    mockRect(scene);
+
+    fireEvent.pointerDown(scene, {
+      clientX: 140,
+      clientY: 100,
+      pointerId: 1,
+      pointerType: "touch",
+    });
+    fireEvent.pointerDown(scene, {
+      clientX: 160,
+      clientY: 100,
+      pointerId: 2,
+      pointerType: "touch",
+    });
+    act(() => flushAnimationFrames());
+
+    fireEvent.pointerUp(scene, { pointerId: 1, pointerType: "touch" });
+    act(() => {
+      dispatchOrientation(40, 5);
+      dispatchOrientation(46, 11);
+      flushAnimationFrames();
+    });
+    fireEvent.pointerMove(scene, {
+      clientX: 20,
+      clientY: 100,
+      pointerId: 2,
+      pointerType: "touch",
+    });
+    act(() => flushAnimationFrames());
+
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-x"))).toBeLessThan(-0.5);
+
+    fireEvent.pointerUp(scene, { pointerId: 2, pointerType: "touch" });
+    act(() => flushAnimationFrames());
+    expect(scene.style.getPropertyValue("--avatar-parallax-x")).toBe("0.0000");
+    expect(scene.style.getPropertyValue("--avatar-parallax-y")).toBe("0.0000");
   });
 
   it("ignores invalid orientation fields while preserving touch fallback", () => {
@@ -225,6 +352,34 @@ describe("HomeAvatarParallax", () => {
     expect(scene.style.getPropertyValue("--avatar-parallax-y")).toBe("0.0000");
   });
 
+  it("clears interrupted touches so orientation can resume after page visibility returns", () => {
+    mockMatchMedia({ coarse: true });
+    const { container } = render(<HomeAvatarParallax />);
+    const scene = container.querySelector(".profile-avatar-scene");
+    mockRect(scene);
+
+    fireEvent.pointerDown(scene, {
+      clientX: 180,
+      clientY: 100,
+      pointerId: 7,
+      pointerType: "touch",
+    });
+    act(() => flushAnimationFrames());
+
+    Object.defineProperty(document, "hidden", { configurable: true, value: true });
+    act(() => document.dispatchEvent(new Event("visibilitychange")));
+    Object.defineProperty(document, "hidden", { configurable: true, value: false });
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+      dispatchOrientation(40, 5);
+      dispatchOrientation(46, 11);
+      flushAnimationFrames();
+    });
+
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-x"))).toBeGreaterThan(0);
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-y"))).toBeGreaterThan(0);
+  });
+
   it("stays centered while the avatar is outside the viewport", () => {
     let observerCallback;
     vi.stubGlobal("IntersectionObserver", class {
@@ -247,6 +402,56 @@ describe("HomeAvatarParallax", () => {
 
     expect(scene.style.getPropertyValue("--avatar-parallax-x")).toBe("0.0000");
     expect(scene.style.getPropertyValue("--avatar-parallax-y")).toBe("0.0000");
+  });
+
+  it("accepts new input after intersection suspension clears a pending frame", () => {
+    let observerCallback;
+    vi.stubGlobal("IntersectionObserver", class {
+      constructor(callback) {
+        observerCallback = callback;
+      }
+      observe() {}
+      disconnect() {}
+    });
+    const { container } = render(<HomeAvatarParallax />);
+    const scene = container.querySelector(".profile-avatar-scene");
+    mockRect(scene);
+
+    fireEvent.pointerMove(scene, {
+      clientX: 200,
+      clientY: 0,
+      pointerType: "mouse",
+    });
+    act(() => {
+      observerCallback([{ isIntersecting: false }]);
+      observerCallback([{ isIntersecting: true }]);
+    });
+    fireEvent.pointerMove(scene, {
+      clientX: 180,
+      clientY: 20,
+      pointerType: "mouse",
+    });
+    act(() => flushAnimationFrames());
+
+    expect(requestAnimationFrame.mock.calls.length).toBeGreaterThan(1);
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-x"))).toBeGreaterThan(0.5);
+    expect(Number(scene.style.getPropertyValue("--avatar-parallax-y"))).toBeLessThan(-0.5);
+  });
+
+  it("subscribes and cleans up legacy media query listeners", () => {
+    const queries = mockLegacyMatchMedia();
+    const { unmount } = render(<HomeAvatarParallax />);
+
+    expect(queries).toHaveLength(3);
+    for (const query of queries) {
+      expect(query.addListener).toHaveBeenCalledOnce();
+    }
+
+    unmount();
+    for (const query of queries) {
+      const listener = query.addListener.mock.calls[0][0];
+      expect(query.removeListener).toHaveBeenCalledWith(listener);
+    }
   });
 
   it("ignores all motion input when reduced motion is requested", () => {
