@@ -1,11 +1,298 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
+import {
+  PARALLAX_CENTER,
+  orientationToParallax,
+  pointerToParallax,
+  smoothParallax,
+  type OrientationBaseline,
+  type ParallaxPoint,
+} from "./home-avatar-parallax";
 
 const LAYERS = ["fallback", "far", "middle", "front"] as const;
+const SMOOTH_AMOUNT = 0.14;
+const EPSILON = 0.002;
+
+function isCentered(point: ParallaxPoint): boolean {
+  return Math.abs(point.x) <= EPSILON && Math.abs(point.y) <= EPSILON;
+}
+
+function samePoint(first: ParallaxPoint, second: ParallaxPoint): boolean {
+  return Math.abs(first.x - second.x) <= EPSILON && Math.abs(first.y - second.y) <= EPSILON;
+}
+
+function subscribeMediaQuery(query: MediaQueryList, listener: () => void) {
+  if (typeof query.addEventListener === "function") {
+    query.addEventListener("change", listener);
+    return () => query.removeEventListener("change", listener);
+  }
+
+  query.addListener(listener);
+  return () => query.removeListener(listener);
+}
 
 export default function HomeBackgroundDepth() {
   const sceneRef = useRef<HTMLDivElement | null>(null);
+  const currentPointRef = useRef<ParallaxPoint>({ ...PARALLAX_CENTER });
+  const targetPointRef = useRef<ParallaxPoint>({ ...PARALLAX_CENTER });
+  const animationFrameRef = useRef<number | null>(null);
+  const orientationBaselineRef = useRef<OrientationBaseline | null>(null);
+  const reducedMotionRef = useRef(false);
+  const finePointerRef = useRef(false);
+  const coarsePointerRef = useRef(false);
+  const pageVisibleRef = useRef(true);
+  const componentVisibleRef = useRef(true);
+
+  useEffect(() => {
+    const finePointerQuery = window.matchMedia("(pointer: fine)");
+    const coarsePointerQuery = window.matchMedia("(pointer: coarse)");
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let pointerAttached = false;
+    let orientationAttached = false;
+
+    const applyPoint = (point: ParallaxPoint, active: boolean) => {
+      const scene = sceneRef.current;
+      if (!scene) {
+        return;
+      }
+
+      scene.style.setProperty("--home-depth-x", point.x.toFixed(4));
+      scene.style.setProperty("--home-depth-y", point.y.toFixed(4));
+      scene.dataset.parallaxActive = String(active);
+    };
+
+    const cancelAnimation = () => {
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+
+    const immediatelyCenter = () => {
+      cancelAnimation();
+      currentPointRef.current = { ...PARALLAX_CENTER };
+      targetPointRef.current = { ...PARALLAX_CENTER };
+      applyPoint(PARALLAX_CENTER, false);
+    };
+
+    const canAcceptInput = () =>
+      !reducedMotionRef.current && pageVisibleRef.current && componentVisibleRef.current;
+
+    const animate = () => {
+      animationFrameRef.current = null;
+      if (!canAcceptInput()) {
+        immediatelyCenter();
+        return;
+      }
+
+      const current = currentPointRef.current;
+      const target = targetPointRef.current;
+      if (samePoint(current, target)) {
+        currentPointRef.current = { ...target };
+        applyPoint(target, !isCentered(target));
+        return;
+      }
+
+      const next = smoothParallax(current, target, SMOOTH_AMOUNT);
+      if (samePoint(next, target)) {
+        currentPointRef.current = { ...target };
+        applyPoint(target, !isCentered(target));
+        return;
+      }
+
+      currentPointRef.current = next;
+      applyPoint(next, true);
+      animationFrameRef.current = window.requestAnimationFrame(animate);
+    };
+
+    const targetPoint = (point: ParallaxPoint) => {
+      if (!canAcceptInput()) {
+        return;
+      }
+
+      targetPointRef.current = point;
+      if (samePoint(currentPointRef.current, point)) {
+        applyPoint(point, !isCentered(point));
+        return;
+      }
+
+      applyPoint(currentPointRef.current, true);
+      if (animationFrameRef.current === null) {
+        animationFrameRef.current = window.requestAnimationFrame(animate);
+      }
+    };
+
+    const smoothlyCenter = () => {
+      orientationBaselineRef.current = null;
+      if (!canAcceptInput()) {
+        immediatelyCenter();
+        return;
+      }
+      targetPoint({ ...PARALLAX_CENTER });
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse" || !canAcceptInput() || !finePointerRef.current) {
+        return;
+      }
+
+      targetPoint(
+        pointerToParallax(event.clientX, event.clientY, {
+          left: 0,
+          top: 0,
+          width: window.innerWidth,
+          height: window.innerHeight,
+        }),
+      );
+    };
+
+    const screenAngle = () => {
+      const angle = window.screen?.orientation?.angle;
+      if (typeof angle === "number" && Number.isFinite(angle)) {
+        return angle;
+      }
+      const legacyAngle = (window as Window & { orientation?: number }).orientation;
+      return typeof legacyAngle === "number" && Number.isFinite(legacyAngle) ? legacyAngle : 0;
+    };
+
+    const onDeviceOrientation = (event: DeviceOrientationEvent) => {
+      if (
+        !canAcceptInput() ||
+        finePointerRef.current ||
+        !coarsePointerRef.current ||
+        event.beta === null ||
+        event.gamma === null ||
+        !Number.isFinite(event.beta) ||
+        !Number.isFinite(event.gamma)
+      ) {
+        if (event.beta === null || event.gamma === null || !Number.isFinite(event.beta) || !Number.isFinite(event.gamma)) {
+          orientationBaselineRef.current = null;
+          immediatelyCenter();
+        }
+        return;
+      }
+
+      if (!orientationBaselineRef.current) {
+        orientationBaselineRef.current = { beta: event.beta, gamma: event.gamma };
+        return;
+      }
+
+      targetPoint(orientationToParallax(event.beta, event.gamma, orientationBaselineRef.current, screenAngle()));
+    };
+
+    const detachPointer = () => {
+      if (pointerAttached) {
+        window.removeEventListener("pointermove", onPointerMove);
+        pointerAttached = false;
+      }
+    };
+
+    const detachOrientation = () => {
+      window.removeEventListener("deviceorientation", onDeviceOrientation);
+      orientationAttached = false;
+    };
+
+    const syncInputListeners = () => {
+      finePointerRef.current = finePointerQuery.matches;
+      coarsePointerRef.current = coarsePointerQuery.matches;
+      reducedMotionRef.current = reducedMotionQuery.matches;
+
+      if (reducedMotionRef.current) {
+        orientationBaselineRef.current = null;
+        detachPointer();
+        detachOrientation();
+        immediatelyCenter();
+        return;
+      }
+
+      if (finePointerRef.current) {
+        detachOrientation();
+        orientationBaselineRef.current = null;
+        if (!pointerAttached) {
+          window.addEventListener("pointermove", onPointerMove);
+          pointerAttached = true;
+        }
+        return;
+      }
+
+      detachPointer();
+      if (coarsePointerRef.current && !orientationAttached) {
+        window.addEventListener("deviceorientation", onDeviceOrientation);
+        orientationAttached = true;
+      }
+      if (!coarsePointerRef.current) {
+        detachOrientation();
+        orientationBaselineRef.current = null;
+      }
+    };
+
+    const onMediaChange = () => syncInputListeners();
+    const onVisibilityChange = () => {
+      pageVisibleRef.current = !document.hidden;
+      if (!pageVisibleRef.current) {
+        orientationBaselineRef.current = null;
+        immediatelyCenter();
+      }
+    };
+    const onComponentVisibility = (entries: IntersectionObserverEntry[]) => {
+      componentVisibleRef.current = entries.some((entry) => entry.isIntersecting);
+      if (!componentVisibleRef.current) {
+        orientationBaselineRef.current = null;
+        immediatelyCenter();
+      }
+    };
+    const onOrientationChange = () => {
+      orientationBaselineRef.current = null;
+      immediatelyCenter();
+    };
+
+    pageVisibleRef.current = !document.hidden;
+    applyPoint(PARALLAX_CENTER, false);
+    syncInputListeners();
+    window.addEventListener("blur", smoothlyCenter);
+    document.addEventListener("mouseleave", smoothlyCenter);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    const screenOrientation = window.screen?.orientation;
+    const hasScreenOrientationEvents =
+      screenOrientation &&
+      typeof screenOrientation.addEventListener === "function" &&
+      typeof screenOrientation.removeEventListener === "function";
+    if (hasScreenOrientationEvents) {
+      screenOrientation.addEventListener("change", onOrientationChange);
+    } else {
+      window.addEventListener("orientationchange", onOrientationChange);
+    }
+
+    const observer =
+      typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver(onComponentVisibility);
+    if (observer && sceneRef.current) {
+      observer.observe(sceneRef.current);
+    }
+
+    const unsubscribeFine = subscribeMediaQuery(finePointerQuery, onMediaChange);
+    const unsubscribeCoarse = subscribeMediaQuery(coarsePointerQuery, onMediaChange);
+    const unsubscribeReduced = subscribeMediaQuery(reducedMotionQuery, onMediaChange);
+
+    return () => {
+      cancelAnimation();
+      detachPointer();
+      detachOrientation();
+      window.removeEventListener("blur", smoothlyCenter);
+      document.removeEventListener("mouseleave", smoothlyCenter);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      if (hasScreenOrientationEvents) {
+        screenOrientation.removeEventListener("change", onOrientationChange);
+      } else {
+        window.removeEventListener("orientationchange", onOrientationChange);
+      }
+      unsubscribeFine();
+      unsubscribeCoarse();
+      unsubscribeReduced();
+      observer?.disconnect();
+    };
+  }, []);
 
   return (
     <div
