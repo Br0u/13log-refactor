@@ -13,16 +13,25 @@ describe("HomeBackgroundDepth", () => {
     const { container } = render(<HomeBackgroundDepth />);
     const scene = container.querySelector(".home-depth-background");
     const layers = [...container.querySelectorAll(".home-depth-background__layer")];
+    const directChildren = scene ? [...scene.children] : [];
+    const layerNames = ["fallback", "far", "middle", "front"];
 
     expect(scene).not.toBeNull();
     expect(scene?.getAttribute("aria-hidden")).toBe("true");
     expect(scene?.dataset.parallaxActive).toBe("false");
     expect(layers).toHaveLength(4);
+    expect(layers).toEqual(directChildren);
     expect(layers.map((layer) => layer.dataset.depthLayer)).toEqual([
       "fallback",
       "far",
       "middle",
       "front",
     ]);
+    layers.forEach((layer, index) => {
+      expect(layer.classList.contains("home-depth-background__layer")).toBe(true);
+      expect(
+        layer.classList.contains(`home-depth-background__layer--${layerNames[index]}`),
+      ).toBe(true);
+    });
   });
 });
