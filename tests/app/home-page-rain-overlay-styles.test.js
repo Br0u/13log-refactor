@@ -7,6 +7,7 @@ describe("home page rain overlay styles", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
     expect(stylesheet).toMatch(/\.main \.profile\.profile--rainy-mask\s*\{[^}]*position:\s*relative;[^}]*isolation:\s*isolate;/s);
+    expect(stylesheet).toMatch(/\.home-depth-background\s*\{[^}]*z-index:\s*0;/s);
     expect(stylesheet).toMatch(/\.main \.profile\.profile--rainy-mask::before\s*\{[^}]*position:\s*fixed;[^}]*inset:\s*0;[^}]*z-index:\s*1;/s);
     expect(stylesheet).toMatch(/\.main \.profile\.profile--rainy-mask\s+\.profile_inner\s*\{[^}]*z-index:\s*3;/s);
   });

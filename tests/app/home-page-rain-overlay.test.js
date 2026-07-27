@@ -9,11 +9,22 @@ describe("home page rain overlay markup", () => {
       path.join(process.cwd(), "app/components/HomeAvatarParallax.tsx"),
       "utf8",
     );
+    const backgroundSource = fs.readFileSync(
+      path.join(process.cwd(), "app/components/HomeBackgroundDepth.tsx"),
+      "utf8",
+    );
 
     expect(source).toContain('className="profile profile--rainy-mask"');
     expect(source).toContain('import HomeAvatarParallax from "./components/HomeAvatarParallax";');
+    expect(source).toContain(
+      'import HomeBackgroundDepth from "./components/HomeBackgroundDepth";',
+    );
     expect(source).toContain("<HomeAvatarParallax />");
     expect(source).not.toContain('className="profile-avatar-card"');
+    expect(source).toContain("<HomeBackgroundDepth />");
+    expect(source.indexOf("<HomeBackgroundDepth />")).toBeLessThan(
+      source.indexOf("<HomeRainLayer />"),
+    );
     expect(source).toContain("<HomeRainLayer />");
     expect(source).not.toContain('className="profile-avatar-note"');
     expect(source).not.toContain('/images/home/curious-cats-fallen-flower-base.png');
@@ -33,6 +44,8 @@ describe("home page rain overlay markup", () => {
     expect(avatarSource).toContain('/images/home/avatar-cats-ink-hover.png');
     expect(avatarSource).toContain('/images/home/avatar-cats-ink-night.png');
     expect(avatarSource).not.toContain("requestPermission");
+    expect(backgroundSource).toContain('"use client"');
+    expect(backgroundSource).not.toContain("requestPermission");
   });
 
   it("uses the new cat ink avatar artwork", () => {

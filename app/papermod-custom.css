@@ -932,6 +932,130 @@ body.dark::before {
   gap: 0.36rem;
 }
 
+body.list:has(.profile--rainy-mask) .header {
+  position: relative;
+  z-index: 3;
+}
+
+.home-depth-background {
+  --home-depth-x: 0;
+  --home-depth-y: 0;
+  --home-depth-layer-scale: 1.045;
+  --home-depth-far-blur: 1.8px;
+  --home-depth-middle-blur: 0.55px;
+  --home-depth-middle-mask: linear-gradient(to bottom, transparent 18%, rgba(0,0,0,.36) 42%, #000 68%);
+  --home-depth-front-mask:
+    radial-gradient(ellipse 52% 76% at 0% 68%, #000 36%, transparent 74%),
+    radial-gradient(ellipse 50% 72% at 100% 72%, #000 34%, transparent 72%),
+    linear-gradient(to top, #000 0%, transparent 30%);
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent;
+  contain: paint;
+}
+
+.home-depth-background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(247, 243, 235, 0.18), rgba(247, 243, 235, 0.18)),
+    radial-gradient(ellipse at center, transparent 42%, rgba(54, 46, 36, 0.045) 100%);
+}
+
+.home-depth-background__layer {
+  position: absolute;
+  inset: -4vmax;
+  background-image: url("/images/backgrounds/home-ink-landscape.webp");
+  background-image: image-set(url("/images/backgrounds/home-ink-landscape.webp") type("image/webp"), url("/images/backgrounds/home-ink-landscape.png") type("image/png"));
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  backface-visibility: hidden;
+}
+
+.home-depth-background__layer--fallback {
+  z-index: 0;
+  opacity: 1;
+  transform: scale(var(--home-depth-layer-scale));
+}
+
+.home-depth-background__layer--far,
+.home-depth-background__layer--middle,
+.home-depth-background__layer--front {
+  opacity: 0;
+}
+
+.home-depth-background__layer--middle {
+  -webkit-mask-image: var(--home-depth-middle-mask);
+  mask-image: var(--home-depth-middle-mask);
+}
+
+.home-depth-background__layer--front {
+  -webkit-mask-image: var(--home-depth-front-mask);
+  mask-image: var(--home-depth-front-mask);
+}
+
+@supports (mask-image: linear-gradient(black, transparent)) or (-webkit-mask-image: linear-gradient(black, transparent)) {
+  .home-depth-background__layer--fallback {
+    opacity: 0;
+  }
+
+  .home-depth-background__layer--far,
+  .home-depth-background__layer--middle,
+  .home-depth-background__layer--front {
+    opacity: 1;
+    will-change: transform;
+  }
+
+  .home-depth-background__layer--far {
+    z-index: 1;
+    filter: blur(var(--home-depth-far-blur)) saturate(0.94);
+    transform:
+      translate3d(calc(var(--home-depth-x) * -2.5px), calc(var(--home-depth-y) * -1.8px), 0)
+      scale(var(--home-depth-layer-scale));
+  }
+
+  .home-depth-background__layer--middle {
+    z-index: 2;
+    filter: blur(var(--home-depth-middle-blur));
+    transform:
+      translate3d(calc(var(--home-depth-x) * 7px), calc(var(--home-depth-y) * 5px), 0)
+      scale(var(--home-depth-layer-scale));
+  }
+
+  .home-depth-background__layer--front {
+    z-index: 3;
+    transform:
+      translate3d(calc(var(--home-depth-x) * 12px), calc(var(--home-depth-y) * 9px), 0)
+      scale(var(--home-depth-layer-scale));
+  }
+}
+
+body.dark.list:has(.profile--rainy-mask) .home-depth-background {
+  --home-depth-middle-mask: linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.38) 45%, #000 70%);
+  --home-depth-front-mask:
+    radial-gradient(ellipse 54% 78% at 0% 70%, #000 38%, transparent 75%),
+    radial-gradient(ellipse 52% 74% at 100% 74%, #000 36%, transparent 73%),
+    linear-gradient(to top, #000 0%, transparent 31%);
+}
+
+body.dark.list:has(.profile--rainy-mask) .home-depth-background__layer {
+  background-image: url("/images/backgrounds/home-night-ink-bg.webp");
+  background-image: image-set(url("/images/backgrounds/home-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/home-night-ink-bg.png") type("image/png"));
+}
+
+body.dark.list:has(.profile--rainy-mask) .home-depth-background::after {
+  background:
+    linear-gradient(rgba(3, 8, 18, 0.18), rgba(3, 8, 18, 0.2)),
+    radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.12) 100%);
+}
+
 .home-rain-layer {
   position: fixed;
   inset: 0;
@@ -1001,6 +1125,11 @@ body.dark::before {
 @media (prefers-reduced-motion: reduce) {
   .home-rain-layer {
     display: none;
+  }
+
+  .home-depth-background__layer {
+    transform: scale(var(--home-depth-layer-scale)) !important;
+    will-change: auto !important;
   }
 }
 
@@ -5676,6 +5805,48 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
       radial-gradient(30rem 18rem at 50% 36%, rgba(202, 181, 132, 0.1), transparent 70%),
       image-set(url("/images/backgrounds/home-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/home-night-ink-bg.png") type("image/png")) center top / cover no-repeat,
       #060d19;
+  }
+
+  .home-depth-background {
+    --home-depth-layer-scale: 1.035;
+    --home-depth-middle-mask: linear-gradient(to bottom, transparent 24%, rgba(0,0,0,.34) 48%, #000 72%);
+    --home-depth-front-mask:
+      radial-gradient(ellipse 58% 74% at 0% 72%, #000 34%, transparent 74%),
+      radial-gradient(ellipse 56% 72% at 100% 74%, #000 32%, transparent 72%),
+      linear-gradient(to top, #000 0%, transparent 27%);
+  }
+
+  .home-depth-background__layer {
+    inset: -3vmax;
+    background-image: url("/images/backgrounds/home-mobile-ink-bg.webp");
+    background-image: image-set(url("/images/backgrounds/home-mobile-ink-bg.webp") type("image/webp"), url("/images/backgrounds/home-mobile-ink-bg.png") type("image/png"));
+    background-position: center top;
+  }
+
+  .home-depth-background__layer--middle {
+    transform:
+      translate3d(calc(var(--home-depth-x) * 5px), calc(var(--home-depth-y) * 4px), 0)
+      scale(var(--home-depth-layer-scale));
+  }
+
+  .home-depth-background__layer--front {
+    transform:
+      translate3d(calc(var(--home-depth-x) * 8px), calc(var(--home-depth-y) * 6px), 0)
+      scale(var(--home-depth-layer-scale));
+  }
+
+  body.dark.list:has(.profile--rainy-mask) .home-depth-background {
+    --home-depth-middle-mask: linear-gradient(to bottom, transparent 26%, rgba(0,0,0,0.38) 50%, #000 74%);
+    --home-depth-front-mask:
+      radial-gradient(ellipse 60% 76% at 0% 73%, #000 36%, transparent 75%),
+      radial-gradient(ellipse 58% 74% at 100% 75%, #000 34%, transparent 73%),
+      linear-gradient(to top, #000 0%, transparent 29%);
+  }
+
+  body.dark.list:has(.profile--rainy-mask) .home-depth-background__layer {
+    background-image: url("/images/backgrounds/home-night-ink-bg.webp");
+    background-image: image-set(url("/images/backgrounds/home-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/home-night-ink-bg.png") type("image/png"));
+    background-position: center top;
   }
 
   body:has(.blog-layout--posts-index),
