@@ -40,12 +40,11 @@ describe("mobile surface styles", () => {
 
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*\.home-depth-background\s*\{[^}]*--home-depth-layer-scale:\s*1\.035;[^}]*transparent 24%[\s\S]*48%[\s\S]*72%/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*\.home-depth-background__layer\s*\{[^}]*inset:\s*-3vmax;[^}]*home-mobile-ink-bg\.png[^}]*home-mobile-ink-bg\.webp[^}]*center top/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*\.home-depth-background__layer--middle\s*\{[^}]*\* 5px[^}]*\* 4px/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*\.home-depth-background__layer--front\s*\{[^}]*\* 8px[^}]*\* 6px/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*\.home-depth-background__layer--middle\s*\{[^}]*\* 5px[^}]*\* 4px[^}]*scale\(var\(--home-depth-layer-scale\)\)/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*\.home-depth-background__layer--front\s*\{[^}]*\* 8px[^}]*\* 6px[^}]*scale\(var\(--home-depth-layer-scale\)\)/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*\.home-depth-background\s*\{[^}]*transparent 27%/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.dark\.list:has\(\.profile--rainy-mask\) \.home-depth-background\s*\{[^}]*transparent 26%[\s\S]*50%[\s\S]*74%/s);
+    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.dark\.list:has\(\.profile--rainy-mask\) \.home-depth-background\s*\{[^}]*transparent 26%[^}]*50%[^}]*74%[^}]*transparent 29%/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.dark\.list:has\(\.profile--rainy-mask\) \.home-depth-background__layer\s*\{[^}]*home-night-ink-bg\.png[^}]*home-night-ink-bg\.webp[^}]*center top/s);
-    expect(stylesheet).toMatch(/transparent 29%/);
   });
 
   it("keeps shared content cards and long-form articles inside the mobile viewport", () => {

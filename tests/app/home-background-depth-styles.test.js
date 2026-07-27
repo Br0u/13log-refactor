@@ -16,6 +16,7 @@ describe("home background depth styles", () => {
     expect(root).toMatch(/overflow:\s*hidden;/);
     expect(root).toMatch(/pointer-events:\s*none;/);
     expect(root).toMatch(/background:\s*transparent;/);
+    expect(root).toMatch(/contain:\s*paint;/);
     expect(rule(css, "\\.home-rain-layer")).toMatch(/z-index:\s*2;/);
     expect(rule(css, "\\.main \\.profile\\.profile--rainy-mask \\.profile_inner")).toMatch(/z-index:\s*3;/);
   });
@@ -32,6 +33,8 @@ describe("home background depth styles", () => {
     expect(css).toMatch(/\.home-depth-background__layer--far\s*\{[^}]*translate3d\(calc\(var\(--home-depth-x\) \* -2\.5px\),\s*calc\(var\(--home-depth-y\) \* -1\.8px\),\s*0\)[\s\S]*scale\(var\(--home-depth-layer-scale\)\)/s);
     expect(css).toMatch(/\.home-depth-background__layer--middle\s*\{[^}]*translate3d\(calc\(var\(--home-depth-x\) \* 7px\),\s*calc\(var\(--home-depth-y\) \* 5px\),\s*0\)[\s\S]*scale\(var\(--home-depth-layer-scale\)\)/s);
     expect(css).toMatch(/\.home-depth-background__layer--front\s*\{[^}]*translate3d\(calc\(var\(--home-depth-x\) \* 12px\),\s*calc\(var\(--home-depth-y\) \* 9px\),\s*0\)[\s\S]*scale\(var\(--home-depth-layer-scale\)\)/s);
+    expect(css).toMatch(/\.home-depth-background__layer--far\s*\{[^}]*filter:\s*blur\(var\(--home-depth-far-blur\)\)\s+saturate\(0\.94\);/s);
+    expect(css).toMatch(/\.home-depth-background__layer--middle\s*\{[^}]*filter:\s*blur\(var\(--home-depth-middle-blur\)\);/s);
   });
 
   it("uses safe opaque fallback layers until masking is supported", () => {
@@ -56,7 +59,7 @@ describe("home background depth styles", () => {
     expect(rule(css, "body\\.dark\\.list:has\\(\\.profile--rainy-mask\\) \\.home-depth-background__layer")).toMatch(/background-image:\s*url\("\/images\/backgrounds\/home-night-ink-bg\.png"\);[\s\S]*background-image:\s*image-set\(url\("\/images\/backgrounds\/home-night-ink-bg\.webp"\)/);
     expect(rule(css, "\\.home-depth-background::after")).toMatch(/z-index:\s*4;[\s\S]*pointer-events:\s*none;/);
     expect(rule(css, "\\.home-depth-background::after")).toMatch(/(?=[\s\S]*rgba\(247, 243, 235, 0\.18\))(?=[\s\S]*rgba\(54, 46, 36, 0\.045\))/);
-    expect(rule(css, "body\\.dark\\.list:has\\(\\.profile--rainy-mask\\) \\.home-depth-background::after")).toMatch(/rgba\(3, 8, 18, 0\.1[89]\)|rgba\(3, 8, 18, 0\.2\)[\s\S]*rgba\(0, 0, 0, 0\.12\)/);
+    expect(rule(css, "body\\.dark\\.list:has\\(\\.profile--rainy-mask\\) \\.home-depth-background::after")).toMatch(/(?=[\s\S]*rgba\(3, 8, 18, 0\.18\))(?=[\s\S]*rgba\(3, 8, 18, 0\.2\))(?=[\s\S]*rgba\(0, 0, 0, 0\.12\))/);
   });
 
   it("freezes every depth layer to its safe scale for reduced motion", () => {
