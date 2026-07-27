@@ -932,6 +932,11 @@ body.dark::before {
   gap: 0.36rem;
 }
 
+body.list:has(.profile--rainy-mask) .header {
+  position: relative;
+  z-index: 3;
+}
+
 .home-depth-background {
   --home-depth-x: 0;
   --home-depth-y: 0;

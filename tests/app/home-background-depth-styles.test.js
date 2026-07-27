@@ -19,6 +19,9 @@ describe("home background depth styles", () => {
     expect(root).toMatch(/contain:\s*paint;/);
     expect(rule(css, "\\.home-rain-layer")).toMatch(/z-index:\s*2;/);
     expect(rule(css, "\\.main \\.profile\\.profile--rainy-mask \\.profile_inner")).toMatch(/z-index:\s*3;/);
+    expect(rule(css, "body\\.list:has\\(\\.profile--rainy-mask\\) \\.header")).toMatch(
+      /position:\s*relative;[\s\S]*z-index:\s*3;/,
+    );
   });
 
   it("balances desktop depth transforms and image fallbacks", () => {
