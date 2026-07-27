@@ -70,6 +70,16 @@ function flushAnimationFrames(limit = 160) {
   }
 }
 
+function flushNextAnimationFrame() {
+  const nextFrame = animationFrames.entries().next().value;
+  if (!nextFrame) {
+    return;
+  }
+  const [id, callback] = nextFrame;
+  animationFrames.delete(id);
+  callback(0);
+}
+
 function dispatchPointer(clientX, clientY, pointerType = "mouse") {
   act(() => {
     window.dispatchEvent(
@@ -263,7 +273,7 @@ describe("HomeBackgroundDepth", () => {
     const addEventListener = vi.spyOn(window, "addEventListener");
     const { scene } = renderScene();
 
-    expect(addEventListener).not.toHaveBeenCalledWith("pointermove", expect.any(Function));
+    expect(addEventListener.mock.calls.some(([type]) => type === "pointermove")).toBe(false);
     dispatchPointer(1000, 0);
     act(() => flushAnimationFrames());
 
@@ -277,7 +287,9 @@ describe("HomeBackgroundDepth", () => {
     const { scene } = renderScene();
 
     setMedia("(pointer: fine)", true);
-    expect(addEventListener).toHaveBeenCalledWith("pointermove", expect.any(Function));
+    expect(addEventListener).toHaveBeenCalledWith("pointermove", expect.any(Function), {
+      passive: true,
+    });
     dispatchPointer(1000, 0);
     act(() => flushAnimationFrames());
     expectPoint(scene, { x: 1, y: -1 });
@@ -289,6 +301,110 @@ describe("HomeBackgroundDepth", () => {
     expectPoint(scene, { x: 0, y: 0 });
     addEventListener.mockRestore();
     removeEventListener.mockRestore();
+  });
+
+  it("recenters and swaps listeners when fine input changes to coarse", () => {
+    setMedia("(pointer: fine)", true);
+    const addEventListener = vi.spyOn(window, "addEventListener");
+    const removeEventListener = vi.spyOn(window, "removeEventListener");
+    const { scene } = renderScene();
+    const pointerRegistration = addEventListener.mock.calls.find(([type]) => type === "pointermove");
+
+    expect(pointerRegistration?.[2]).toEqual({ passive: true });
+    dispatchPointer(1000, 0);
+    act(() => flushAnimationFrames());
+    expectPoint(scene, { x: 1, y: -1 });
+
+    setMedia("(pointer: coarse)", true);
+    setMedia("(pointer: fine)", false);
+
+    expectPoint(scene, { x: 0, y: 0 });
+    expect(removeEventListener).toHaveBeenCalledWith("pointermove", pointerRegistration[1]);
+    expect(addEventListener.mock.calls.some(([type]) => type === "deviceorientation")).toBe(true);
+    addEventListener.mockRestore();
+    removeEventListener.mockRestore();
+  });
+
+  it("recenters and swaps listeners when coarse input changes to fine", () => {
+    setMedia("(pointer: coarse)", true);
+    const addEventListener = vi.spyOn(window, "addEventListener");
+    const removeEventListener = vi.spyOn(window, "removeEventListener");
+    const { scene } = renderScene();
+    const orientationRegistration = addEventListener.mock.calls.find(
+      ([type]) => type === "deviceorientation",
+    );
+    dispatchOrientation(10, 5);
+    dispatchOrientation(16, 11);
+    act(() => flushAnimationFrames());
+    expectPoint(scene, { x: 0.5, y: 0.5 });
+
+    setMedia("(pointer: fine)", true);
+
+    expectPoint(scene, { x: 0, y: 0 });
+    expect(removeEventListener).toHaveBeenCalledWith(
+      "deviceorientation",
+      orientationRegistration[1],
+    );
+    expect(addEventListener).toHaveBeenCalledWith("pointermove", expect.any(Function), {
+      passive: true,
+    });
+    addEventListener.mockRestore();
+    removeEventListener.mockRestore();
+  });
+
+  it("recenters and detaches movement when fine input changes to none", () => {
+    setMedia("(pointer: fine)", true);
+    const addEventListener = vi.spyOn(window, "addEventListener");
+    const removeEventListener = vi.spyOn(window, "removeEventListener");
+    const { scene } = renderScene();
+    const pointerRegistration = addEventListener.mock.calls.find(([type]) => type === "pointermove");
+    dispatchPointer(1000, 0);
+    act(() => flushAnimationFrames());
+
+    setMedia("(pointer: fine)", false);
+
+    expectPoint(scene, { x: 0, y: 0 });
+    expect(removeEventListener).toHaveBeenCalledWith("pointermove", pointerRegistration[1]);
+    expect(addEventListener.mock.calls.filter(([type]) => type === "deviceorientation")).toHaveLength(
+      0,
+    );
+    addEventListener.mockRestore();
+    removeEventListener.mockRestore();
+  });
+
+  it("coalesces pointer bursts and ignores repeated settled input until an animation frame", () => {
+    setMedia("(pointer: fine)", true);
+    const { scene } = renderScene();
+    const setProperty = vi.spyOn(scene.style, "setProperty");
+
+    dispatchPointer(900, 100);
+    dispatchPointer(1000, 0);
+    dispatchPointer(1000, 0);
+
+    expect(setProperty).not.toHaveBeenCalled();
+    expect(animationFrames.size).toBe(1);
+    act(() => flushNextAnimationFrame());
+    expect(setProperty).toHaveBeenCalledTimes(2);
+    expect(animationFrames.size).toBe(1);
+    act(() => flushAnimationFrames());
+
+    setProperty.mockClear();
+    dispatchPointer(1000, 0);
+    expect(setProperty).not.toHaveBeenCalled();
+    expect(animationFrames.size).toBe(0);
+    setProperty.mockRestore();
+  });
+
+  it("stays centered and static when matchMedia is unavailable", () => {
+    window.matchMedia = undefined;
+
+    const { scene } = renderScene();
+    dispatchPointer(1000, 0);
+    act(() => flushAnimationFrames());
+
+    expectPoint(scene, { x: 0, y: 0 });
+    expect(scene.dataset.parallaxActive).toBe("false");
+    expect(animationFrames.size).toBe(0);
   });
 
   it("calibrates then maps coarse-only device orientation", () => {
@@ -353,16 +469,22 @@ describe("HomeBackgroundDepth", () => {
   });
 
   it("removes every runtime listener and observer on unmount", () => {
-    setMedia("(pointer: fine)", true);
+    setMedia("(pointer: coarse)", true);
+    const addWindowListener = vi.spyOn(window, "addEventListener");
     const removeWindowListener = vi.spyOn(window, "removeEventListener");
     const removeDocumentListener = vi.spyOn(document, "removeEventListener");
     const { unmount } = renderScene();
+    const orientationRegistration = addWindowListener.mock.calls.find(
+      ([type]) => type === "deviceorientation",
+    );
 
     unmount();
 
-    expect(removeWindowListener).toHaveBeenCalledWith("pointermove", expect.any(Function));
     expect(removeWindowListener).toHaveBeenCalledWith("blur", expect.any(Function));
-    expect(removeWindowListener).toHaveBeenCalledWith("deviceorientation", expect.any(Function));
+    expect(removeWindowListener).toHaveBeenCalledWith(
+      "deviceorientation",
+      orientationRegistration[1],
+    );
     expect(removeDocumentListener).toHaveBeenCalledWith("mouseleave", expect.any(Function));
     expect(removeDocumentListener).toHaveBeenCalledWith("visibilitychange", expect.any(Function));
     expect(screenOrientation.removeEventListener).toHaveBeenCalledWith("change", expect.any(Function));
@@ -370,6 +492,7 @@ describe("HomeBackgroundDepth", () => {
     [...mediaQueries.values()].forEach((media) => {
       expect(media.listeners.size).toBe(0);
     });
+    addWindowListener.mockRestore();
     removeWindowListener.mockRestore();
     removeDocumentListener.mockRestore();
   });

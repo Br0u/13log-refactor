@@ -13,6 +13,7 @@ import {
 const LAYERS = ["fallback", "far", "middle", "front"] as const;
 const SMOOTH_AMOUNT = 0.14;
 const EPSILON = 0.002;
+type InputMode = "fine" | "coarse" | "none" | "disabled";
 
 function isCentered(point: ParallaxPoint): boolean {
   return Math.abs(point.x) <= EPSILON && Math.abs(point.y) <= EPSILON;
@@ -22,7 +23,11 @@ function samePoint(first: ParallaxPoint, second: ParallaxPoint): boolean {
   return Math.abs(first.x - second.x) <= EPSILON && Math.abs(first.y - second.y) <= EPSILON;
 }
 
-function subscribeMediaQuery(query: MediaQueryList, listener: () => void) {
+function subscribeMediaQuery(query: MediaQueryList | null, listener: () => void) {
+  if (!query) {
+    return () => undefined;
+  }
+
   if (typeof query.addEventListener === "function") {
     query.addEventListener("change", listener);
     return () => query.removeEventListener("change", listener);
@@ -45,11 +50,14 @@ export default function HomeBackgroundDepth() {
   const componentVisibleRef = useRef(true);
 
   useEffect(() => {
-    const finePointerQuery = window.matchMedia("(pointer: fine)");
-    const coarsePointerQuery = window.matchMedia("(pointer: coarse)");
-    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const matchMedia =
+      typeof window.matchMedia === "function" ? window.matchMedia.bind(window) : null;
+    const finePointerQuery = matchMedia?.("(pointer: fine)") ?? null;
+    const coarsePointerQuery = matchMedia?.("(pointer: coarse)") ?? null;
+    const reducedMotionQuery = matchMedia?.("(prefers-reduced-motion: reduce)") ?? null;
     let pointerAttached = false;
     let orientationAttached = false;
+    let effectiveMode: InputMode | null = null;
 
     const applyPoint = (point: ParallaxPoint) => {
       const scene = sceneRef.current;
@@ -67,7 +75,10 @@ export default function HomeBackgroundDepth() {
         return;
       }
 
-      scene.dataset.parallaxActive = String(active);
+      const nextActive = String(active);
+      if (scene.dataset.parallaxActive !== nextActive) {
+        scene.dataset.parallaxActive = nextActive;
+      }
     };
 
     const cancelAnimation = () => {
@@ -126,15 +137,13 @@ export default function HomeBackgroundDepth() {
         return;
       }
 
-      targetPointRef.current = point;
-      if (samePoint(currentPointRef.current, point)) {
-        applyPoint(point);
-        setActive(!isCentered(point));
+      if (samePoint(targetPointRef.current, point)) {
         return;
       }
 
-      setActive(true);
+      targetPointRef.current = point;
       if (animationFrameRef.current === null) {
+        setActive(true);
         animationFrameRef.current = window.requestAnimationFrame(animate);
       }
     };
@@ -205,41 +214,44 @@ export default function HomeBackgroundDepth() {
     };
 
     const detachOrientation = () => {
-      window.removeEventListener("deviceorientation", onDeviceOrientation);
-      orientationAttached = false;
+      if (orientationAttached) {
+        window.removeEventListener("deviceorientation", onDeviceOrientation);
+        orientationAttached = false;
+      }
     };
 
     const syncInputListeners = () => {
-      finePointerRef.current = finePointerQuery.matches;
-      coarsePointerRef.current = coarsePointerQuery.matches;
-      reducedMotionRef.current = reducedMotionQuery.matches;
+      finePointerRef.current = finePointerQuery?.matches ?? false;
+      coarsePointerRef.current = coarsePointerQuery?.matches ?? false;
+      reducedMotionRef.current = reducedMotionQuery?.matches ?? false;
 
-      if (reducedMotionRef.current) {
+      const nextMode: InputMode = reducedMotionRef.current
+        ? "disabled"
+        : finePointerRef.current
+          ? "fine"
+          : coarsePointerRef.current
+            ? "coarse"
+            : "none";
+
+      if (nextMode !== effectiveMode) {
         orientationBaselineRef.current = null;
         detachPointer();
         detachOrientation();
         immediatelyCenter();
-        return;
+        effectiveMode = nextMode;
       }
 
-      if (finePointerRef.current) {
-        detachOrientation();
-        orientationBaselineRef.current = null;
+      if (effectiveMode === "fine") {
         if (!pointerAttached) {
-          window.addEventListener("pointermove", onPointerMove);
+          window.addEventListener("pointermove", onPointerMove, { passive: true });
           pointerAttached = true;
         }
         return;
       }
 
-      detachPointer();
-      if (coarsePointerRef.current && !orientationAttached) {
+      if (effectiveMode === "coarse" && !orientationAttached) {
         window.addEventListener("deviceorientation", onDeviceOrientation);
         orientationAttached = true;
-      }
-      if (!coarsePointerRef.current) {
-        detachOrientation();
-        orientationBaselineRef.current = null;
       }
     };
 
