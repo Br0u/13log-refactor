@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import HomeAvatarParallax from "./components/HomeAvatarParallax";
+import HomeBackgroundDepth from "./components/HomeBackgroundDepth";
 import HomeRainLayer from "./components/HomeRainLayer";
 import {
   FileText,
@@ -15,6 +16,7 @@ import {
 export default function HomePage() {
   return (
     <section className="profile profile--rainy-mask">
+      <HomeBackgroundDepth />
       <HomeRainLayer />
       <div className="profile_inner">
         <HomeAvatarParallax />
