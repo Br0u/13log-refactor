@@ -959,8 +959,8 @@ body.dark::before {
   z-index: 4;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at center, transparent 54%, rgba(54, 46, 36, 0.045) 100%),
-    linear-gradient(rgba(247, 243, 235, 0.18), rgba(247, 243, 235, 0.18));
+    linear-gradient(rgba(247, 243, 235, 0.18), rgba(247, 243, 235, 0.18)),
+    radial-gradient(ellipse at center, transparent 42%, rgba(54, 46, 36, 0.045) 100%);
 }
 
 .home-depth-background__layer {
@@ -1033,10 +1033,10 @@ body.dark::before {
 }
 
 body.dark.list:has(.profile--rainy-mask) .home-depth-background {
-  --home-depth-middle-mask: linear-gradient(to bottom, transparent 20%, rgba(0,0,0,.42) 45%, #000 70%);
+  --home-depth-middle-mask: linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.38) 45%, #000 70%);
   --home-depth-front-mask:
-    radial-gradient(ellipse 54% 78% at 2% 70%, #000 34%, transparent 75%),
-    radial-gradient(ellipse 52% 74% at 98% 74%, #000 32%, transparent 74%),
+    radial-gradient(ellipse 54% 78% at 0% 70%, #000 38%, transparent 75%),
+    radial-gradient(ellipse 52% 74% at 100% 74%, #000 36%, transparent 73%),
     linear-gradient(to top, #000 0%, transparent 31%);
 }
 
@@ -1047,8 +1047,8 @@ body.dark.list:has(.profile--rainy-mask) .home-depth-background__layer {
 
 body.dark.list:has(.profile--rainy-mask) .home-depth-background::after {
   background:
-    radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, 0.12) 100%),
-    linear-gradient(rgba(3, 8, 18, 0.18), rgba(3, 8, 18, 0.2));
+    linear-gradient(rgba(3, 8, 18, 0.18), rgba(3, 8, 18, 0.2)),
+    radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.12) 100%);
 }
 
 .home-rain-layer {
@@ -5804,10 +5804,10 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
 
   .home-depth-background {
     --home-depth-layer-scale: 1.035;
-    --home-depth-middle-mask: linear-gradient(to bottom, transparent 24%, rgba(0,0,0,.36) 48%, #000 72%);
+    --home-depth-middle-mask: linear-gradient(to bottom, transparent 24%, rgba(0,0,0,.34) 48%, #000 72%);
     --home-depth-front-mask:
-      radial-gradient(ellipse 56% 78% at 0% 70%, #000 34%, transparent 75%),
-      radial-gradient(ellipse 54% 74% at 100% 74%, #000 32%, transparent 74%),
+      radial-gradient(ellipse 58% 74% at 0% 72%, #000 34%, transparent 74%),
+      radial-gradient(ellipse 56% 72% at 100% 74%, #000 32%, transparent 72%),
       linear-gradient(to top, #000 0%, transparent 27%);
   }
 
@@ -5831,10 +5831,10 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
   }
 
   body.dark.list:has(.profile--rainy-mask) .home-depth-background {
-    --home-depth-middle-mask: linear-gradient(to bottom, transparent 26%, rgba(0,0,0,.42) 50%, #000 74%);
+    --home-depth-middle-mask: linear-gradient(to bottom, transparent 26%, rgba(0,0,0,0.38) 50%, #000 74%);
     --home-depth-front-mask:
-      radial-gradient(ellipse 58% 80% at 2% 72%, #000 32%, transparent 76%),
-      radial-gradient(ellipse 56% 76% at 98% 76%, #000 30%, transparent 75%),
+      radial-gradient(ellipse 60% 76% at 0% 73%, #000 36%, transparent 75%),
+      radial-gradient(ellipse 58% 74% at 100% 75%, #000 34%, transparent 73%),
       linear-gradient(to top, #000 0%, transparent 29%);
   }
 

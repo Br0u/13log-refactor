@@ -54,12 +54,12 @@ describe("home background depth styles", () => {
 
     expect(day).toMatch(/--home-depth-middle-mask:\s*linear-gradient\(to bottom, transparent 18%, rgba\(0,0,0,\.36\) 42%, #000 68%\);/);
     expect(day).toMatch(/radial-gradient\(ellipse 52% 76% at 0% 68%, #000 36%, transparent 74%\)[\s\S]*radial-gradient\(ellipse 50% 72% at 100% 72%, #000 34%, transparent 72%\)[\s\S]*transparent 30%/);
-    expect(night).toMatch(/transparent 20%[\s\S]*45%[\s\S]*70%/);
-    expect(night).toMatch(/transparent 31%/);
+    expect(night).toMatch(/--home-depth-middle-mask:\s*linear-gradient\(to bottom, transparent 20%, rgba\(0,0,0,0\.38\) 45%, #000 70%\);/);
+    expect(night).toMatch(/--home-depth-front-mask:\s*radial-gradient\(ellipse 54% 78% at 0% 70%, #000 38%, transparent 75%\),\s*radial-gradient\(ellipse 52% 74% at 100% 74%, #000 36%, transparent 73%\),\s*linear-gradient\(to top, #000 0%, transparent 31%\);/s);
     expect(rule(css, "body\\.dark\\.list:has\\(\\.profile--rainy-mask\\) \\.home-depth-background__layer")).toMatch(/background-image:\s*url\("\/images\/backgrounds\/home-night-ink-bg\.png"\);[\s\S]*background-image:\s*image-set\(url\("\/images\/backgrounds\/home-night-ink-bg\.webp"\)/);
     expect(rule(css, "\\.home-depth-background::after")).toMatch(/z-index:\s*4;[\s\S]*pointer-events:\s*none;/);
-    expect(rule(css, "\\.home-depth-background::after")).toMatch(/(?=[\s\S]*rgba\(247, 243, 235, 0\.18\))(?=[\s\S]*rgba\(54, 46, 36, 0\.045\))/);
-    expect(rule(css, "body\\.dark\\.list:has\\(\\.profile--rainy-mask\\) \\.home-depth-background::after")).toMatch(/(?=[\s\S]*rgba\(3, 8, 18, 0\.18\))(?=[\s\S]*rgba\(3, 8, 18, 0\.2\))(?=[\s\S]*rgba\(0, 0, 0, 0\.12\))/);
+    expect(rule(css, "\\.home-depth-background::after")).toMatch(/background:\s*linear-gradient\(rgba\(247, 243, 235, 0\.18\), rgba\(247, 243, 235, 0\.18\)\),\s*radial-gradient\(ellipse at center, transparent 42%, rgba\(54, 46, 36, 0\.045\) 100%\);/s);
+    expect(rule(css, "body\\.dark\\.list:has\\(\\.profile--rainy-mask\\) \\.home-depth-background::after")).toMatch(/background:\s*linear-gradient\(rgba\(3, 8, 18, 0\.18\), rgba\(3, 8, 18, 0\.2\)\),\s*radial-gradient\(ellipse at center, transparent 40%, rgba\(0, 0, 0, 0\.12\) 100%\);/s);
   });
 
   it("freezes every depth layer to its safe scale for reduced motion", () => {
