@@ -190,10 +190,15 @@ describe("HomeBackgroundDepth", () => {
 
     dispatchPointer(1000, 0);
     expect(scene.dataset.parallaxActive).toBe("true");
+    const activeChanges = [];
+    const observer = new MutationObserver((records) => activeChanges.push(...records));
+    observer.observe(scene, { attributes: true, attributeFilter: ["data-parallax-active"] });
     act(() => flushAnimationFrames());
 
     expectPoint(scene, { x: 1, y: -1 });
     expect(scene.dataset.parallaxActive).toBe("true");
+    expect([...activeChanges, ...observer.takeRecords()]).toHaveLength(0);
+    observer.disconnect();
   });
 
   it.each([

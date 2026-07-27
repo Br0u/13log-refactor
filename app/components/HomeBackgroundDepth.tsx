@@ -51,7 +51,7 @@ export default function HomeBackgroundDepth() {
     let pointerAttached = false;
     let orientationAttached = false;
 
-    const applyPoint = (point: ParallaxPoint, active: boolean) => {
+    const applyPoint = (point: ParallaxPoint) => {
       const scene = sceneRef.current;
       if (!scene) {
         return;
@@ -59,6 +59,14 @@ export default function HomeBackgroundDepth() {
 
       scene.style.setProperty("--home-depth-x", point.x.toFixed(4));
       scene.style.setProperty("--home-depth-y", point.y.toFixed(4));
+    };
+
+    const setActive = (active: boolean) => {
+      const scene = sceneRef.current;
+      if (!scene) {
+        return;
+      }
+
       scene.dataset.parallaxActive = String(active);
     };
 
@@ -73,7 +81,8 @@ export default function HomeBackgroundDepth() {
       cancelAnimation();
       currentPointRef.current = { ...PARALLAX_CENTER };
       targetPointRef.current = { ...PARALLAX_CENTER };
-      applyPoint(PARALLAX_CENTER, false);
+      applyPoint(PARALLAX_CENTER);
+      setActive(false);
     };
 
     const canAcceptInput = () =>
@@ -90,19 +99,25 @@ export default function HomeBackgroundDepth() {
       const target = targetPointRef.current;
       if (samePoint(current, target)) {
         currentPointRef.current = { ...target };
-        applyPoint(target, !isCentered(target));
+        applyPoint(target);
+        if (isCentered(target)) {
+          setActive(false);
+        }
         return;
       }
 
       const next = smoothParallax(current, target, SMOOTH_AMOUNT);
       if (samePoint(next, target)) {
         currentPointRef.current = { ...target };
-        applyPoint(target, !isCentered(target));
+        applyPoint(target);
+        if (isCentered(target)) {
+          setActive(false);
+        }
         return;
       }
 
       currentPointRef.current = next;
-      applyPoint(next, true);
+      applyPoint(next);
       animationFrameRef.current = window.requestAnimationFrame(animate);
     };
 
@@ -113,11 +128,12 @@ export default function HomeBackgroundDepth() {
 
       targetPointRef.current = point;
       if (samePoint(currentPointRef.current, point)) {
-        applyPoint(point, !isCentered(point));
+        applyPoint(point);
+        setActive(!isCentered(point));
         return;
       }
 
-      applyPoint(currentPointRef.current, true);
+      setActive(true);
       if (animationFrameRef.current === null) {
         animationFrameRef.current = window.requestAnimationFrame(animate);
       }
@@ -248,7 +264,8 @@ export default function HomeBackgroundDepth() {
     };
 
     pageVisibleRef.current = !document.hidden;
-    applyPoint(PARALLAX_CENTER, false);
+    applyPoint(PARALLAX_CENTER);
+    setActive(false);
     syncInputListeners();
     window.addEventListener("blur", smoothlyCenter);
     document.addEventListener("mouseleave", smoothlyCenter);
