@@ -28,13 +28,20 @@ function subscribeMediaQuery(query: MediaQueryList | null, listener: () => void)
     return () => undefined;
   }
 
-  if (typeof query.addEventListener === "function") {
+  if (
+    typeof query.addEventListener === "function" &&
+    typeof query.removeEventListener === "function"
+  ) {
     query.addEventListener("change", listener);
     return () => query.removeEventListener("change", listener);
   }
 
-  query.addListener(listener);
-  return () => query.removeListener(listener);
+  if (typeof query.addListener === "function" && typeof query.removeListener === "function") {
+    query.addListener(listener);
+    return () => query.removeListener(listener);
+  }
+
+  return () => undefined;
 }
 
 export default function HomeBackgroundDepth() {
@@ -99,6 +106,14 @@ export default function HomeBackgroundDepth() {
     const canAcceptInput = () =>
       !reducedMotionRef.current && pageVisibleRef.current && componentVisibleRef.current;
 
+    const finishAtTarget = (target: ParallaxPoint) => {
+      currentPointRef.current = { ...target };
+      applyPoint(target);
+      if (isCentered(target)) {
+        setActive(false);
+      }
+    };
+
     const animate = () => {
       animationFrameRef.current = null;
       if (!canAcceptInput()) {
@@ -109,21 +124,13 @@ export default function HomeBackgroundDepth() {
       const current = currentPointRef.current;
       const target = targetPointRef.current;
       if (samePoint(current, target)) {
-        currentPointRef.current = { ...target };
-        applyPoint(target);
-        if (isCentered(target)) {
-          setActive(false);
-        }
+        finishAtTarget(target);
         return;
       }
 
       const next = smoothParallax(current, target, SMOOTH_AMOUNT);
       if (samePoint(next, target)) {
-        currentPointRef.current = { ...target };
-        applyPoint(target);
-        if (isCentered(target)) {
-          setActive(false);
-        }
+        finishAtTarget(target);
         return;
       }
 

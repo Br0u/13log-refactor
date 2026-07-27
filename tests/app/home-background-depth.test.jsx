@@ -407,6 +407,16 @@ describe("HomeBackgroundDepth", () => {
     expect(animationFrames.size).toBe(0);
   });
 
+  it("stays static when media queries expose no subscription API", () => {
+    window.matchMedia = vi.fn((query) => ({ matches: false, media: query }));
+
+    const { scene, unmount } = renderScene();
+
+    expectPoint(scene, { x: 0, y: 0 });
+    expect(scene.dataset.parallaxActive).toBe("false");
+    expect(() => unmount()).not.toThrow();
+  });
+
   it("calibrates then maps coarse-only device orientation", () => {
     setMedia("(pointer: coarse)", true);
     const { scene } = renderScene();
