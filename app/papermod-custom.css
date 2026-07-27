@@ -966,7 +966,7 @@ body.dark::before {
 .home-depth-background__layer {
   position: absolute;
   inset: -4vmax;
-  background-image: url("/images/backgrounds/home-ink-landscape.png");
+  background-image: url("/images/backgrounds/home-ink-landscape.webp");
   background-image: image-set(url("/images/backgrounds/home-ink-landscape.webp") type("image/webp"), url("/images/backgrounds/home-ink-landscape.png") type("image/png"));
   background-position: center;
   background-size: cover;
@@ -1041,7 +1041,7 @@ body.dark.list:has(.profile--rainy-mask) .home-depth-background {
 }
 
 body.dark.list:has(.profile--rainy-mask) .home-depth-background__layer {
-  background-image: url("/images/backgrounds/home-night-ink-bg.png");
+  background-image: url("/images/backgrounds/home-night-ink-bg.webp");
   background-image: image-set(url("/images/backgrounds/home-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/home-night-ink-bg.png") type("image/png"));
 }
 
@@ -5813,7 +5813,7 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
 
   .home-depth-background__layer {
     inset: -3vmax;
-    background-image: url("/images/backgrounds/home-mobile-ink-bg.png");
+    background-image: url("/images/backgrounds/home-mobile-ink-bg.webp");
     background-image: image-set(url("/images/backgrounds/home-mobile-ink-bg.webp") type("image/webp"), url("/images/backgrounds/home-mobile-ink-bg.png") type("image/png"));
     background-position: center top;
   }
@@ -5839,7 +5839,7 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
   }
 
   body.dark.list:has(.profile--rainy-mask) .home-depth-background__layer {
-    background-image: url("/images/backgrounds/home-night-ink-bg.png");
+    background-image: url("/images/backgrounds/home-night-ink-bg.webp");
     background-image: image-set(url("/images/backgrounds/home-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/home-night-ink-bg.png") type("image/png"));
     background-position: center top;
   }
