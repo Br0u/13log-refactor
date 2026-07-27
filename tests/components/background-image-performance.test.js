@@ -6,12 +6,6 @@ import { describe, expect, it } from "vitest";
 const projectRoot = process.cwd();
 const stylesheetPath = path.join(projectRoot, "app/papermod-custom.css");
 const backgroundsDir = path.join(projectRoot, "public/images/backgrounds");
-const compatibilityFallbacks = [
-  "about-mobile-profile-card.png",
-  "photos-mobile-night-ink-bg.png",
-  "posts-mobile-rail-bg.png",
-  "posts-mobile-night-rail-bg.png",
-];
 
 describe("background image performance", () => {
   it("serves CSS background PNGs through WebP image-set fallbacks", () => {
@@ -57,38 +51,36 @@ describe("background image performance", () => {
     expect(stylesheetWithoutImageSets).not.toMatch(backgroundPngPattern);
   });
 
-  it("places a raw WebP compatibility background before each new image-set", () => {
+  it("places a raw WebP compatibility background before every image-set background", () => {
     const stylesheet = fs.readFileSync(stylesheetPath, "utf8");
     const root = postcss.parse(stylesheet);
+    const imageSetDeclarations = [];
 
-    for (const pngName of compatibilityFallbacks) {
-      const webpName = pngName.replace(/\.png$/, ".webp");
-      const imageSetDeclarations = [];
+    root.walkDecls("background", (declaration) => {
+      if (declaration.value.includes("image-set(")) {
+        imageSetDeclarations.push(declaration);
+      }
+    });
 
-      root.walkDecls("background", (declaration) => {
-        if (
-          declaration.value.includes("image-set(") &&
-          declaration.value.includes(`url("/images/backgrounds/${pngName}")`)
-        ) {
-          imageSetDeclarations.push(declaration);
-        }
-      });
+    expect(imageSetDeclarations.length).toBeGreaterThan(0);
 
-      expect(imageSetDeclarations).toHaveLength(1);
-
-      const imageSetDeclaration = imageSetDeclarations[0];
+    for (const imageSetDeclaration of imageSetDeclarations) {
       const imageSet = imageSetDeclaration.value.match(
         /image-set\((?:[^()]|\([^()]*\))*\)/,
       )?.[0];
       const compatibilityDeclaration = imageSetDeclaration.prev();
+      const webpCandidate = imageSet?.match(
+        /url\("(\/images\/backgrounds\/[^"]+?\.webp)"\)/,
+      )?.[1];
 
       expect(imageSet).toBeDefined();
+      expect(webpCandidate).toBeDefined();
       expect(compatibilityDeclaration?.type).toBe("decl");
       expect(compatibilityDeclaration?.prop).toBe("background");
       expect(compatibilityDeclaration?.value).toBe(
         imageSetDeclaration.value.replace(
           imageSet,
-          `url("/images/backgrounds/${webpName}")`,
+          `url("${webpCandidate}")`,
         ),
       );
       expect(compatibilityDeclaration?.value).not.toContain(".png");

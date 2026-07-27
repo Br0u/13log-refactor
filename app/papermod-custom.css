@@ -343,6 +343,7 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  isolation: isolate;
 }
 
 a { color: var(--link-color); }
@@ -416,6 +417,10 @@ body.dark.list {
 body.list:has(.profile--rainy-mask) {
   background:
     linear-gradient(rgba(247, 243, 235, 0.18), rgba(247, 243, 235, 0.18)),
+    url("/images/backgrounds/home-ink-landscape.webp") center / cover no-repeat fixed,
+    var(--theme);
+  background:
+    linear-gradient(rgba(247, 243, 235, 0.18), rgba(247, 243, 235, 0.18)),
     image-set(url("/images/backgrounds/home-ink-landscape.webp") type("image/webp"), url("/images/backgrounds/home-ink-landscape.png") type("image/png")) center / cover no-repeat fixed,
     var(--theme);
 }
@@ -430,12 +435,22 @@ body.dark.list:has(.profile--rainy-mask) {
     linear-gradient(rgba(3, 8, 18, 0.18), rgba(3, 8, 18, 0.2)),
     radial-gradient(38rem 22rem at 43% 40%, rgba(202, 181, 132, 0.11), transparent 68%),
     radial-gradient(22rem 14rem at 50% 86%, rgba(231, 198, 124, 0.12), transparent 72%),
+    url("/images/backgrounds/home-night-ink-bg.webp") center / cover no-repeat fixed,
+    #060d19;
+  background:
+    linear-gradient(rgba(3, 8, 18, 0.18), rgba(3, 8, 18, 0.2)),
+    radial-gradient(38rem 22rem at 43% 40%, rgba(202, 181, 132, 0.11), transparent 68%),
+    radial-gradient(22rem 14rem at 50% 86%, rgba(231, 198, 124, 0.12), transparent 72%),
     image-set(url("/images/backgrounds/home-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/home-night-ink-bg.png") type("image/png")) center / cover no-repeat fixed,
     #060d19;
 }
 
 body:has(.blog-layout--posts-index),
 body:has(.blog-layout--post-detail) {
+  background:
+    linear-gradient(rgba(247, 243, 235, 0.16), rgba(247, 243, 235, 0.16)),
+    url("/images/backgrounds/posts-ink-bg.webp") center / cover no-repeat fixed,
+    var(--theme);
   background:
     linear-gradient(rgba(247, 243, 235, 0.16), rgba(247, 243, 235, 0.16)),
     image-set(url("/images/backgrounds/posts-ink-bg.webp") type("image/webp"), url("/images/backgrounds/posts-ink-bg.png") type("image/png")) center / cover no-repeat fixed,
@@ -456,11 +471,21 @@ body.dark:has(.blog-layout--post-detail) {
     linear-gradient(rgba(1, 6, 15, 0.36), rgba(1, 6, 15, 0.48)),
     radial-gradient(44rem 26rem at 17% 10%, rgba(120, 171, 236, 0.09), transparent 68%),
     radial-gradient(34rem 22rem at 88% 20%, rgba(222, 201, 165, 0.055), transparent 72%),
+    url("/images/backgrounds/posts-night-ink-bg.webp") center / cover no-repeat fixed,
+    #050b15;
+  background:
+    linear-gradient(rgba(1, 6, 15, 0.36), rgba(1, 6, 15, 0.48)),
+    radial-gradient(44rem 26rem at 17% 10%, rgba(120, 171, 236, 0.09), transparent 68%),
+    radial-gradient(34rem 22rem at 88% 20%, rgba(222, 201, 165, 0.055), transparent 72%),
     image-set(url("/images/backgrounds/posts-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/posts-night-ink-bg.png") type("image/png")) center / cover no-repeat fixed,
     #050b15;
 }
 
 body:has(.blog-layout--link-index:not(.playzone-layout)) {
+  background:
+    linear-gradient(rgba(247, 243, 235, 0.12), rgba(247, 243, 235, 0.12)),
+    url("/images/backgrounds/link-ink-bg.webp") center / cover no-repeat fixed,
+    var(--theme);
   background:
     linear-gradient(rgba(247, 243, 235, 0.12), rgba(247, 243, 235, 0.12)),
     image-set(url("/images/backgrounds/link-ink-bg.webp") type("image/webp"), url("/images/backgrounds/link-ink-bg.png") type("image/png")) center / cover no-repeat fixed,
@@ -480,11 +505,21 @@ body.dark:has(.blog-layout--link-index:not(.playzone-layout)) {
     linear-gradient(rgba(1, 6, 15, 0.34), rgba(1, 6, 15, 0.5)),
     radial-gradient(42rem 25rem at 18% 10%, rgba(126, 174, 238, 0.08), transparent 68%),
     radial-gradient(34rem 22rem at 84% 18%, rgba(222, 201, 165, 0.045), transparent 72%),
+    url("/images/backgrounds/link-night-ink-bg.webp") center / cover no-repeat fixed,
+    #050b15;
+  background:
+    linear-gradient(rgba(1, 6, 15, 0.34), rgba(1, 6, 15, 0.5)),
+    radial-gradient(42rem 25rem at 18% 10%, rgba(126, 174, 238, 0.08), transparent 68%),
+    radial-gradient(34rem 22rem at 84% 18%, rgba(222, 201, 165, 0.045), transparent 72%),
     image-set(url("/images/backgrounds/link-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/link-night-ink-bg.png") type("image/png")) center / cover no-repeat fixed,
     #050b15;
 }
 
 body:has(.playzone-layout) {
+  background:
+    linear-gradient(rgba(247, 243, 235, 0.12), rgba(247, 243, 235, 0.12)),
+    url("/images/backgrounds/playzone-ink-bg.webp") center / cover no-repeat fixed,
+    var(--theme);
   background:
     linear-gradient(rgba(247, 243, 235, 0.12), rgba(247, 243, 235, 0.12)),
     image-set(url("/images/backgrounds/playzone-ink-bg.webp") type("image/webp"), url("/images/backgrounds/playzone-ink-bg.png") type("image/png")) center / cover no-repeat fixed,
@@ -504,12 +539,22 @@ body.dark:has(.playzone-layout) {
     linear-gradient(rgba(1, 6, 15, 0.34), rgba(1, 6, 15, 0.5)),
     radial-gradient(44rem 26rem at 84% 16%, rgba(126, 174, 238, 0.08), transparent 68%),
     radial-gradient(34rem 22rem at 18% 12%, rgba(222, 201, 165, 0.045), transparent 72%),
+    url("/images/backgrounds/playzone-night-ink-bg.webp") center / cover no-repeat fixed,
+    #050b15;
+  background:
+    linear-gradient(rgba(1, 6, 15, 0.34), rgba(1, 6, 15, 0.5)),
+    radial-gradient(44rem 26rem at 84% 16%, rgba(126, 174, 238, 0.08), transparent 68%),
+    radial-gradient(34rem 22rem at 18% 12%, rgba(222, 201, 165, 0.045), transparent 72%),
     image-set(url("/images/backgrounds/playzone-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/playzone-night-ink-bg.png") type("image/png")) center / cover no-repeat fixed,
     #050b15;
 }
 
 body:has(.blog-layout--photos-index),
 body:has(.blog-layout--photo-album) {
+  background:
+    linear-gradient(rgba(247, 243, 235, 0.12), rgba(247, 243, 235, 0.12)),
+    url("/images/backgrounds/photos-ink-bg.webp") center / cover no-repeat fixed,
+    var(--theme);
   background:
     linear-gradient(rgba(247, 243, 235, 0.12), rgba(247, 243, 235, 0.12)),
     image-set(url("/images/backgrounds/photos-ink-bg.webp") type("image/webp"), url("/images/backgrounds/photos-ink-bg.png") type("image/png")) center / cover no-repeat fixed,
@@ -530,11 +575,21 @@ body.dark:has(.blog-layout--photo-album) {
     linear-gradient(rgba(1, 6, 15, 0.34), rgba(1, 6, 15, 0.52)),
     radial-gradient(44rem 26rem at 14% 12%, rgba(126, 174, 238, 0.08), transparent 68%),
     radial-gradient(34rem 22rem at 88% 18%, rgba(222, 201, 165, 0.045), transparent 72%),
+    url("/images/backgrounds/photos-night-ink-bg.webp") center / cover no-repeat fixed,
+    #050b15;
+  background:
+    linear-gradient(rgba(1, 6, 15, 0.34), rgba(1, 6, 15, 0.52)),
+    radial-gradient(44rem 26rem at 14% 12%, rgba(126, 174, 238, 0.08), transparent 68%),
+    radial-gradient(34rem 22rem at 88% 18%, rgba(222, 201, 165, 0.045), transparent 72%),
     image-set(url("/images/backgrounds/photos-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/photos-night-ink-bg.png") type("image/png")) center / cover no-repeat fixed,
     #050b15;
 }
 
 body:has(.about-note-layout--ink) {
+  background:
+    linear-gradient(rgba(247, 243, 235, 0.1), rgba(247, 243, 235, 0.1)),
+    url("/images/backgrounds/about-ink-bg.webp") center / cover no-repeat fixed,
+    var(--theme);
   background:
     linear-gradient(rgba(247, 243, 235, 0.1), rgba(247, 243, 235, 0.1)),
     image-set(url("/images/backgrounds/about-ink-bg.webp") type("image/webp"), url("/images/backgrounds/about-ink-bg.png") type("image/png")) center / cover no-repeat fixed,
@@ -554,8 +609,140 @@ body.dark:has(.about-note-layout--ink) {
     linear-gradient(rgba(1, 6, 15, 0.34), rgba(1, 6, 15, 0.5)),
     radial-gradient(42rem 25rem at 19% 10%, rgba(126, 174, 238, 0.08), transparent 68%),
     radial-gradient(34rem 22rem at 84% 18%, rgba(222, 201, 165, 0.045), transparent 72%),
+    url("/images/backgrounds/about-night-ink-bg.webp") center / cover no-repeat fixed,
+    #050b15;
+  background:
+    linear-gradient(rgba(1, 6, 15, 0.34), rgba(1, 6, 15, 0.5)),
+    radial-gradient(42rem 25rem at 19% 10%, rgba(126, 174, 238, 0.08), transparent 68%),
+    radial-gradient(34rem 22rem at 84% 18%, rgba(222, 201, 165, 0.045), transparent 72%),
     image-set(url("/images/backgrounds/about-night-ink-bg.webp") type("image/webp"), url("/images/backgrounds/about-night-ink-bg.png") type("image/png")) center / cover no-repeat fixed,
     #050b15;
+}
+
+/*
+ * Legacy Chromium fallback:
+ * keep page artwork available when relational selectors are unsupported.
+ * Modern browsers disable these fixed pseudo-elements and use the body rules above.
+ */
+.blog-layout--posts-index::before,
+.blog-layout--post-detail::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(247, 243, 235, 0.16), rgba(247, 243, 235, 0.16)),
+    url("/images/backgrounds/posts-ink-bg.webp") center / cover no-repeat fixed,
+    var(--theme);
+}
+
+.dark .blog-layout--posts-index::before,
+.dark .blog-layout--post-detail::before {
+  background:
+    linear-gradient(rgba(1, 6, 15, 0.36), rgba(1, 6, 15, 0.48)),
+    radial-gradient(44rem 26rem at 17% 10%, rgba(120, 171, 236, 0.09), transparent 68%),
+    radial-gradient(34rem 22rem at 88% 20%, rgba(222, 201, 165, 0.055), transparent 72%),
+    url("/images/backgrounds/posts-night-ink-bg.webp") center / cover no-repeat fixed,
+    #050b15;
+}
+
+.blog-layout--link-index:not(.playzone-layout)::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(247, 243, 235, 0.12), rgba(247, 243, 235, 0.12)),
+    url("/images/backgrounds/link-ink-bg.webp") center / cover no-repeat fixed,
+    var(--theme);
+}
+
+.dark .blog-layout--link-index:not(.playzone-layout)::before {
+  background:
+    linear-gradient(rgba(1, 6, 15, 0.34), rgba(1, 6, 15, 0.5)),
+    radial-gradient(42rem 25rem at 18% 10%, rgba(126, 174, 238, 0.08), transparent 68%),
+    radial-gradient(34rem 22rem at 84% 18%, rgba(222, 201, 165, 0.045), transparent 72%),
+    url("/images/backgrounds/link-night-ink-bg.webp") center / cover no-repeat fixed,
+    #050b15;
+}
+
+.playzone-layout::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(247, 243, 235, 0.12), rgba(247, 243, 235, 0.12)),
+    url("/images/backgrounds/playzone-ink-bg.webp") center / cover no-repeat fixed,
+    var(--theme);
+}
+
+.dark .playzone-layout::before {
+  background:
+    linear-gradient(rgba(1, 6, 15, 0.34), rgba(1, 6, 15, 0.5)),
+    radial-gradient(44rem 26rem at 84% 16%, rgba(126, 174, 238, 0.08), transparent 68%),
+    radial-gradient(34rem 22rem at 18% 12%, rgba(222, 201, 165, 0.045), transparent 72%),
+    url("/images/backgrounds/playzone-night-ink-bg.webp") center / cover no-repeat fixed,
+    #050b15;
+}
+
+.blog-layout--photos-index::before,
+.blog-layout--photo-album::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(247, 243, 235, 0.12), rgba(247, 243, 235, 0.12)),
+    url("/images/backgrounds/photos-ink-bg.webp") center / cover no-repeat fixed,
+    var(--theme);
+}
+
+.dark .blog-layout--photos-index::before,
+.dark .blog-layout--photo-album::before {
+  background:
+    linear-gradient(rgba(1, 6, 15, 0.34), rgba(1, 6, 15, 0.52)),
+    radial-gradient(44rem 26rem at 14% 12%, rgba(126, 174, 238, 0.08), transparent 68%),
+    radial-gradient(34rem 22rem at 88% 18%, rgba(222, 201, 165, 0.045), transparent 72%),
+    url("/images/backgrounds/photos-night-ink-bg.webp") center / cover no-repeat fixed,
+    #050b15;
+}
+
+.about-note-layout--ink::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(247, 243, 235, 0.1), rgba(247, 243, 235, 0.1)),
+    url("/images/backgrounds/about-ink-bg.webp") center / cover no-repeat fixed,
+    var(--theme);
+}
+
+.dark .about-note-layout--ink::before {
+  background:
+    linear-gradient(rgba(1, 6, 15, 0.34), rgba(1, 6, 15, 0.5)),
+    radial-gradient(42rem 25rem at 19% 10%, rgba(126, 174, 238, 0.08), transparent 68%),
+    radial-gradient(34rem 22rem at 84% 18%, rgba(222, 201, 165, 0.045), transparent 72%),
+    url("/images/backgrounds/about-night-ink-bg.webp") center / cover no-repeat fixed,
+    #050b15;
+}
+
+@supports selector(body:has(*)) {
+  .blog-layout--posts-index::before,
+  .blog-layout--post-detail::before,
+  .blog-layout--link-index:not(.playzone-layout)::before,
+  .playzone-layout::before,
+  .blog-layout--photos-index::before,
+  .blog-layout--photo-album::before,
+  .about-note-layout--ink::before {
+    content: none;
+  }
 }
 
 body.dark::before {
@@ -581,6 +768,11 @@ body.dark::before {
   background: transparent;
   border-color: color-mix(in srgb, var(--border) 72%, transparent);
   box-shadow: none;
+}
+
+body > .header {
+  position: relative;
+  z-index: 3;
 }
 
 .dark .header,
@@ -2049,6 +2241,9 @@ body.dark:has(.blog-layout--post-detail) .blog-rail__brand {
 body.dark:has(.blog-layout--posts-index) .blog-rail__intro-card,
 body.dark:has(.blog-layout--post-detail) .blog-rail__intro-card {
   border-color: rgba(105, 157, 226, 0.38);
+  background:
+    linear-gradient(180deg, rgba(6, 14, 26, 0.08), rgba(6, 14, 26, 0.18)),
+    url("/images/backgrounds/posts-night-intro-bg.webp");
   background:
     linear-gradient(180deg, rgba(6, 14, 26, 0.08), rgba(6, 14, 26, 0.18)),
     image-set(url("/images/backgrounds/posts-night-intro-bg.webp") type("image/webp"), url("/images/backgrounds/posts-night-intro-bg.png") type("image/png"));
@@ -5461,6 +5656,7 @@ body.dark:has(.blog-layout--post-detail) .posts-masonry--posts-list:not(.posts-m
   right: -7vw;
   width: min(36rem, 48vw);
   height: min(17rem, 24vw);
+  background: url("/images/backgrounds/posts-ink-bg.webp") center / cover no-repeat;
   background: image-set(url("/images/backgrounds/posts-ink-bg.webp") type("image/webp"), url("/images/backgrounds/posts-ink-bg.png") type("image/png")) center / cover no-repeat;
   opacity: 0.13;
   filter: grayscale(1) contrast(0.72) brightness(1.16);
@@ -5795,11 +5991,20 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
   body.list:has(.profile--rainy-mask) {
     background:
       linear-gradient(rgba(247, 243, 235, 0.18), rgba(247, 243, 235, 0.18)),
+      url("/images/backgrounds/home-mobile-ink-bg.webp") center top / cover no-repeat,
+      var(--theme);
+    background:
+      linear-gradient(rgba(247, 243, 235, 0.18), rgba(247, 243, 235, 0.18)),
       image-set(url("/images/backgrounds/home-mobile-ink-bg.webp") type("image/webp"), url("/images/backgrounds/home-mobile-ink-bg.png") type("image/png")) center top / cover no-repeat,
       var(--theme);
   }
 
   body.dark.list:has(.profile--rainy-mask) {
+    background:
+      linear-gradient(rgba(3, 8, 18, 0.18), rgba(3, 8, 18, 0.22)),
+      radial-gradient(30rem 18rem at 50% 36%, rgba(202, 181, 132, 0.1), transparent 70%),
+      url("/images/backgrounds/home-night-ink-bg.webp") center top / cover no-repeat,
+      #060d19;
     background:
       linear-gradient(rgba(3, 8, 18, 0.18), rgba(3, 8, 18, 0.22)),
       radial-gradient(30rem 18rem at 50% 36%, rgba(202, 181, 132, 0.1), transparent 70%),
@@ -5853,12 +6058,21 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
   body:has(.blog-layout--post-detail) {
     background:
       linear-gradient(rgba(247, 243, 235, 0.18), rgba(247, 243, 235, 0.18)),
+      url("/images/backgrounds/posts-mobile-ink-bg.webp") center top / cover no-repeat,
+      var(--theme);
+    background:
+      linear-gradient(rgba(247, 243, 235, 0.18), rgba(247, 243, 235, 0.18)),
       image-set(url("/images/backgrounds/posts-mobile-ink-bg.webp") type("image/webp"), url("/images/backgrounds/posts-mobile-ink-bg.png") type("image/png")) center top / cover no-repeat,
       var(--theme);
   }
 
   body.dark:has(.blog-layout--posts-index),
   body.dark:has(.blog-layout--post-detail) {
+    background:
+      linear-gradient(180deg, rgba(2, 8, 18, 0.12) 0%, rgba(2, 8, 18, 0.42) 42%, rgba(2, 8, 18, 0.78) 100%),
+      radial-gradient(22rem 14rem at 18% 11%, rgba(133, 184, 255, 0.12), transparent 70%),
+      url("/images/backgrounds/posts-mobile-night-ink-bg.webp") center top / cover no-repeat,
+      #050b15;
     background:
       linear-gradient(180deg, rgba(2, 8, 18, 0.12) 0%, rgba(2, 8, 18, 0.42) 42%, rgba(2, 8, 18, 0.78) 100%),
       radial-gradient(22rem 14rem at 18% 11%, rgba(133, 184, 255, 0.12), transparent 70%),
@@ -5869,11 +6083,20 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
   body:has(.blog-layout--link-index:not(.playzone-layout)) {
     background:
       linear-gradient(rgba(247, 243, 235, 0.14), rgba(247, 243, 235, 0.14)),
+      url("/images/backgrounds/link-mobile-ink-bg.webp") center top / cover no-repeat,
+      var(--theme);
+    background:
+      linear-gradient(rgba(247, 243, 235, 0.14), rgba(247, 243, 235, 0.14)),
       image-set(url("/images/backgrounds/link-mobile-ink-bg.webp") type("image/webp"), url("/images/backgrounds/link-mobile-ink-bg.png") type("image/png")) center top / cover no-repeat,
       var(--theme);
   }
 
   body.dark:has(.blog-layout--link-index:not(.playzone-layout)) {
+    background:
+      linear-gradient(180deg, rgba(1, 6, 15, 0.08) 0%, rgba(1, 6, 15, 0.32) 42%, rgba(1, 6, 15, 0.76) 100%),
+      radial-gradient(24rem 16rem at 18% 10%, rgba(126, 174, 238, 0.12), transparent 70%),
+      url("/images/backgrounds/link-mobile-night-ink-bg.webp") center top / cover no-repeat,
+      #050b15;
     background:
       linear-gradient(180deg, rgba(1, 6, 15, 0.08) 0%, rgba(1, 6, 15, 0.32) 42%, rgba(1, 6, 15, 0.76) 100%),
       radial-gradient(24rem 16rem at 18% 10%, rgba(126, 174, 238, 0.12), transparent 70%),
@@ -5884,11 +6107,20 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
   body:has(.playzone-layout) {
     background:
       linear-gradient(rgba(247, 243, 235, 0.14), rgba(247, 243, 235, 0.14)),
+      url("/images/backgrounds/playzone-mobile-ink-bg.webp") center top / cover no-repeat,
+      var(--theme);
+    background:
+      linear-gradient(rgba(247, 243, 235, 0.14), rgba(247, 243, 235, 0.14)),
       image-set(url("/images/backgrounds/playzone-mobile-ink-bg.webp") type("image/webp"), url("/images/backgrounds/playzone-mobile-ink-bg.png") type("image/png")) center top / cover no-repeat,
       var(--theme);
   }
 
   body.dark:has(.playzone-layout) {
+    background:
+      linear-gradient(180deg, rgba(1, 6, 15, 0.08) 0%, rgba(1, 6, 15, 0.3) 42%, rgba(1, 6, 15, 0.78) 100%),
+      radial-gradient(25rem 16rem at 22% 8%, rgba(126, 174, 238, 0.12), transparent 70%),
+      url("/images/backgrounds/playzone-mobile-night-ink-bg.webp") center top / cover no-repeat,
+      #050b15;
     background:
       linear-gradient(180deg, rgba(1, 6, 15, 0.08) 0%, rgba(1, 6, 15, 0.3) 42%, rgba(1, 6, 15, 0.78) 100%),
       radial-gradient(25rem 16rem at 22% 8%, rgba(126, 174, 238, 0.12), transparent 70%),
@@ -5898,6 +6130,10 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
 
   body:has(.blog-layout--photos-index),
   body:has(.blog-layout--photo-album) {
+    background:
+      linear-gradient(rgba(247, 243, 235, 0.14), rgba(247, 243, 235, 0.14)),
+      url("/images/backgrounds/photos-mobile-ink-bg.webp") center top / cover no-repeat,
+      var(--theme);
     background:
       linear-gradient(rgba(247, 243, 235, 0.14), rgba(247, 243, 235, 0.14)),
       image-set(url("/images/backgrounds/photos-mobile-ink-bg.webp") type("image/webp"), url("/images/backgrounds/photos-mobile-ink-bg.png") type("image/png")) center top / cover no-repeat,
@@ -5919,11 +6155,20 @@ body.dark:has(.playzone-layout) .link-essay-entry:not(:last-child)::after {
   body:has(.about-note-layout--ink) {
     background:
       linear-gradient(rgba(247, 243, 235, 0.12), rgba(247, 243, 235, 0.12)),
+      url("/images/backgrounds/about-mobile-ink-bg.webp") center top / cover no-repeat,
+      var(--theme);
+    background:
+      linear-gradient(rgba(247, 243, 235, 0.12), rgba(247, 243, 235, 0.12)),
       image-set(url("/images/backgrounds/about-mobile-ink-bg.webp") type("image/webp"), url("/images/backgrounds/about-mobile-ink-bg.png") type("image/png")) center top / cover no-repeat,
       var(--theme);
   }
 
   body.dark:has(.about-note-layout--ink) {
+    background:
+      linear-gradient(180deg, rgba(1, 6, 15, 0.1) 0%, rgba(1, 6, 15, 0.3) 42%, rgba(1, 6, 15, 0.74) 100%),
+      radial-gradient(24rem 16rem at 18% 10%, rgba(126, 174, 238, 0.12), transparent 70%),
+      url("/images/backgrounds/about-mobile-night-ink-bg.webp") center top / cover no-repeat,
+      #050b15;
     background:
       linear-gradient(180deg, rgba(1, 6, 15, 0.1) 0%, rgba(1, 6, 15, 0.3) 42%, rgba(1, 6, 15, 0.74) 100%),
       radial-gradient(24rem 16rem at 18% 10%, rgba(126, 174, 238, 0.12), transparent 70%),
