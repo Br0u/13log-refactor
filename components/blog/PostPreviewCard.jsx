@@ -96,11 +96,13 @@ export default function PostPreviewCard({
   const summary = normalizeSummaryText(post.summary || post.description || post.content || "");
   const microDate = getMicroDateParts(post.date);
   const microMarkup = isMicro ? createMicroMarkup(post) : "";
+  const hasPairedMicroImages = isMicro && /\bpost-figure-pair\b/.test(microMarkup);
   const showMicroScrollRange = isMicro && microScrollChrome;
   const cardClassName = [
     "post-entry",
     "post-preview-card",
     isMicro ? "post-preview-card--micro" : "post-preview-card--post",
+    hasPairedMicroImages ? "post-preview-card--micro-paired" : "",
     isExpandedMicro ? "post-preview-card--micro-expanded" : "",
     isRelaxedMicro ? "post-preview-card--micro-relaxed" : "",
     focusState === "active" ? "is-micro-active" : "",

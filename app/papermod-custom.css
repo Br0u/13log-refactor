@@ -5432,6 +5432,42 @@ body.dark:has(.blog-layout--post-detail) .posts-masonry--posts-list:not(.posts-m
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 }
 
+.post-preview-card--micro .post-figure-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.5rem, 1.4vw, 1rem);
+  align-items: start;
+  margin: 0.3rem 0 0.4rem;
+}
+
+.post-preview-card--micro .post-figure-pair .post-figure {
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+}
+
+.post-preview-card--micro .post-figure-pair .post-figure__image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: min(20rem, 45vh);
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+.post-preview-card--micro .post-figure-pair .post-figure__caption {
+  margin: 0.16rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.post-preview-card--micro-paired .post-preview-card__excerpt-block {
+  overflow: visible;
+  max-height: none;
+}
+
 .posts-masonry--interactive[data-micro-focus]:not([data-micro-focus=""]) .post-preview-card--micro.is-micro-active .post-preview-card__micro-surface {
   position: absolute;
   left: -0.82rem;

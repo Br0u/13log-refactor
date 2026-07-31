@@ -136,6 +136,25 @@ describe("PostPreviewCard", () => {
     expect(markup).not.toContain("post-preview-card__micro-image post-preview-card__micro-image");
   });
 
+  it("marks microposts containing a duo image layout for unclipped paired rendering", () => {
+    const markup = renderToStaticMarkup(
+      <PostPreviewCard
+        post={{
+          type: "micro",
+          id: "micro-duo",
+          content: "双图 micro post",
+          summary: "双图 micro post",
+          renderedContentHtml: "<div class=\"post-figure-pair\"><figure class=\"post-figure post-figure--paired\"><img src=\"/left.jpg\" alt=\"left\"></figure><figure class=\"post-figure post-figure--paired\"><img src=\"/right.jpg\" alt=\"right\"></figure></div>",
+          date: "2026-07-31T03:20:00.000Z",
+          tags: [],
+          categories: [],
+        }}
+      />
+    );
+
+    expect(markup).toContain("post-preview-card--micro-paired");
+  });
+
   it("uses native scrolling instead of rendering a custom micropost scroll range", () => {
     const markup = renderToStaticMarkup(
       <PostPreviewCard
