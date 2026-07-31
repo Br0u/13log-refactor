@@ -1,6 +1,12 @@
 "use client";
 
 import React, { useEffect, useId, useRef, useState } from "react";
+import { upload } from "@vercel/blob/client";
+import {
+  buildAdminImagePath,
+  inferImageContentType,
+  isSupportedAdminImageFile,
+} from "../../lib/admin-image-files";
 
 function findClipboardImageFile(items = []) {
   for (const item of Array.from(items || [])) {
@@ -116,23 +122,7 @@ export default function MarkdownEditorField({
     setUploadingImage(true);
 
     try {
-      const formData = new FormData();
-      formData.set("file", file);
-
-      const response = await fetch("/api/admin/uploads/image", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Image upload failed.");
-      }
-
-      const body = await response.json();
-      const url = String(body?.url || "");
-      if (!url) {
-        throw new Error("Image upload failed.");
-      }
+      const url = await uploadImage(file);
 
       const markdown = `![image](${url})`;
       const nextValue = insertTextAtSelection(value, markdown, selectionStart, selectionEnd);
@@ -152,20 +142,17 @@ export default function MarkdownEditorField({
   }
 
   async function uploadImage(file) {
-    const formData = new FormData();
-    formData.set("file", file);
-
-    const response = await fetch("/api/admin/uploads/image", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
+    if (!isSupportedAdminImageFile(file)) {
       throw new Error("Image upload failed.");
     }
 
-    const body = await response.json();
-    const url = String(body?.url || "");
+    const uploaded = await upload(buildAdminImagePath(file.name || "image"), file, {
+      access: "public",
+      handleUploadUrl: "/api/admin/uploads/image/client",
+      contentType: inferImageContentType(file),
+      multipart: true,
+    });
+    const url = String(uploaded?.url || "");
     if (!url) {
       throw new Error("Image upload failed.");
     }

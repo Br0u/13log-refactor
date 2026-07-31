@@ -82,6 +82,14 @@ describe("posts timeline styles", () => {
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card__micro-image\s*\{[^}]*max-height:\s*12rem;/s);
   });
 
+  it("shows both paired micropost images without the text excerpt clipping them", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.post-preview-card--micro\s+\.post-figure-pair\s*\{[^}]*display:\s*grid;[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);/s);
+    expect(stylesheet).toMatch(/\.post-preview-card--micro-paired\s+\.post-preview-card__excerpt-block\s*\{[^}]*overflow:\s*visible;[^}]*max-height:\s*none;/s);
+    expect(stylesheet).toMatch(/\.post-preview-card--micro\s+\.post-figure-pair\s+\.post-figure__image\s*\{[^}]*max-width:\s*100%;[^}]*max-height:\s*min\(20rem,\s*45vh\);[^}]*object-fit:\s*contain;/s);
+  });
+
   it("keeps image micros fully expanded in the posts list layout", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 

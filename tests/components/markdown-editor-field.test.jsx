@@ -2,11 +2,27 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+const { uploadMock } = vi.hoisted(() => ({
+  uploadMock: vi.fn(),
+}));
+
+vi.mock("@vercel/blob/client", () => ({
+  upload: uploadMock,
+}));
+
 import MarkdownEditorField from "../../components/admin/MarkdownEditorField";
+
+function mockUploadedUrls(...urls) {
+  uploadMock.mockImplementation(async () => ({
+    url: urls[Math.min(uploadMock.mock.calls.length - 1, urls.length - 1)],
+  }));
+}
 
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  uploadMock.mockReset();
 });
 
 describe("MarkdownEditorField", () => {
@@ -88,20 +104,7 @@ describe("MarkdownEditorField", () => {
   });
 
   it("uploads a pasted image and inserts markdown at the caret", async () => {
-    const fetchMock = vi.fn(async (url) => {
-      if (url === "/api/admin/uploads/image") {
-        return {
-          ok: true,
-          json: async () => ({ url: "https://blob.example/test.png" }),
-        };
-      }
-
-      return {
-        ok: true,
-        json: async () => ({ html: "<p>unused</p>" }),
-      };
-    });
-    vi.stubGlobal("fetch", fetchMock);
+    mockUploadedUrls("https://blob.example/test.png");
 
     render(
       <MarkdownEditorField
@@ -133,19 +136,17 @@ describe("MarkdownEditorField", () => {
         .toBe("hello ![image](https://blob.example/test.png)");
     });
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/api/admin/uploads/image",
+    expect(uploadMock).toHaveBeenCalledWith(
+      expect.stringContaining("admin-images/"),
+      file,
       expect.objectContaining({
-        method: "POST",
-        body: expect.any(FormData),
+        handleUploadUrl: "/api/admin/uploads/image/client",
+        multipart: true,
       })
     );
   });
 
   it("does not upload on text-only paste", () => {
-    const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-
     render(
       <MarkdownEditorField
         name="markdown"
@@ -168,24 +169,11 @@ describe("MarkdownEditorField", () => {
       },
     });
 
-    expect(fetchMock).not.toHaveBeenCalledWith("/api/admin/uploads/image", expect.anything());
+    expect(uploadMock).not.toHaveBeenCalled();
   });
 
   it("shows an upload error and preserves content when image upload fails", async () => {
-    const fetchMock = vi.fn(async (url) => {
-      if (url === "/api/admin/uploads/image") {
-        return {
-          ok: false,
-          json: async () => ({ message: "Upload failed" }),
-        };
-      }
-
-      return {
-        ok: true,
-        json: async () => ({ html: "<p>unused</p>" }),
-      };
-    });
-    vi.stubGlobal("fetch", fetchMock);
+    uploadMock.mockRejectedValue(new Error("Upload failed"));
 
     render(
       <MarkdownEditorField
@@ -217,20 +205,7 @@ describe("MarkdownEditorField", () => {
   });
 
   it("uploads a selected image from the picker and inserts markdown at the caret", async () => {
-    const fetchMock = vi.fn(async (url) => {
-      if (url === "/api/admin/uploads/image") {
-        return {
-          ok: true,
-          json: async () => ({ url: "https://blob.example/mobile.png" }),
-        };
-      }
-
-      return {
-        ok: true,
-        json: async () => ({ html: "<p>unused</p>" }),
-      };
-    });
-    vi.stubGlobal("fetch", fetchMock);
+    mockUploadedUrls("https://blob.example/mobile.png");
 
     render(
       <MarkdownEditorField
@@ -258,6 +233,55 @@ describe("MarkdownEditorField", () => {
     });
   });
 
+  it("uploads mobile HEIC images directly to blob storage instead of sending the raw file through the server", async () => {
+    const fetchMock = vi.fn(async () => {
+      throw new Error("The raw image upload route should not be used.");
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    uploadMock.mockResolvedValue({
+      url: "https://blob.example/mobile.heic",
+      pathname: "admin-images/mobile.heic",
+    });
+
+    render(
+      <MarkdownEditorField
+        name="content"
+        label="Content"
+        initialValue=""
+        mode="micro"
+      />
+    );
+
+    const fileInput = screen.getByLabelText("Upload image");
+    const mobilePhoto = new File(
+      [new Uint8Array(6 * 1024 * 1024)],
+      "IMG_0001.HEIC",
+      { type: "" }
+    );
+
+    fireEvent.change(fileInput, {
+      target: {
+        files: [mobilePhoto],
+      },
+    });
+
+    await waitFor(() => {
+      expect(uploadMock).toHaveBeenCalledWith(
+        expect.stringContaining("admin-images/"),
+        mobilePhoto,
+        expect.objectContaining({
+          access: "public",
+          handleUploadUrl: "/api/admin/uploads/image/client",
+          contentType: "image/heic",
+          multipart: true,
+        })
+      );
+    });
+    expect(screen.getByRole("textbox", { name: "Content" }).value)
+      .toBe("![image](https://blob.example/mobile.heic)");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("renders a two-image upload trigger", () => {
     render(
       <MarkdownEditorField
@@ -273,23 +297,7 @@ describe("MarkdownEditorField", () => {
   });
 
   it("uploads two selected images and inserts a duo images shortcode", async () => {
-    const fetchMock = vi.fn(async (url) => {
-      if (url === "/api/admin/uploads/image") {
-        const callIndex = fetchMock.mock.calls.filter(([target]) => target === "/api/admin/uploads/image").length;
-        return {
-          ok: true,
-          json: async () => ({
-            url: callIndex === 1 ? "https://blob.example/left.png" : "https://blob.example/right.png",
-          }),
-        };
-      }
-
-      return {
-        ok: true,
-        json: async () => ({ html: "<p>unused</p>" }),
-      };
-    });
-    vi.stubGlobal("fetch", fetchMock);
+    mockUploadedUrls("https://blob.example/left.png", "https://blob.example/right.png");
     vi.stubGlobal("prompt", vi.fn((message, defaultValue) => {
       if (String(message).includes("left")) return "山雾";
       if (String(message).includes("right")) return "湖光";
@@ -326,28 +334,12 @@ describe("MarkdownEditorField", () => {
   });
 
   it("shows an upload error and skips inserting a duo images shortcode when one upload fails", async () => {
-    const fetchMock = vi.fn(async (url) => {
-      if (url === "/api/admin/uploads/image") {
-        const callIndex = fetchMock.mock.calls.filter(([target]) => target === "/api/admin/uploads/image").length;
-        if (callIndex === 1) {
-          return {
-            ok: true,
-            json: async () => ({ url: "https://blob.example/left.png" }),
-          };
-        }
-
-        return {
-          ok: false,
-          json: async () => ({ message: "Upload failed" }),
-        };
+    uploadMock.mockImplementation(async () => {
+      if (uploadMock.mock.calls.length === 1) {
+        return { url: "https://blob.example/left.png" };
       }
-
-      return {
-        ok: true,
-        json: async () => ({ html: "<p>unused</p>" }),
-      };
+      throw new Error("Upload failed");
     });
-    vi.stubGlobal("fetch", fetchMock);
 
     render(
       <MarkdownEditorField
@@ -373,23 +365,7 @@ describe("MarkdownEditorField", () => {
   });
 
   it("falls back to default duo image captions when prompts are blank", async () => {
-    const fetchMock = vi.fn(async (url) => {
-      if (url === "/api/admin/uploads/image") {
-        const callIndex = fetchMock.mock.calls.filter(([target]) => target === "/api/admin/uploads/image").length;
-        return {
-          ok: true,
-          json: async () => ({
-            url: callIndex === 1 ? "https://blob.example/left.png" : "https://blob.example/right.png",
-          }),
-        };
-      }
-
-      return {
-        ok: true,
-        json: async () => ({ html: "<p>unused</p>" }),
-      };
-    });
-    vi.stubGlobal("fetch", fetchMock);
+    mockUploadedUrls("https://blob.example/left.png", "https://blob.example/right.png");
     vi.stubGlobal("prompt", vi.fn(() => ""));
 
     render(
@@ -419,23 +395,7 @@ describe("MarkdownEditorField", () => {
   });
 
   it("allows selecting the two upload images across two picker interactions", async () => {
-    const fetchMock = vi.fn(async (url) => {
-      if (url === "/api/admin/uploads/image") {
-        const callIndex = fetchMock.mock.calls.filter(([target]) => target === "/api/admin/uploads/image").length;
-        return {
-          ok: true,
-          json: async () => ({
-            url: callIndex === 1 ? "https://blob.example/left.png" : "https://blob.example/right.png",
-          }),
-        };
-      }
-
-      return {
-        ok: true,
-        json: async () => ({ html: "<p>unused</p>" }),
-      };
-    });
-    vi.stubGlobal("fetch", fetchMock);
+    mockUploadedUrls("https://blob.example/left.png", "https://blob.example/right.png");
     vi.stubGlobal("prompt", vi.fn(() => ""));
 
     render(
@@ -473,23 +433,7 @@ describe("MarkdownEditorField", () => {
   });
 
   it("collects two pasted images in duo mode and inserts a duo images shortcode", async () => {
-    const fetchMock = vi.fn(async (url) => {
-      if (url === "/api/admin/uploads/image") {
-        const callIndex = fetchMock.mock.calls.filter(([target]) => target === "/api/admin/uploads/image").length;
-        return {
-          ok: true,
-          json: async () => ({
-            url: callIndex === 1 ? "https://blob.example/paste-left.png" : "https://blob.example/paste-right.png",
-          }),
-        };
-      }
-
-      return {
-        ok: true,
-        json: async () => ({ html: "<p>unused</p>" }),
-      };
-    });
-    vi.stubGlobal("fetch", fetchMock);
+    mockUploadedUrls("https://blob.example/paste-left.png", "https://blob.example/paste-right.png");
     vi.stubGlobal("prompt", vi.fn((message, defaultValue) => {
       if (String(message).includes("left")) return "左贴图";
       if (String(message).includes("right")) return "右贴图";
