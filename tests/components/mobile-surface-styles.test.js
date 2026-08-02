@@ -3,6 +3,16 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 describe("mobile surface styles", () => {
+  it("covers the bottom safe area and fades the fixed navigation without blocking content", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+    const layoutSource = fs.readFileSync(path.join(process.cwd(), "app/layout.js"), "utf8");
+
+    expect(stylesheet).toMatch(/\.mobile-nav-scrim\s*\{[^}]*position:\s*fixed;[^}]*bottom:\s*0;[^}]*pointer-events:\s*none;/s);
+    expect(stylesheet).toMatch(/#menu\[data-mobile-nav-state="hidden"\]\s*\{[^}]*opacity:\s*0;[^}]*transform:\s*translate3d\([^}]*pointer-events:\s*none;/s);
+    expect(stylesheet).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*#menu,[\s\S]*\.mobile-nav-scrim\s*\{[^}]*transition:\s*none;/s);
+    expect(layoutSource).toContain('viewportFit: "cover"');
+  });
+
   it("restores page-specific ink backgrounds after the mobile body reset", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
     const resetIndex = stylesheet.indexOf("html,\n  body {\n    overflow-x: hidden;\n    background: var(--theme);");

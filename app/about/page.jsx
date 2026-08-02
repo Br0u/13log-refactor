@@ -44,6 +44,7 @@ function AboutLocationCard({ modifier = "", titleId = "about-location-title" }) 
             className="about-note__map-frame"
             location="Toronto, Ontario"
             coordinates="43.6532° N, 79.3832° W"
+            viewport={modifier.includes("--mobile") ? "mobile" : "desktop"}
           />
         </div>
       </section>

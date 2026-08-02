@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 
 import { signInternalRiskBody } from "./lib/internal-risk-auth";
 import {
@@ -17,6 +17,8 @@ type RiskApiDecision =
   | { action: "block"; status: 403 | 429 };
 
 const INTERNAL_RISK_DEADLINE_MS = 2_000;
+
+type RiskPayloadMode = "log-only";
 
 function normalizeRiskApiDecision(value: unknown): RiskApiDecision {
   if (
@@ -44,7 +46,10 @@ function isLocalDevelopmentRequest(request: NextRequest) {
   return ["localhost", "127.0.0.1", "::1", "[::1]"].includes(request.nextUrl.hostname);
 }
 
-async function evaluateRisk(request: NextRequest): Promise<RiskApiDecision> {
+async function evaluateRisk(
+  request: NextRequest,
+  mode?: RiskPayloadMode,
+): Promise<RiskApiDecision> {
   const geo = getRequestGeo(request);
   const referer = request.headers.get("referer") || "";
   const userAgent = request.headers.get("user-agent") || "";
@@ -70,6 +75,7 @@ async function evaluateRisk(request: NextRequest): Promise<RiskApiDecision> {
     riskScore: assessment.riskScore,
     riskLabel: assessment.riskLabel,
     method: request.method,
+    ...(mode ? { mode } : {}),
   });
   const signed = await signInternalRiskBody(body, Date.now());
   const controller = new AbortController();
@@ -99,7 +105,40 @@ async function evaluateRisk(request: NextRequest): Promise<RiskApiDecision> {
   }
 }
 
-export async function middleware(request: NextRequest) {
+function isSynchronousEnforcementPath(pathname: string) {
+  return pathname === "/admin"
+    || pathname.startsWith("/admin/")
+    || pathname === "/api"
+    || pathname.startsWith("/api/");
+}
+
+function schedulePublicRiskLog(request: NextRequest, event?: NextFetchEvent) {
+  if (!event || typeof event.waitUntil !== "function") {
+    return;
+  }
+
+  let isTracked = false;
+  const task = Promise.resolve().then(async () => {
+    if (!isTracked) {
+      return;
+    }
+
+    try {
+      await evaluateRisk(request, "log-only");
+    } catch {
+      // Public telemetry must never reject the waitUntil task or block navigation.
+    }
+  });
+
+  try {
+    event.waitUntil(task);
+    isTracked = true;
+  } catch {
+    // Do not start an untracked telemetry task when waitUntil is unavailable.
+  }
+}
+
+export async function middleware(request: NextRequest, event?: NextFetchEvent) {
   if (!isProtectedPath(request.nextUrl.pathname)) {
     return NextResponse.next();
   }
@@ -109,6 +148,11 @@ export async function middleware(request: NextRequest) {
   }
 
   if (shouldSkipRiskEvaluation(request)) {
+    return NextResponse.next();
+  }
+
+  if (!isSynchronousEnforcementPath(request.nextUrl.pathname)) {
+    schedulePublicRiskLog(request, event);
     return NextResponse.next();
   }
 

@@ -4,16 +4,20 @@ import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 
-const { getPublicTimelineEntriesMock } = vi.hoisted(() => ({
-  getPublicTimelineEntriesMock: vi.fn(async () => (
-    Array.from({ length: 13 }, (_, index) => ({
+const { getPublicPostsPageDataMock } = vi.hoisted(() => ({
+  getPublicPostsPageDataMock: vi.fn(async () => {
+    const entries = Array.from({ length: 13 }, (_, index) => ({
       slug: `post-${index + 1}`,
       title: `Post ${index + 1}`,
       type: "post",
       categories: ["Notes"],
       tags: ["Tag"],
-    }))
-  )),
+    }));
+    return {
+      allEntries: entries,
+      filteredEntries: entries,
+    };
+  }),
 }));
 
 vi.mock("../../components/blog/PostPreviewCard", () => ({
@@ -23,7 +27,7 @@ vi.mock("../../components/blog/PostPreviewCard", () => ({
 }));
 
 vi.mock("../../lib/public-content", () => ({
-  getPublicTimelineEntries: getPublicTimelineEntriesMock,
+  getPublicPostsPageData: getPublicPostsPageDataMock,
 }));
 
 import PostsPage from "../../app/posts/page.jsx";
@@ -76,14 +80,14 @@ describe("posts index page", () => {
     expect(markup).toContain('data-testid="posts-timeline-sentinel"');
   });
 
-  it("uses a lightweight timeline pass for filter chips before loading the active tag feed", async () => {
-    getPublicTimelineEntriesMock.mockClear();
+  it("loads filter chips and the active tag feed through one page facade call", async () => {
+    getPublicPostsPageDataMock.mockClear();
 
     await PostsPage({
       searchParams: Promise.resolve({ tag: "Tag" }),
     });
 
-    expect(getPublicTimelineEntriesMock).toHaveBeenNthCalledWith(1, { renderMicroHtml: false });
-    expect(getPublicTimelineEntriesMock).toHaveBeenNthCalledWith(2, { tag: "Tag" });
+    expect(getPublicPostsPageDataMock).toHaveBeenCalledTimes(1);
+    expect(getPublicPostsPageDataMock).toHaveBeenCalledWith({ tag: "Tag" });
   });
 });

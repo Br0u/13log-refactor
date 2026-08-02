@@ -164,39 +164,55 @@ export function initImageZoom() {
     focusWithoutScroll(closeButton);
   }
 
-  function bindZoomTargets() {
-    const targets = Array.from(document.querySelectorAll(IMAGE_SELECTOR)).filter((node) => node instanceof HTMLImageElement);
-    targets.forEach((image) => {
-      if (boundImages.has(image) || image.dataset.imageZoomBound === "true") return;
-      boundImages.add(image);
-      image.dataset.imageZoomBound = "true";
-      if (!image.hasAttribute("tabindex")) {
-        image.setAttribute("tabindex", "0");
+  function bindZoomTarget(image) {
+    if (!(image instanceof HTMLImageElement)) return;
+    if (boundImages.has(image) || image.dataset.imageZoomBound === "true") return;
+
+    boundImages.add(image);
+    image.dataset.imageZoomBound = "true";
+    if (!image.hasAttribute("tabindex")) {
+      image.setAttribute("tabindex", "0");
+    }
+
+    const onClick = () => openOverlay(image);
+    const onKeyDown = (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openOverlay(image);
       }
+    };
 
-      const onClick = () => openOverlay(image);
-      const onKeyDown = (event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          openOverlay(image);
-        }
-      };
+    image.addEventListener("click", onClick);
+    image.addEventListener("keydown", onKeyDown);
+    image.__imageZoomCleanup = () => {
+      image.removeEventListener("click", onClick);
+      image.removeEventListener("keydown", onKeyDown);
+      delete image.dataset.imageZoomBound;
+      delete image.__imageZoomCleanup;
+    };
+  }
 
-      image.addEventListener("click", onClick);
-      image.addEventListener("keydown", onKeyDown);
-      image.__imageZoomCleanup = () => {
-        image.removeEventListener("click", onClick);
-        image.removeEventListener("keydown", onKeyDown);
-        delete image.dataset.imageZoomBound;
-        delete image.__imageZoomCleanup;
-      };
-    });
+  function bindZoomTargets(root = document) {
+    if (root instanceof HTMLImageElement && root.matches(IMAGE_SELECTOR)) {
+      bindZoomTarget(root);
+    }
+
+    if (typeof root.querySelectorAll !== "function") return;
+    root.querySelectorAll(IMAGE_SELECTOR).forEach(bindZoomTarget);
   }
 
   bindZoomTargets();
 
   if (typeof MutationObserver !== "undefined" && document.body) {
-    observer = new MutationObserver(bindZoomTargets);
+    observer = new MutationObserver((records) => {
+      records.forEach((record) => {
+        record.addedNodes.forEach((node) => {
+          if (node instanceof Element) {
+            bindZoomTargets(node);
+          }
+        });
+      });
+    });
     observer.observe(document.body, { childList: true, subtree: true });
   }
 

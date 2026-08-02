@@ -186,6 +186,81 @@ describe("internal risk api", () => {
     }));
   });
 
+  it("records log-only public telemetry as a non-blocked outcome without enforcement checks", async () => {
+    findBlacklistByIpHashMock.mockResolvedValue({ id: "blacklist-1", ipHash: "public-log-only" });
+    countRecentAccessLogsMock.mockResolvedValue(999);
+
+    const response = await riskPostRoute(await signedRiskRequest({
+      ipHash: "public-log-only",
+      path: "/posts",
+      country: "CA",
+      region: "Ontario",
+      city: "Guelph",
+      userAgent: "Mozilla/5.0",
+      referer: "https://example.com",
+      riskScore: 0,
+      riskLabel: "normal",
+      ipSummary: "203.0.113.x",
+      mode: "log-only",
+    }));
+
+    expect(await response.json()).toEqual({
+      action: "allow",
+      status: 200,
+      reason: "logged",
+    });
+    expect(findBlacklistByIpHashMock).not.toHaveBeenCalled();
+    expect(countRecentAccessLogsMock).not.toHaveBeenCalled();
+    expect(createAccessLogMock).toHaveBeenCalledWith(expect.objectContaining({
+      ipHash: "public-log-only",
+      path: "/posts",
+      riskScore: 0,
+      riskLabel: "normal",
+      isBlocked: false,
+      blockReason: null,
+    }));
+  });
+
+  it("keeps repeat-bot accounting after the non-blocked log for log-only telemetry", async () => {
+    findBlacklistByIpHashMock.mockResolvedValue({ id: "blacklist-1", ipHash: "public-bot" });
+    countRecentAccessLogsMock.mockResolvedValue(999);
+    countBotAccessLogsMock.mockResolvedValueOnce(3);
+
+    const response = await riskPostRoute(await signedRiskRequest({
+      ipHash: "public-bot",
+      path: "/posts",
+      country: "CN",
+      region: "",
+      city: "",
+      userAgent: "python-requests/2.32.3",
+      referer: "",
+      riskScore: 85,
+      riskLabel: "bot",
+      ipSummary: "203.0.113.x",
+      mode: "log-only",
+    }));
+
+    expect(await response.json()).toEqual({
+      action: "allow",
+      status: 200,
+      reason: "logged",
+    });
+    expect(findBlacklistByIpHashMock).not.toHaveBeenCalled();
+    expect(countRecentAccessLogsMock).not.toHaveBeenCalled();
+    expect(createAccessLogMock).toHaveBeenCalledWith(expect.objectContaining({
+      ipHash: "public-bot",
+      riskScore: 85,
+      riskLabel: "bot",
+      isBlocked: false,
+      blockReason: null,
+    }));
+    expect(countBotAccessLogsMock).toHaveBeenCalledWith("public-bot");
+    expect(upsertBlacklistMock).toHaveBeenCalledWith("public-bot", "bot_threshold", "risk_control");
+    expect(createAccessLogMock.mock.invocationCallOrder[0]).toBeLessThan(
+      countBotAccessLogsMock.mock.invocationCallOrder[0],
+    );
+  });
+
   it("blocks bot traffic and escalates repeat offenders into the blacklist", async () => {
     countBotAccessLogsMock.mockResolvedValueOnce(3);
 
@@ -314,6 +389,32 @@ describe("internal risk api", () => {
         "content-type": "application/json",
         "x-risk-timestamp": signed.timestamp,
         "x-risk-signature": changedSignature,
+      },
+      body,
+    }));
+
+    expect(response.status).toBe(403);
+    expectNoRepositoryCalls();
+  });
+
+  it("rejects an invalid log-only HMAC before any repository work", async () => {
+    const body = JSON.stringify({
+      ipHash: "invalid-log-only",
+      ipSummary: "203.0.113.x",
+      path: "/posts",
+      riskScore: 85,
+      riskLabel: "bot",
+      mode: "log-only",
+    });
+    const signed = await signInternalRiskBody(body, Date.now());
+    const invalidSignature = `${signed.signature[0] === "0" ? "1" : "0"}${signed.signature.slice(1)}`;
+
+    const response = await riskPostRoute(new Request("http://localhost:3000/api/internal/risk", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-risk-timestamp": signed.timestamp,
+        "x-risk-signature": invalidSignature,
       },
       body,
     }));

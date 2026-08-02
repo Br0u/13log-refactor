@@ -26,39 +26,70 @@ function createDrop(id) {
   };
 }
 
-function prefersReducedMotion() {
-  return typeof window !== "undefined"
-    && typeof window.matchMedia === "function"
-    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
 export default function HomeRainLayer() {
   const nextId = useRef(0);
   const timerRef = useRef(null);
   const [drops, setDrops] = useState([]);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    if (prefersReducedMotion()) return undefined;
+    const motionQuery = typeof window.matchMedia === "function"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
+    let disposed = false;
 
     const spawn = () => {
+      if (disposed) return;
       const drop = createDrop(nextId.current);
       nextId.current += 1;
       setDrops((current) => [...current.slice(-(MAX_DROPS - 1)), drop]);
     };
 
+    const clearSchedule = () => {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+
     const schedule = () => {
+      if (disposed || document.hidden || motionQuery?.matches) return;
       timerRef.current = window.setTimeout(() => {
+        timerRef.current = null;
         spawn();
         schedule();
       }, Math.round(randomBetween(260, 680)));
     };
 
-    spawn();
-    schedule();
+    const syncActivity = () => {
+      const paused = document.hidden || Boolean(motionQuery?.matches);
+      clearSchedule();
+      setIsPaused(paused);
+
+      if (motionQuery?.matches) {
+        setDrops([]);
+      } else if (!paused) {
+        spawn();
+        schedule();
+      }
+    };
+
+    document.addEventListener("visibilitychange", syncActivity);
+    if (typeof motionQuery?.addEventListener === "function") {
+      motionQuery.addEventListener("change", syncActivity);
+    } else {
+      motionQuery?.addListener?.(syncActivity);
+    }
+    syncActivity();
 
     return () => {
-      if (timerRef.current) {
-        window.clearTimeout(timerRef.current);
+      disposed = true;
+      clearSchedule();
+      document.removeEventListener("visibilitychange", syncActivity);
+      if (typeof motionQuery?.removeEventListener === "function") {
+        motionQuery.removeEventListener("change", syncActivity);
+      } else {
+        motionQuery?.removeListener?.(syncActivity);
       }
     };
   }, []);
@@ -68,7 +99,11 @@ export default function HomeRainLayer() {
   };
 
   return (
-    <div className="home-rain-layer" aria-hidden="true">
+    <div
+      className="home-rain-layer"
+      data-rain-state={isPaused ? "paused" : "running"}
+      aria-hidden="true"
+    >
       {drops.map((drop) => (
         <span
           className="home-rain-drop"
