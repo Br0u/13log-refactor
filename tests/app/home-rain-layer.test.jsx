@@ -20,6 +20,10 @@ describe("HomeRainLayer", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockMatchMedia(false);
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      value: false,
+    });
   });
 
   afterEach(() => {
@@ -76,5 +80,39 @@ describe("HomeRainLayer", () => {
 
     expect(container.querySelector(".home-rain-layer")).not.toBeNull();
     expect(container.querySelector(".home-rain-drop")).toBeNull();
+  });
+
+  it("stops scheduling drops while the document is hidden and resumes when visible", () => {
+    const { container } = render(<HomeRainLayer />);
+
+    act(() => {
+      vi.advanceTimersByTime(900);
+    });
+    const visibleDropCount = container.querySelectorAll(".home-rain-drop").length;
+    expect(visibleDropCount).toBeGreaterThan(0);
+
+    act(() => {
+      Object.defineProperty(document, "hidden", {
+        configurable: true,
+        value: true,
+      });
+      document.dispatchEvent(new Event("visibilitychange"));
+      vi.advanceTimersByTime(3000);
+    });
+
+    expect(container.querySelectorAll(".home-rain-drop")).toHaveLength(visibleDropCount);
+    expect(container.querySelector(".home-rain-layer")?.dataset.rainState).toBe("paused");
+
+    act(() => {
+      Object.defineProperty(document, "hidden", {
+        configurable: true,
+        value: false,
+      });
+      document.dispatchEvent(new Event("visibilitychange"));
+      vi.advanceTimersByTime(900);
+    });
+
+    expect(container.querySelectorAll(".home-rain-drop").length).toBeGreaterThan(visibleDropCount);
+    expect(container.querySelector(".home-rain-layer")?.dataset.rainState).toBe("running");
   });
 });

@@ -121,6 +121,40 @@ describe("image zoom enhancement", () => {
     cleanup();
   });
 
+  it("only scans added subtrees instead of rescanning the whole document", async () => {
+    document.body.innerHTML = `
+      <article class="post-single">
+        <div class="post-content">
+          <img class="post-figure__image" src="/initial.jpg" alt="initial image">
+        </div>
+      </article>
+    `;
+    const documentQuerySelectorAll = vi.spyOn(document, "querySelectorAll");
+    const cleanup = initImageZoom();
+
+    const unrelatedMutation = document.createElement("span");
+    unrelatedMutation.className = "home-rain-drop";
+    document.body.appendChild(unrelatedMutation);
+    await Promise.resolve();
+
+    expect(documentQuerySelectorAll).toHaveBeenCalledTimes(1);
+
+    const addedArticle = document.createElement("article");
+    addedArticle.className = "post-single";
+    addedArticle.innerHTML = `
+      <div class="post-content">
+        <img class="post-figure__image" src="/late.jpg" alt="late image">
+      </div>
+    `;
+    document.body.appendChild(addedArticle);
+    await Promise.resolve();
+
+    expect(documentQuerySelectorAll).toHaveBeenCalledTimes(1);
+    expect(addedArticle.querySelector("img")?.dataset.imageZoomBound).toBe("true");
+
+    cleanup();
+  });
+
   it("focuses overlay controls without scrolling the background page", () => {
     vi.useFakeTimers();
     vi.stubGlobal("requestAnimationFrame", (callback) => {

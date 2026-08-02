@@ -3,7 +3,7 @@ import Link from "next/link";
 import { collectFilterCounts } from "../../lib/content";
 import PostsTimeline from "../../components/blog/PostsTimeline";
 import BlogRail from "../../components/blog/BlogRail";
-import { getPublicTimelineEntries } from "../../lib/public-content";
+import { getPublicPostsPageData } from "../../lib/public-content";
 
 export const dynamic = "force-dynamic";
 
@@ -39,16 +39,9 @@ function renderHeader(tags, activeTag) {
 export default async function PostsPage({ searchParams }) {
   const sp = await searchParams;
   const activeTag = typeof sp?.tag === "string" && sp.tag.trim() ? sp.tag.trim() : null;
-  const [allEntries, filteredEntries] = activeTag
-    ? await Promise.all([
-      getPublicTimelineEntries({ renderMicroHtml: false }),
-      getPublicTimelineEntries({ tag: activeTag }),
-    ])
-    : [await getPublicTimelineEntries(), null];
+  const { allEntries, filteredEntries } = await getPublicPostsPageData({ tag: activeTag });
   const tags = collectFilterCounts(allEntries);
-  const posts = activeTag
-    ? filteredEntries
-    : allEntries;
+  const posts = filteredEntries;
 
   return (
     <div className="blog-layout blog-layout--posts-index">

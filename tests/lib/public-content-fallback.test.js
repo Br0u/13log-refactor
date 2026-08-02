@@ -29,7 +29,12 @@ vi.mock("../../lib/repositories/micro-posts", () => ({
   getPublishedMicroPosts: getPublishedMicroPostsMock,
 }));
 
-import { getPublicPostBySlug, getPublicPosts, getPublicTimelineEntries } from "../../lib/public-content";
+import {
+  getPublicPostBySlug,
+  getPublicPosts,
+  getPublicPostsPageData,
+  getPublicTimelineEntries,
+} from "../../lib/public-content";
 
 function createUnavailableDbError() {
   const error = new Error("Can't reach database server");
@@ -109,5 +114,30 @@ describe("public content database fallback", () => {
         href: "/posts/file-post",
       },
     ]);
+  });
+
+  it("keeps the posts page facade usable when both database reads are unavailable", async () => {
+    getPublishedPostsMock.mockRejectedValueOnce(createUnavailableDbError());
+    getPublishedMicroPostsMock.mockRejectedValueOnce(createUnavailableDbError());
+    getFilePostsMock.mockReturnValueOnce([
+      {
+        slug: "file-post",
+        title: "File Post",
+        date: "2026-03-01T00:00:00.000Z",
+        tags: ["fallback"],
+        categories: [],
+      },
+    ]);
+
+    const pageData = await getPublicPostsPageData({ tag: "fallback" });
+
+    expect(pageData.allEntries).toMatchObject([
+      { slug: "file-post", type: "post", href: "/posts/file-post" },
+    ]);
+    expect(pageData.filteredEntries).toMatchObject([
+      { slug: "file-post", type: "post", href: "/posts/file-post" },
+    ]);
+    expect(getPublishedPostsMock).toHaveBeenCalledTimes(1);
+    expect(getPublishedMicroPostsMock).toHaveBeenCalledTimes(1);
   });
 });

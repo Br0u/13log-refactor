@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import { Map } from "lucide-react";
 
@@ -10,15 +10,44 @@ interface LocationMapProps {
   className?: string;
   center?: [number, number];
   zoom?: number;
+  viewport?: "desktop" | "mobile";
 }
 
-export function LocationMap({
+const MOBILE_MAP_QUERY = "(max-width: 960px)";
+const DEFAULT_CENTER: [number, number] = [-79.3832, 43.6532];
+
+function subscribeMobileViewport(listener: () => void) {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return () => {};
+  }
+
+  const query = window.matchMedia(MOBILE_MAP_QUERY);
+  if (typeof query.addEventListener === "function") {
+    query.addEventListener("change", listener);
+    return () => query.removeEventListener("change", listener);
+  }
+
+  query.addListener(listener);
+  return () => query.removeListener(listener);
+}
+
+function getMobileViewportSnapshot() {
+  return typeof window !== "undefined"
+    && typeof window.matchMedia === "function"
+    && window.matchMedia(MOBILE_MAP_QUERY).matches;
+}
+
+function getServerViewportSnapshot() {
+  return false;
+}
+
+function ActiveLocationMap({
   location = "Toronto, ON",
   coordinates = "43.6532° N, 79.3832° W",
   className,
-  center = [-79.3832, 43.6532],
+  center = DEFAULT_CENTER,
   zoom = 11.2,
-}: LocationMapProps) {
+}: Omit<LocationMapProps, "viewport">) {
   const [isHovered, setIsHovered] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -29,10 +58,9 @@ export function LocationMap({
 
     let cancelled = false;
     let observer: ResizeObserver | null = null;
-    let pulseFrame = 0;
 
     const pulseEl = document.createElement("div");
-    pulseEl.className = "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-400";
+    pulseEl.className = "location-map__pulse";
 
     const coreWrap = document.createElement("div");
     coreWrap.className = "relative rounded-full border-2 border-white shadow-lg shadow-gray-500";
@@ -45,17 +73,6 @@ export function LocationMap({
     markerRoot.className = "relative cursor-default";
     markerRoot.appendChild(pulseEl);
     markerRoot.appendChild(coreWrap);
-
-    const animatePulse = (timeMs: number) => {
-      const t = timeMs * 0.0045;
-      const progress = (Math.sin(t) + 1) / 2;
-      const size = 48 + progress * 20;
-      const opacity = 0.2 + (1 - progress) * 0.2;
-      pulseEl.style.width = `${size}px`;
-      pulseEl.style.height = `${size}px`;
-      pulseEl.style.opacity = `${opacity}`;
-      pulseFrame = window.requestAnimationFrame(animatePulse);
-    };
 
     (async () => {
       const maplibre = await import("maplibre-gl");
@@ -81,13 +98,11 @@ export function LocationMap({
 
       mapInstanceRef.current = map;
       markerRef.current = marker;
-      pulseFrame = window.requestAnimationFrame(animatePulse);
     })();
 
     return () => {
       cancelled = true;
       if (observer) observer.disconnect();
-      if (pulseFrame) window.cancelAnimationFrame(pulseFrame);
       if (markerRef.current) {
         markerRef.current.remove();
         markerRef.current = null;
@@ -184,4 +199,19 @@ export function LocationMap({
       </motion.div>
     </div>
   );
+}
+
+export function LocationMap({ viewport, ...props }: LocationMapProps) {
+  const isMobileViewport = useSyncExternalStore(
+    subscribeMobileViewport,
+    getMobileViewportSnapshot,
+    getServerViewportSnapshot,
+  );
+  const isActive = viewport === "mobile"
+    ? isMobileViewport
+    : viewport === "desktop"
+      ? !isMobileViewport
+      : true;
+
+  return isActive ? <ActiveLocationMap {...props} /> : null;
 }

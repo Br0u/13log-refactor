@@ -23,6 +23,7 @@ const riskPayloadSchema = z.object({
   riskScore: z.number().int().nonnegative(),
   riskLabel: z.enum(["normal", "suspicious", "bot"]),
   method: z.string().optional(),
+  mode: z.enum(["enforce", "log-only"]).optional().default("enforce"),
 });
 
 const RATE_LIMIT_WINDOW_SECONDS = 10;
@@ -67,6 +68,27 @@ export async function POST(request: Request) {
     riskScore: payload.riskScore,
     riskLabel: payload.riskLabel,
   };
+
+  if (payload.mode === "log-only") {
+    await createAccessLog({
+      ...baseLog,
+      isBlocked: false,
+      blockReason: null,
+    });
+
+    if (payload.riskScore >= 70 || payload.riskLabel === "bot") {
+      const botCount = await countBotAccessLogs(payload.ipHash);
+      if (botCount >= 3) {
+        await upsertBlacklist(payload.ipHash, "bot_threshold", "risk_control");
+      }
+    }
+
+    return json({
+      action: "allow",
+      status: 200,
+      reason: "logged",
+    });
+  }
 
   const blacklistEntry = await findBlacklistByIpHash(payload.ipHash);
   if (blacklistEntry) {
