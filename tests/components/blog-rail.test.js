@@ -17,7 +17,7 @@ describe("BlogRail", () => {
     const source = fs.readFileSync(path.join(process.cwd(), "components/blog/BlogRail.jsx"), "utf8");
 
     expect(source).toContain('className="blog-rail__brand-logo"');
-    expect(source).toContain('src="/icon.png"');
+    expect(source).toContain('src="/logo-avatar-transparent.png"');
     expect(source).toContain('alt="" aria-hidden="true"');
   });
 
