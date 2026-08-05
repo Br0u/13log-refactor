@@ -56,7 +56,7 @@ export default function BlogRail({
     <aside className={`blog-rail blog-rail--${variant}`}>
       <div className="blog-rail__brand">
         <Link className="blog-rail__brand-home" href="/" aria-label="13log home">
-          <img className="blog-rail__brand-logo" src="/icon.png" alt="" aria-hidden="true" width="240" height="240" />
+          <img className="blog-rail__brand-logo" src="/logo-avatar-transparent.png" alt="" aria-hidden="true" width="240" height="240" />
           <span className="blog-rail__brand-text">
             <span className="blog-rail__brand-kicker">/ MY LITTLE WORLD /</span>
             <span className="blog-rail__brand-mark">13log</span>
