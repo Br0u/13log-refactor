@@ -13,13 +13,12 @@ describe("BlogRail", () => {
     expect(source).toMatch(/function\s+resolveActiveSection\(variant\)\s*\{[^}]*variant\s*===\s*"detail"[^}]*return\s+"posts";/s);
   });
 
-  it("renders the supplied landscape mark in the rail brand", () => {
+  it("renders the avatar image in the rail brand", () => {
     const source = fs.readFileSync(path.join(process.cwd(), "components/blog/BlogRail.jsx"), "utf8");
 
     expect(source).toContain('className="blog-rail__brand-logo"');
-    expect(source).toContain('viewBox="0 0 240 240"');
-    expect(source).toContain('r="108"');
-    expect(source).toContain('d="M50 170 L90 125 L125 170 L150 140 L185 170 Z"');
+    expect(source).toContain('src="/icon.png"');
+    expect(source).toContain('alt="" aria-hidden="true"');
   });
 
   it("marks only the matching rail item as active and current", () => {
