@@ -68,7 +68,7 @@ function initMenuScrollMemory() {
   return () => menu.removeEventListener("scroll", onScroll);
 }
 
-function initAnchorSmoothScroll() {
+export function initAnchorSmoothScroll() {
   const handlers = [];
 
   document.querySelectorAll("a[href^='#']").forEach((anchor) => {
@@ -83,6 +83,9 @@ function initAnchorSmoothScroll() {
       e.preventDefault();
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
+      if (anchor.classList.contains("skip-link")) {
+        target.focus({ preventScroll: true });
+      }
       if (id === "top") {
         history.replaceState(null, "", " ");
       } else {

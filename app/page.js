@@ -1,5 +1,5 @@
 ﻿import Link from "next/link";
-import HomeAvatarParallax from "./components/HomeAvatarParallax";
+import HomeAvatar from "./components/HomeAvatar";
 import HomeBackgroundDepth from "./components/HomeBackgroundDepth";
 import HomeRainLayer from "./components/HomeRainLayer";
 import {
@@ -19,7 +19,7 @@ export default function HomePage() {
       <HomeBackgroundDepth />
       <HomeRainLayer />
       <div className="profile_inner">
-        <HomeAvatarParallax />
+        <HomeAvatar />
         <h1>花似伊，柳似伊</h1>
         <span className="profile-kicker">Books · Life</span>
         <div className="profile-links">
