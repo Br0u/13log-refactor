@@ -6,7 +6,7 @@ describe("home page rain overlay markup", () => {
   it("adds the rainy mask hook without changing the existing homepage content labels", () => {
     const source = fs.readFileSync(path.join(process.cwd(), "app/page.js"), "utf8");
     const avatarSource = fs.readFileSync(
-      path.join(process.cwd(), "app/components/HomeAvatarParallax.tsx"),
+      path.join(process.cwd(), "app/components/HomeAvatar.jsx"),
       "utf8",
     );
     const backgroundSource = fs.readFileSync(
@@ -15,12 +15,11 @@ describe("home page rain overlay markup", () => {
     );
 
     expect(source).toContain('className="profile profile--rainy-mask"');
-    expect(source).toContain('import HomeAvatarParallax from "./components/HomeAvatarParallax";');
+    expect(source).toContain('import HomeAvatar from "./components/HomeAvatar";');
     expect(source).toContain(
       'import HomeBackgroundDepth from "./components/HomeBackgroundDepth";',
     );
-    expect(source).toContain("<HomeAvatarParallax />");
-    expect(source).not.toContain('className="profile-avatar-card"');
+    expect(source).toContain("<HomeAvatar />");
     expect(source).toContain("<HomeBackgroundDepth />");
     expect(source.indexOf("<HomeBackgroundDepth />")).toBeLessThan(
       source.indexOf("<HomeRainLayer />"),
@@ -37,31 +36,22 @@ describe("home page rain overlay markup", () => {
     expect(source).toContain("button-inner\">Photos");
     expect(source).toContain("button-inner\">Link");
 
-    expect(avatarSource).toContain('className="profile-avatar-card"');
-    expect(avatarSource).toContain('className="profile-avatar-scene"');
-    expect(avatarSource).toContain("profile-avatar-state--");
-    expect(avatarSource).toContain('/images/home/avatar-cats-ink.png');
-    expect(avatarSource).toContain('/images/home/avatar-cats-ink-hover.png');
-    expect(avatarSource).toContain('/images/home/avatar-cats-ink-night.png');
-    expect(avatarSource).not.toContain("requestPermission");
+    expect(avatarSource).toContain('className="profile-avatar"');
+    expect(avatarSource).toContain('aria-hidden="true"');
     expect(backgroundSource).toContain('"use client"');
     expect(backgroundSource).not.toContain("requestPermission");
   });
 
   it("uses the new cat ink avatar artwork", () => {
-    const avatarAssetPath = path.join(process.cwd(), "public/images/home/avatar-cats-ink.png");
-    const hoverAssetPath = path.join(process.cwd(), "public/images/home/avatar-cats-ink-hover.png");
-    const nightAssetPath = path.join(process.cwd(), "public/images/home/avatar-cats-ink-night.png");
+    const avatarAssetPath = path.join(process.cwd(), "public/images/home/avatar-cats-ink-v2.png");
+    const nightAvatarAssetPath = path.join(process.cwd(), "public/images/home/avatar-cats-ink-night-v2.png");
     const avatarAsset = fs.readFileSync(avatarAssetPath);
-    const hoverAsset = fs.readFileSync(hoverAssetPath);
-    const nightAsset = fs.readFileSync(nightAssetPath);
+    const nightAvatarAsset = fs.readFileSync(nightAvatarAssetPath);
 
     expect(avatarAsset.subarray(1, 4).toString("ascii")).toBe("PNG");
-    expect(hoverAsset.subarray(1, 4).toString("ascii")).toBe("PNG");
-    expect(nightAsset.subarray(1, 4).toString("ascii")).toBe("PNG");
     expect(avatarAsset[25]).toBe(6);
-    expect(hoverAsset[25]).toBe(6);
-    expect(nightAsset[25]).toBe(6);
+    expect(nightAvatarAsset.subarray(1, 4).toString("ascii")).toBe("PNG");
+    expect(nightAvatarAsset[25]).toBe(6);
   });
 
   it("points the Photos shortcut at the site-native photos index", () => {

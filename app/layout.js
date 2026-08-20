@@ -54,6 +54,7 @@ export default function RootLayout({ children }) {
             `,
           }}
         />
+        <a className="skip-link" href="#main-content">跳到主要内容</a>
         <header className="header">
           <nav className="nav">
             <div className="logo">
@@ -82,7 +83,7 @@ export default function RootLayout({ children }) {
           </nav>
         </header>
 
-        <main className="main">{children}</main>
+        <main className="main" id="main-content" tabIndex={-1}>{children}</main>
 
         <aside className="page-toc-rail" id="page-toc-rail" hidden aria-label="Table of Contents">
           <nav className="page-toc-rail__inner">
