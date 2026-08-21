@@ -35,8 +35,19 @@ describe("post detail styles", () => {
   it("refines body copy rhythm for long-form reading", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s*\{[^}]*font-size:\s*1\.2rem;[^}]*line-height:\s*1\.92;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s*\{[^}]*font-size:\s*1\.14rem;[^}]*line-height:\s*1\.82;/s);
     expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+p\s*\{[^}]*text-indent:\s*2em;[^}]*margin-top:\s*0\.18rem;[^}]*margin-bottom:\s*1\.16rem;/s);
+  });
+
+  it("styles rich markdown primitives without forcing them into the body serif", () => {
+    const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+:is\(code,\s*kbd,\s*samp,\s*var\)\s*\{[^}]*font-family:\s*var\(--latin-font\)\s*!important;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+mark,[\s\S]*?\.post-single\s+\.post-content\s+ins\s*\{[^}]*box-decoration-break:\s*clone;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+\.task-list-item\s*>\s*input\s*\{[^}]*accent-color:\s*var\(--accent\);/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+table\s*\{[^}]*overflow-x:\s*auto;[^}]*font-variant-numeric:\s*tabular-nums;/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+details\s*>\s*summary:focus-visible\s*\{[^}]*outline:\s*2px\s+solid\s+var\(--focus-ring\);/s);
+    expect(stylesheet).toMatch(/\.post-single\s+\.post-content\s+rt\s*\{[^}]*font-family:\s*var\(--latin-font\)\s*!important;/s);
   });
 
   it("keeps in-content headings below the page title in visual weight", () => {
