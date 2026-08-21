@@ -3108,12 +3108,15 @@ body.dark:has(.blog-layout--photo-album) .photo-album-frame::after {
 }
 
 .post-single .post-content {
-  font-size: 1.2rem;
-  line-height: 1.92;
+  font-size: 1.14rem;
+  line-height: 1.82;
   padding: 0.55rem 0.15rem 0.2rem;
   background: transparent;
   border: none;
   box-shadow: none;
+  font-kerning: normal;
+  font-optical-sizing: auto;
+  overflow-wrap: break-word;
 }
 
 .post-single .post-content p { text-indent: 2em; margin-top: 0.18rem; margin-bottom: 1.16rem; }
@@ -3125,10 +3128,12 @@ body.dark:has(.blog-layout--photo-album) .photo-album-frame::after {
   border-left: 1px solid color-mix(in srgb, var(--accent) 46%, var(--border));
   color: var(--primary);
   font-weight: 720;
-  line-height: 1.45;
+  line-height: 1.35;
   letter-spacing: 0;
   padding-left: 0.92rem;
   margin: 2.18rem 0 0.92rem;
+  scroll-margin-top: 5rem;
+  text-wrap: balance;
 }
 
 .post-single .post-content h1 {
@@ -3149,14 +3154,192 @@ body.dark:has(.blog-layout--photo-album) .photo-album-frame::after {
 
 .post-single .post-content a {
   color: var(--primary);
-  border-bottom: 1px dashed var(--accent-muted);
-  text-decoration: none;
+  border-bottom: 0;
+  text-decoration-line: underline;
+  text-decoration-color: var(--accent-muted);
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.18em;
+  text-underline-position: from-font;
+  text-decoration-skip-ink: auto;
 }
 
 .post-single .post-content a:hover,
 .post-single .post-content a:focus-visible {
   color: var(--accent);
-  border-bottom-color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+.post-single .post-content strong {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.post-single .post-content :is(code, kbd, samp, var) {
+  font-family: var(--latin-font) !important;
+  font-size: 0.82em;
+  font-variant-ligatures: none;
+}
+
+.post-single .post-content :not(pre) > code {
+  margin-inline: 0.16em;
+  padding: 0.14em 0.38em;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  border-radius: 0.28em;
+  background: color-mix(in srgb, var(--code-bg) 88%, transparent);
+  color: color-mix(in srgb, var(--primary) 88%, var(--accent-warm));
+  overflow-wrap: anywhere;
+}
+
+.post-single .post-content kbd {
+  display: inline-block;
+  min-width: 1.7em;
+  padding: 0.12em 0.42em 0.18em;
+  border: 1px solid color-mix(in srgb, var(--border) 74%, var(--secondary));
+  border-bottom-width: 2px;
+  border-radius: 0.32em;
+  background: color-mix(in srgb, var(--entry) 82%, var(--code-bg));
+  color: var(--primary);
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.post-single .post-content mark,
+.post-single .post-content ins {
+  padding-inline: 0.12em;
+  border-radius: 0.12em;
+  background: color-mix(in srgb, var(--accent-muted) 28%, transparent);
+  color: var(--primary);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.post-single .post-content ins {
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.16em;
+}
+
+.post-single .post-content del {
+  color: var(--secondary);
+  text-decoration-color: color-mix(in srgb, var(--secondary) 72%, transparent);
+  text-decoration-thickness: from-font;
+}
+
+.post-single .post-content abbr[title] {
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.18em;
+  cursor: help;
+}
+
+.post-single .post-content :is(sup, sub) {
+  position: relative;
+  font-size: 0.72em;
+  line-height: 0;
+}
+
+.post-single .post-content ruby {
+  ruby-align: space-around;
+}
+
+.post-single .post-content rt {
+  color: var(--secondary);
+  font-family: var(--latin-font) !important;
+  font-size: 0.55em;
+  letter-spacing: 0.04em;
+}
+
+.post-single .post-content .symbol {
+  font-family: var(--symbol-font) !important;
+}
+
+.post-single .post-content :is(blockquote, li, details, figcaption, td, th) p {
+  text-indent: 0;
+}
+
+.post-single .post-content :is(ul, ol) {
+  padding-inline-start: 1.45em;
+}
+
+.post-single .post-content li {
+  padding-inline-start: 0.2em;
+}
+
+.post-single .post-content li::marker {
+  color: color-mix(in srgb, var(--accent) 76%, var(--secondary));
+  font-family: var(--latin-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.post-single .post-content .contains-task-list {
+  padding-inline-start: 0;
+  list-style: none;
+}
+
+.post-single .post-content .task-list-item {
+  padding-inline-start: 0;
+}
+
+.post-single .post-content .task-list-item > input {
+  width: 1em;
+  height: 1em;
+  margin: 0 0.5em 0 0;
+  accent-color: var(--accent);
+  vertical-align: -0.08em;
+}
+
+.post-single .post-content table {
+  width: 100%;
+  margin-block: 1.6rem;
+  overflow-x: auto;
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+  border-collapse: collapse;
+}
+
+.post-single .post-content table th,
+.post-single .post-content table:not(.highlighttable, .highlight table, .gist .highlight) td {
+  min-width: 7.5em;
+  padding: 0.62em 0.72em;
+  border-bottom-color: color-mix(in srgb, var(--border) 84%, transparent);
+  line-height: 1.55;
+  vertical-align: top;
+}
+
+.post-single .post-content table th {
+  background: color-mix(in srgb, var(--soft-bg-1) 82%, transparent);
+  color: var(--primary);
+  font-weight: 650;
+}
+
+.post-single .post-content details {
+  margin: 1.45rem 0;
+  padding: 0.72rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  border-radius: 0.48rem;
+  background: color-mix(in srgb, var(--soft-bg-2) 72%, transparent);
+}
+
+.post-single .post-content details > summary {
+  color: var(--primary);
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.post-single .post-content details > summary::marker {
+  color: var(--accent);
+}
+
+.post-single .post-content details > summary:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+}
+
+.post-single .post-content details[open] > summary {
+  margin-bottom: 0.68rem;
 }
 
 .post-single .post-content blockquote {
@@ -3403,8 +3586,8 @@ body.dark:has(.blog-layout--photo-album) .photo-album-frame::after {
 }
 
 .post-single--blended .post-content {
-  font-size: 1.17rem;
-  line-height: 1.9;
+  font-size: 1.14rem;
+  line-height: 1.82;
   padding: 0.15rem 0;
 }
 
