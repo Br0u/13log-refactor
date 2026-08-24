@@ -13,9 +13,9 @@ describe("home page hero styles", () => {
   it("styles the home avatar as one static responsive image", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.main \.profile\.profile--rainy-mask \.profile_inner\s*\{[^}]*gap:\s*0\.36rem;/s);
+    expect(stylesheet).toMatch(/\.main \.profile\.profile--atmosphere \.profile_inner\s*\{[^}]*gap:\s*0\.36rem;/s);
     expect(stylesheet).toMatch(/\.profile-avatar\s*\{[^}]*width:\s*min\(21\.5rem,\s*80vw\);[^}]*aspect-ratio:\s*1;[^}]*margin-bottom:\s*0;[^}]*background-image:\s*url\("\/images\/home\/avatar-cats-ink-v2\.png"\);/s);
-    expect(stylesheet).toMatch(/body\.dark\.list:has\(\.profile--rainy-mask\)\s+\.profile-avatar\s*\{[^}]*background-image:\s*url\("\/images\/home\/avatar-cats-ink-night-v2\.png"\);/s);
+    expect(stylesheet).toMatch(/body\.dark\.list:has\(\.profile--atmosphere\)\s+\.profile-avatar\s*\{[^}]*background-image:\s*url\("\/images\/home\/avatar-cats-ink-night-v2\.png"\);/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*480px\)[\s\S]*\.profile-avatar\s*\{[^}]*width:\s*min\(14\.6rem,\s*70vw\);/s);
     expect(stylesheet).not.toContain("profile-avatar-scene");
     expect(stylesheet).not.toContain("profile-avatar-layer");
@@ -27,10 +27,10 @@ describe("home page hero styles", () => {
   it("uses the night artwork and warm glow treatment for dark home mode", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/body\.dark\.list:has\(\.profile--rainy-mask\)\s*\{[^}]*home-night-ink-bg\.png[^}]*fixed,/s);
+    expect(stylesheet).toMatch(/body\.dark\.list:has\(\.profile--atmosphere\)\s*\{[^}]*home-night-ink-bg\.png[^}]*fixed,/s);
     expect(stylesheet).toMatch(/\.dark\s+\.header\s*\{[^}]*background:\s*transparent;/s);
-    expect(stylesheet).toMatch(/body\.dark\.list:has\(\.profile--rainy-mask\)\s+\.profile h1\s*\{[^}]*#f1dfbd[^}]*text-shadow:/s);
-    expect(stylesheet).toMatch(/body\.dark\.list:has\(\.profile--rainy-mask\)\s+\.profile \.button\s*\{[^}]*rgba\(237,\s*219,\s*184,\s*0\.88\)[^}]*border-color:\s*rgba\(232,\s*211,\s*171,\s*0\.58\);/s);
+    expect(stylesheet).toMatch(/body\.dark\.list:has\(\.profile--atmosphere\)\s+\.profile h1\s*\{[^}]*#f1dfbd[^}]*text-shadow:/s);
+    expect(stylesheet).toMatch(/body\.dark\.list:has\(\.profile--atmosphere\)\s+\.profile \.button\s*\{[^}]*rgba\(237,\s*219,\s*184,\s*0\.88\)[^}]*border-color:\s*rgba\(232,\s*211,\s*171,\s*0\.58\);/s);
   });
 
   it("uses Ma Shan Zheng for the home hero title", () => {

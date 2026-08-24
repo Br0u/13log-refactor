@@ -1,7 +1,7 @@
 ﻿import Link from "next/link";
 import HomeAvatar from "./components/HomeAvatar";
 import HomeBackgroundDepth from "./components/HomeBackgroundDepth";
-import HomeRainLayer from "./components/HomeRainLayer";
+import HomeAtmosphereLayer from "./components/HomeAtmosphereLayer";
 import {
   FileText,
   Gamepad2,
@@ -15,9 +15,9 @@ import {
 
 export default function HomePage() {
   return (
-    <section className="profile profile--rainy-mask">
+    <section className="profile profile--atmosphere">
       <HomeBackgroundDepth />
-      <HomeRainLayer />
+      <HomeAtmosphereLayer />
       <div className="profile_inner">
         <HomeAvatar />
         <h1>花似伊，柳似伊</h1>

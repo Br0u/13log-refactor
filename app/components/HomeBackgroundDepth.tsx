@@ -344,6 +344,8 @@ export default function HomeBackgroundDepth() {
           key={layer}
         />
       ))}
+      <div className="home-depth-background__sakura" data-depth-layer="sakura" />
+      <div className="home-depth-background__sequoia" data-depth-layer="sequoia" />
     </div>
   );
 }

@@ -175,10 +175,12 @@ afterEach(() => {
 });
 
 describe("HomeBackgroundDepth", () => {
-  it("renders one hidden fallback and three decorative depth layers", () => {
+  it("renders the background layers followed by the light and dark foregrounds", () => {
     const { container } = render(<HomeBackgroundDepth />);
     const scene = container.querySelector(".home-depth-background");
     const layers = [...container.querySelectorAll(".home-depth-background__layer")];
+    const sakura = container.querySelector(".home-depth-background__sakura");
+    const sequoia = container.querySelector(".home-depth-background__sequoia");
     const directChildren = scene ? [...scene.children] : [];
     const layerNames = ["fallback", "far", "middle", "front"];
 
@@ -186,7 +188,11 @@ describe("HomeBackgroundDepth", () => {
     expect(scene?.getAttribute("aria-hidden")).toBe("true");
     expect(scene?.dataset.parallaxActive).toBe("false");
     expect(layers).toHaveLength(4);
-    expect(layers).toEqual(directChildren);
+    expect(sakura).not.toBeNull();
+    expect(sakura?.dataset.depthLayer).toBe("sakura");
+    expect(sequoia).not.toBeNull();
+    expect(sequoia?.dataset.depthLayer).toBe("sequoia");
+    expect(directChildren).toEqual([...layers, sakura, sequoia]);
     expect(layers.map((layer) => layer.dataset.depthLayer)).toEqual(layerNames);
     layers.forEach((layer, index) => {
       expect(layer.classList.contains("home-depth-background__layer")).toBe(true);

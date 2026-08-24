@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { mediaBlockContaining } from "../helpers/css-rules";
 
 describe("mobile surface styles", () => {
   it("covers the bottom safe area and fades the fixed navigation without blocking content", () => {
@@ -17,12 +18,17 @@ describe("mobile surface styles", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
     const resetIndex = stylesheet.indexOf("html,\n  body {\n    overflow-x: hidden;\n    background: var(--theme);");
     const mobileBackgroundIndex = stylesheet.indexOf("@media (max-width: 960px)", stylesheet.indexOf("/* Mobile surface polish */"));
+    const homeMobile = mediaBlockContaining(
+      stylesheet,
+      "max-width:\\s*960px",
+      "body.list:has(.profile--atmosphere)",
+    );
 
     expect(resetIndex).toBeGreaterThan(-1);
     expect(mobileBackgroundIndex).toBeGreaterThan(resetIndex);
-    expect(stylesheet).toMatch(/body\.list:has\(\.profile--rainy-mask\)\s*\{[^}]*home-ink-landscape\.png[^}]*fixed,/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.list:has\(\.profile--rainy-mask\)\s*\{[^}]*home-mobile-ink-bg\.png[^}]*no-repeat,/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.dark\.list:has\(\.profile--rainy-mask\)\s*\{[^}]*home-night-ink-bg\.png[^}]*no-repeat,/s);
+    expect(stylesheet).toMatch(/body\.list:has\(\.profile--atmosphere\)\s*\{[^}]*home-ink-landscape\.png[^}]*fixed,/s);
+    expect(homeMobile).toMatch(/body\.list:has\(\.profile--atmosphere\)\s*\{[^}]*home-mobile-ink-bg\.png[^}]*no-repeat,/s);
+    expect(homeMobile).toMatch(/body\.dark\.list:has\(\.profile--atmosphere\)\s*\{[^}]*home-night-ink-bg\.png[^}]*no-repeat,/s);
     expect(stylesheet).toMatch(/body:has\(\.blog-layout--posts-index\),\s*body:has\(\.blog-layout--post-detail\)\s*\{[^}]*posts-ink-bg\.png[^}]*fixed,/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--posts-index\),\s*body:has\(\.blog-layout--post-detail\)\s*\{[^}]*posts-mobile-ink-bg\.png[^}]*no-repeat,/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.dark:has\(\.blog-layout--posts-index\),\s*body\.dark:has\(\.blog-layout--post-detail\)\s*\{[^}]*posts-mobile-night-ink-bg\.png[^}]*no-repeat,/s);
@@ -47,14 +53,24 @@ describe("mobile surface styles", () => {
 
   it("uses mobile depth artwork, masks, and restrained parallax offsets", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
+    const depthMobile = mediaBlockContaining(
+      stylesheet,
+      "max-width:\\s*960px",
+      ".home-depth-background",
+    );
+    const darkDepthMobile = mediaBlockContaining(
+      stylesheet,
+      "max-width:\\s*960px",
+      "body.dark.list:has(.profile--atmosphere) .home-depth-background",
+    );
 
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*?\.home-depth-background\s*\{[^}]*--home-depth-layer-scale:\s*1\.035;[^}]*--home-depth-middle-mask:\s*linear-gradient\(to bottom, transparent 24%, rgba\(0,0,0,0?\.34\) 48%, #000 72%\);[^}]*--home-depth-front-mask:\s*radial-gradient\(ellipse 58% 74% at 0% 72%, #000 34%, transparent 74%\),\s*radial-gradient\(ellipse 56% 72% at 100% 74%, #000 32%, transparent 72%\),\s*linear-gradient\(to top, #000 0%, transparent 27%\);/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*\.home-depth-background__layer\s*\{[^}]*inset:\s*-3vmax;[^}]*background-image:\s*url\("\/images\/backgrounds\/home-mobile-ink-bg\.webp"\);[^}]*background-image:\s*image-set\(url\("\/images\/backgrounds\/home-mobile-ink-bg\.webp"\) type\("image\/webp"\), url\("\/images\/backgrounds\/home-mobile-ink-bg\.png"\) type\("image\/png"\)\);[^}]*center top/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*\.home-depth-background__layer--middle\s*\{[^}]*\* 5px[^}]*\* 4px[^}]*scale\(var\(--home-depth-layer-scale\)\)/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*\.home-depth-background__layer--front\s*\{[^}]*\* 8px[^}]*\* 6px[^}]*scale\(var\(--home-depth-layer-scale\)\)/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*\.home-depth-background\s*\{[^}]*transparent 27%/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*?body\.dark\.list:has\(\.profile--rainy-mask\) \.home-depth-background\s*\{[^}]*--home-depth-middle-mask:\s*linear-gradient\(to bottom, transparent 26%, rgba\(0,0,0,0?\.38\) 50%, #000 74%\);[^}]*--home-depth-front-mask:\s*radial-gradient\(ellipse 60% 76% at 0% 73%, #000 36%, transparent 75%\),\s*radial-gradient\(ellipse 58% 74% at 100% 75%, #000 34%, transparent 73%\),\s*linear-gradient\(to top, #000 0%, transparent 29%\);/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.dark\.list:has\(\.profile--rainy-mask\) \.home-depth-background__layer\s*\{[^}]*background-image:\s*url\("\/images\/backgrounds\/home-night-ink-bg\.webp"\);[^}]*background-image:\s*image-set\(url\("\/images\/backgrounds\/home-night-ink-bg\.webp"\) type\("image\/webp"\), url\("\/images\/backgrounds\/home-night-ink-bg\.png"\) type\("image\/png"\)\);[^}]*center top/s);
+    expect(depthMobile).toMatch(/\.home-depth-background\s*\{[^}]*--home-depth-layer-scale:\s*1\.035;[^}]*--home-depth-middle-mask:\s*linear-gradient\(to bottom, transparent 24%, rgba\(0,0,0,0?\.34\) 48%, #000 72%\);[^}]*--home-depth-front-mask:\s*radial-gradient\(ellipse 58% 74% at 0% 72%, #000 34%, transparent 74%\),\s*radial-gradient\(ellipse 56% 72% at 100% 74%, #000 32%, transparent 72%\),\s*linear-gradient\(to top, #000 0%, transparent 27%\);/s);
+    expect(depthMobile).toMatch(/\.home-depth-background__layer\s*\{[^}]*inset:\s*-3vmax;[^}]*background-image:\s*url\("\/images\/backgrounds\/home-mobile-ink-bg\.webp"\);[^}]*background-image:\s*image-set\(url\("\/images\/backgrounds\/home-mobile-ink-bg\.webp"\) type\("image\/webp"\), url\("\/images\/backgrounds\/home-mobile-ink-bg\.png"\) type\("image\/png"\)\);[^}]*center top/s);
+    expect(depthMobile).toMatch(/\.home-depth-background__layer--middle\s*\{[^}]*\* 5px[^}]*\* 4px[^}]*scale\(var\(--home-depth-layer-scale\)\)/s);
+    expect(depthMobile).toMatch(/\.home-depth-background__layer--front\s*\{[^}]*\* 8px[^}]*\* 6px[^}]*scale\(var\(--home-depth-layer-scale\)\)/s);
+    expect(depthMobile).toMatch(/\.home-depth-background\s*\{[^}]*transparent 27%/s);
+    expect(darkDepthMobile).toMatch(/body\.dark\.list:has\(\.profile--atmosphere\) \.home-depth-background\s*\{[^}]*--home-depth-middle-mask:\s*linear-gradient\(to bottom, transparent 26%, rgba\(0,0,0,0?\.38\) 50%, #000 74%\);[^}]*--home-depth-front-mask:\s*radial-gradient\(ellipse 60% 76% at 0% 73%, #000 36%, transparent 75%\),\s*radial-gradient\(ellipse 58% 74% at 100% 75%, #000 34%, transparent 73%\),\s*linear-gradient\(to top, #000 0%, transparent 29%\);/s);
+    expect(darkDepthMobile).toMatch(/body\.dark\.list:has\(\.profile--atmosphere\) \.home-depth-background__layer\s*\{[^}]*background-image:\s*url\("\/images\/backgrounds\/home-night-ink-bg\.webp"\);[^}]*background-image:\s*image-set\(url\("\/images\/backgrounds\/home-night-ink-bg\.webp"\) type\("image\/webp"\), url\("\/images\/backgrounds\/home-night-ink-bg\.png"\) type\("image\/png"\)\);[^}]*center top/s);
   });
 
   it("keeps shared content cards and long-form articles inside the mobile viewport", () => {
