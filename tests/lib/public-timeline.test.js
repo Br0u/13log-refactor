@@ -179,4 +179,24 @@ describe("public timeline facade", () => {
     expect(microPost?.renderedContentHtml).toContain("第一行<br>");
     expect(microPost?.renderedContentHtml).toContain("第二行");
   });
+
+  it("keeps the full text of long microposts in the public card payload", async () => {
+    const content = "长内容".repeat(100);
+    getPublishedPostsMock.mockResolvedValue([]);
+    getFilePostsMock.mockReturnValue([]);
+    getPublishedMicroPostsMock.mockResolvedValue([
+      {
+        id: "micro-long-text",
+        content,
+        status: "PUBLISHED",
+        publishedAt: new Date("2026-09-02T06:12:00.000Z"),
+        tags: [],
+        likeCount: 0,
+      },
+    ]);
+
+    const entries = await publicContent.getPublicTimelineEntries();
+
+    expect(entries[0].summary).toBe(content);
+  });
 });

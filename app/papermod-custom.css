@@ -5283,7 +5283,8 @@ body.dark:has(.about-note-layout--ink) .about-guestbook__form button {
 }
 
 .posts-masonry--posts-list .post-preview-card--micro-relaxed .post-preview-card__excerpt-block {
-  max-height: calc(1.74em * 10);
+  overflow: visible;
+  max-height: none;
 }
 
 .posts-masonry--posts-list .post-preview-card:not(:last-child)::after {
