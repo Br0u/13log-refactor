@@ -97,10 +97,10 @@ describe("posts timeline styles", () => {
     expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro-expanded\s+\.post-preview-card__excerpt-block\s*\{[^}]*overflow:\s*visible;[^}]*max-height:\s*none;/s);
   });
 
-  it("gives long text micros more reading height in the posts list layout", () => {
+  it("shows the full text of long microposts in the posts list layout", () => {
     const stylesheet = fs.readFileSync(path.join(process.cwd(), "app/papermod-custom.css"), "utf8");
 
-    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro-relaxed\s+\.post-preview-card__excerpt-block\s*\{[^}]*max-height:\s*calc\(1\.74em\s*\*\s*10\);/s);
+    expect(stylesheet).toMatch(/\.posts-masonry--posts-list\s+\.post-preview-card--micro-relaxed\s+\.post-preview-card__excerpt-block\s*\{[^}]*overflow:\s*visible;[^}]*max-height:\s*none;/s);
   });
 
   it("removes the clickable cursor hint from micro cards in the posts list layout", () => {
