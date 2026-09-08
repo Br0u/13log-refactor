@@ -1,114 +1,89 @@
-﻿import React from "react";
+import React from "react";
+import Image from "next/image";
 import HtmlContent from "../components/HtmlContent";
 import AboutGuestbook from "../../components/about/AboutGuestbook";
+import AboutScroll from "../../components/about/AboutScroll";
+import AboutInkProgress from "../../components/about/AboutInkProgress";
+import HangingPhoto from "../../components/about/HangingPhoto";
 import { LocationMap } from "../../components/ui/expand-map";
 import { getAboutPage, renderMarkdown } from "../../lib/content";
+import { getPublicPhotoAlbumBySlug } from "../../lib/public-photos";
+import styles from "./about.module.css";
 
-export const metadata = {
-  title: "About | 我的小小世界",
-};
+export const metadata = { title: "About | 我的小小世界" };
 
-function stripLegacyMapSection(markdown = "") {
-  const source = markdown || "";
-  const marker = '<link rel="stylesheet" href="https://unpkg.com/maplibre-gl';
-  const index = source.indexOf(marker);
-  if (index < 0) return source;
-
-  const head = source.slice(0, index);
-  // remove trailing horizontal rule before legacy map block
-  return head.replace(/[\r\n]+---[\r\n\s]*$/, "").trimEnd();
-}
-
-function extractLeadHero(html = "") {
-  const source = html || "";
-  const match = source.match(/<figure class="about-hero-wrap">[\s\S]*?<\/figure>/i);
-  if (!match) return { heroHtml: "", bodyHtml: source };
-
-  return {
-    heroHtml: match[0],
-    bodyHtml: source.replace(match[0], "").trim(),
-  };
-}
-
-function AboutLocationCard({ modifier = "", titleId = "about-location-title" }) {
-  return (
-    <section className={`about-note__map-rail ${modifier}`}>
-      <section className="about-map about-note__location about-note__location--wide" aria-labelledby={titleId}>
-        <div className="about-note__location-header">
-          <p className="about-note__location-kicker">From</p>
-          <h2 id={titleId} className="about-note__location-title">Current Location</h2>
-        </div>
-
-        <div className="about-note__map-shell about-note__map-shell--banner">
-          <LocationMap
-            className="about-note__map-frame"
-            location="Toronto, Ontario"
-            coordinates="43.6532° N, 79.3832° W"
-            viewport={modifier.includes("--mobile") ? "mobile" : "desktop"}
-          />
-        </div>
-      </section>
-    </section>
-  );
-}
-
-function AboutNightProfileCard() {
-  return (
-    <section className="about-night-profile-card" aria-label="Brou profile">
-      <div className="about-night-profile-card__avatar">
-        <img src="/pics/about/tx.jpg" alt="" aria-hidden="true" />
-      </div>
-      <div className="about-night-profile-card__copy">
-        <div className="about-night-profile-card__name">Brou</div>
-        <p className="about-night-profile-card__motto">ei yo wo cao</p>
-        <p className="about-night-profile-card__verse">
-          <span>少年听雨歌楼上，</span>
-          <span>而今听雨僧庐下。</span>
-        </p>
-      </div>
-    </section>
-  );
-}
+// Fixed selections from the published Random album; unpublished items disappear.
+const selections = [
+  { imageUrl: "/images/gallery/R0001640.jpg", caption: "林间" },
+  { imageUrl: "/images/gallery/IMG_4256.jpg", caption: "暮色" },
+  { imageUrl: "/images/gallery/IMG_8441.jpg", caption: "猫与窗" },
+  { imageUrl: "/images/gallery/R0002247.jpg", caption: "月色" },
+  { imageUrl: "/images/gallery/IMG_4023.jpg", caption: "夕照" },
+];
 
 export default async function AboutPage() {
   const about = getAboutPage();
-  const cleanedContent = stripLegacyMapSection(about.content || "");
-  const html = await renderMarkdown(cleanedContent);
-  const { heroHtml, bodyHtml } = extractLeadHero(html);
+  const [me, blog = ""] = (about.content || "").split("<!-- photos -->");
+  const [meHtml, blogHtml, album] = await Promise.all([
+    renderMarkdown(me), renderMarkdown(blog), getPublicPhotoAlbumBySlug("random"),
+  ]);
+  const photos = selections.flatMap(({ imageUrl, caption }) => {
+    const photo = album?.photos.find((item) => item.imageUrl === imageUrl);
+    return photo ? [{ ...photo, caption }] : [];
+  });
+
   return (
-    <section className="about-note-layout about-note-layout--ink">
-      <aside className="about-note-layout__side">
-        {heroHtml ? (
-          <div
-            className="about-note-layout__media about-note__media"
-            dangerouslySetInnerHTML={{ __html: heroHtml }}
-          />
-        ) : null}
+    <section className={styles.note} aria-label="关于 Brou">
+      <AboutInkProgress />
+      <noscript><style>{`.${styles.scrollTrack}{height:auto;margin-bottom:60px}.${styles.scrollStage}{position:static;height:auto}.${styles.paper}{clip-path:none!important}.${styles.bottomRod}{top:100%!important}.${styles.paperEdge},.${styles.rollTitle},.${styles.scrollFrame}::before{display:none!important}`}</style></noscript>
+      <div className={styles.opening}>
+      <header className={styles.intro}>
+        <p className={styles.eyebrow}>关于 / ABOUT</p>
+        <div className={styles.identity}>
+          <h1>Brou<span aria-hidden="true">.</span></h1>
+        </div>
+        <p className={styles.subtitle}>懒，但尚未放弃。</p>
+        <div className={styles.authorNote}>
+          <Image src="/pics/about/tx.jpg" alt="Brou 的头像" width={44} height={44} />
+          <p>写字、摄影，也写代码。<br />在这里留下一些生活的痕迹。</p>
+        </div>
+        <a className={`skip-link ${styles.skip}`} href="#about-body">向下展卷 <span aria-hidden="true">↓</span></a>
+      </header>
 
-        <AboutLocationCard modifier="about-note__map-rail--side" titleId="about-location-title-side" />
-      </aside>
-
-      <div className="about-note-layout__article">
-        <article className="post-single about-note">
-          <header className="post-header about-note__header">
-            <AboutNightProfileCard />
-            <div className="about-note__intro-copy">
-              <p className="about-note__eyebrow">A NOTE</p>
-              {about.description ? <p className="post-description about-note__dek">{about.description}</p> : null}
-            </div>
-          </header>
-
-          <AboutLocationCard modifier="about-note__map-rail--mobile" titleId="about-location-title-mobile" />
-
-          <div className="about-note__body">
-            <HtmlContent html={bodyHtml} className="post-content about-note__content" />
-          </div>
-
-          <footer className="about-note__footer">
-            <AboutGuestbook />
-          </footer>
-        </article>
+      <AboutScroll>
+        <div className={styles.inscription}>
+          <p><span>竹影潭下绿</span><span>荷花镜里香</span></p>
+          <span className={styles.smallSeal} aria-hidden="true">小记</span>
+        </div>
+      </AboutScroll>
       </div>
+
+      <article id="about-body" tabIndex={-1} className={styles.body}>
+        <div className={styles.chapter} data-ink-node="壹"><span>壹</span><span>一些关于我的事 / ABOUT ME</span></div>
+        <HtmlContent html={meHtml} className={styles.prose} />
+        {photos.length > 0 && (
+          <section className={styles.memories} aria-label="照片小记" data-ink-node="影">
+            <div className={styles.photos}>
+              {photos.map((photo, index) => (
+                <HangingPhoto photo={photo} index={index} key={photo.id} />
+              ))}
+            </div>
+            <p className={styles.photoNote}>用镜头记录一些无意义的瞬间。<a href="/photos">翻翻相册 ↗</a></p>
+          </section>
+        )}
+        <div className={styles.chapter} data-ink-node="贰"><span>贰</span><span>这一方小天地 / THE BLOG</span></div>
+        <HtmlContent html={blogHtml} className={styles.prose} />
+        <section className={styles.location} aria-labelledby="about-location" data-ink-node="叁">
+          <div className={styles.chapter}><span>叁</span><span>此刻所在 / FROM</span></div>
+          <h2 id="about-location">Toronto, Ontario</h2>
+          <LocationMap className={styles.map} location="Toronto, Ontario" coordinates="43.6532° N, 79.3832° W" />
+        </section>
+        <footer className={styles.letter} data-ink-node="终">
+          <div className={styles.chapter}><span>终</span><span>见字如面 / A LETTER</span></div>
+          <AboutGuestbook />
+        </footer>
+        <p className={styles.endmark}>未完，待续。<span aria-hidden="true">○</span></p>
+      </article>
     </section>
   );
 }
