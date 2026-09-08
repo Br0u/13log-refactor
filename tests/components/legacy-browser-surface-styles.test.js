@@ -16,7 +16,6 @@ const legacyBackgrounds = new Map([
   [".playzone-layout::before", "playzone-ink-bg.webp"],
   [".blog-layout--photos-index::before", "photos-ink-bg.webp"],
   [".blog-layout--photo-album::before", "photos-ink-bg.webp"],
-  [".about-note-layout--ink::before", "about-ink-bg.webp"],
 ]);
 
 function rulesMatching(selector) {

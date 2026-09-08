@@ -38,8 +38,6 @@ describe("mobile surface styles", () => {
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.dark:has\(\.playzone-layout\)\s*\{[^}]*playzone-mobile-night-ink-bg\.png[^}]*no-repeat,/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--photos-index\),\s*body:has\(\.blog-layout--photo-album\)\s*\{[^}]*photos-mobile-ink-bg\.png[^}]*no-repeat,/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body\.dark:has\(\.blog-layout--photos-index\),\s*body\.dark:has\(\.blog-layout--photo-album\)\s*\{[^}]*photos-mobile-night-ink-bg\.png[^}]*no-repeat,/s);
-    expect(stylesheet).toMatch(/body:has\(\.about-note-layout--ink\)\s*\{[^}]*about-ink-bg\.png[^}]*fixed,/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.about-note-layout--ink\)\s*\{[^}]*about-mobile-ink-bg\.png[^}]*no-repeat,/s);
   });
 
   it("tightens the home hero controls for narrow screens", () => {
@@ -112,8 +110,6 @@ describe("mobile surface styles", () => {
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--photos-index\)\s+#menu,[\s\S]*\{[^}]*position:\s*fixed;[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\);/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--photos-index\)\s+#menu\s+\.site-nav-icon,[\s\S]*\{[^}]*display:\s*block;/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.blog-layout--posts-index\)\s+\.blog-rail__nav\s*\{[^}]*display:\s*none;/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.about-note-layout--ink\)\s+#menu\s*\{[^}]*position:\s*fixed;[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\);/s);
-    expect(stylesheet).toMatch(/@media\s*\(max-width:\s*960px\)\s*\{[\s\S]*body:has\(\.about-note-layout--ink\)\s+\.about-note__map-rail--side\s*\{[^}]*display:\s*none;/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*body:has\(\.blog-layout--link-index:not\(\.playzone-layout\)\)\s+#menu\s*\{[^}]*position:\s*fixed;[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\);/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*body:has\(\.blog-layout--link-index:not\(\.playzone-layout\)\)\s+\.link-essay-entry__layout\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(5\.4rem,\s*8\.7rem\);/s);
     expect(stylesheet).toMatch(/@media\s*\(max-width:\s*720px\)\s*\{[\s\S]*body:has\(\.playzone-layout\)\s+#menu\s*\{[^}]*position:\s*fixed;[^}]*grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\);/s);
