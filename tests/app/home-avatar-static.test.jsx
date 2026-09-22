@@ -1,15 +1,19 @@
 // @vitest-environment jsdom
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import React from "react";
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
 import HomeAvatar from "../../app/components/HomeAvatar";
 
-it("renders one non-interactive avatar surface without duplicate images", () => {
+it("renders one accessible summon button without duplicate images", () => {
   const { container } = render(<HomeAvatar />);
   const avatar = container.querySelector(".profile-avatar");
 
-  expect(avatar?.tagName).toBe("SPAN");
-  expect(avatar?.getAttribute("aria-hidden")).toBe("true");
+  expect(avatar?.tagName).toBe("BUTTON");
+  expect(avatar?.getAttribute("aria-label")).toBe("叫小猫出门");
   expect(container.querySelectorAll("img")).toHaveLength(0);
-  expect(container.querySelector("[tabindex]")).toBeNull();
+  const summoned = vi.fn();
+  window.addEventListener("pixel-cat:summon", summoned);
+  fireEvent.click(avatar);
+  expect(summoned).toHaveBeenCalledTimes(1);
+  window.removeEventListener("pixel-cat:summon", summoned);
 });

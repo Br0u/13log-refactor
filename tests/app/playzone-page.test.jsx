@@ -34,7 +34,7 @@ describe("playzone page", () => {
     expect(dataSource).toContain("https://playtext-five.vercel.app");
     expect(dataSource).toContain('tags: ["文本游戏", "极简交互"]');
     expect(source).toContain("data-link-card");
-    expect(source).toContain('data-preview-enabled="true"');
+    expect(source).toContain('data-preview-enabled={project.external ? "true" : "false"}');
     expect(source).toContain("data-preview-url={project.href}");
     expect(source).toContain('className="link-essay-entry__preview is-empty"');
     expect(source).toContain('data-preview-container');

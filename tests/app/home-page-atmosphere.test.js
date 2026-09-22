@@ -42,8 +42,8 @@ describe("home page atmosphere markup", () => {
     expect(source).toContain("button-inner\">Photos");
     expect(source).toContain("button-inner\">Link");
 
-    expect(avatarSource).toContain('className="profile-avatar"');
-    expect(avatarSource).toContain('aria-hidden="true"');
+    expect(avatarSource).toContain('className="profile-avatar pixel-cat-summon"');
+    expect(avatarSource).toContain('aria-label="叫小猫出门"');
     expect(backgroundSource).toContain('"use client"');
     expect(backgroundSource).not.toContain("requestPermission");
   });

@@ -1,0 +1,50 @@
+.profile-avatar.pixel-cat-summon { pointer-events: auto; border: 0; padding: 0; background-color: transparent; cursor: pointer; position: relative; }
+.pixel-cat-summon:focus-visible { outline: 2px dashed #8199ac; outline-offset: -24px; }
+.pixel-cat-summon::after { content: '点击，叫小猫出门'; position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); color: var(--secondary); font-size: 12px; white-space: nowrap; opacity: 0; transition: opacity .2s; }
+.pixel-cat-summon:hover::after, .pixel-cat-summon:focus-visible::after { opacity: 1; }
+.pixel-cat-sprite { display: block; width: var(--sprite-size, 96px); height: var(--sprite-size, 96px); background-image: url('/pixel-cat/cat.png?v=3'); background-size: calc(var(--sprite-size, 96px) * 8) calc(var(--sprite-size, 96px) * var(--sprite-rows, 64)); background-position-y: calc(var(--sprite-row, 0) * var(--sprite-size, 96px) * -1); image-rendering: pixelated; animation: cat-frames .96s steps(8) infinite; animation-fill-mode: forwards; pointer-events: none; }
+@keyframes cat-frames { to { background-position-x: calc(var(--sprite-size, 96px) * -8); } }
+@keyframes cat-once { to { background-position-x: calc(var(--sprite-size, 96px) * -7); } }
+.pixel-cat-layer { position: fixed; inset: 0; pointer-events: none; z-index: 1200; }
+.pixel-cat-actor { position: absolute; top: 0; left: 0; width: 96px; height: 96px; will-change: transform; }
+.pixel-cat-handle { appearance: none; display: block; border: 0; padding: 0; background: transparent; width: 96px; height: 96px; pointer-events: auto; touch-action: none; cursor: grab; border-radius: 12px; }
+.pixel-cat-handle:active { cursor: grabbing; }
+.pixel-cat-handle:focus-visible { outline: 2px dashed #8199ac; outline-offset: -8px; }
+.pixel-cat-handle:disabled { cursor: default; pointer-events: none; }
+.pixel-cat-door { position: absolute; width: 96px; height: 96px; background: url('/pixel-cat/door.png') 0 0 / 768px 96px; image-rendering: pixelated; animation: cat-door .56s steps(7) forwards; }
+.pixel-cat-door[data-closing='true'] { animation: cat-door-close .56s steps(7) forwards; }
+@keyframes cat-door { to { background-position-x: -672px; } }
+@keyframes cat-door-close { from { background-position-x: -672px; } to { background-position-x: 0; } }
+.pixel-cat-panel { box-sizing: border-box; pointer-events: auto; position: absolute; width: min(304px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto; padding: 18px 16px 8px; border: 1px solid var(--border, #dedbd4); border-radius: 16px; background: var(--theme, #fff); color: var(--primary, #242329); box-shadow: 0 4px 18px #17171d0d, 0 1px 3px #17171d0a; font-family: inherit; font-size: 14px; line-height: 1.8; }
+.pixel-cat-panel button { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 6px; min-width: 32px; min-height: 32px; border: 0; border-radius: 8px; background: transparent; color: var(--secondary, #706b65); font: inherit; transition: background .15s, color .15s; }
+.pixel-cat-panel button:hover, .pixel-cat-panel button[aria-pressed='true'] { background: var(--entry, #f1efeb); color: var(--primary, #242329); }
+.pixel-cat-panel .pixel-cat-close { position: absolute; right: 5px; top: 5px; min-width: 28px; min-height: 28px; }
+.pixel-cat-panel button:disabled { opacity: .35; cursor: default; }
+.pixel-cat-panel button:focus-visible, .pixel-cat-panel input:focus-visible { outline: 2px solid #8199ac; outline-offset: 2px; }
+.pixel-cat-panel .pixel-cat-speech { margin: 0 10px 16px 0; padding-right: 5px; overflow-wrap: anywhere; white-space: pre-wrap; max-height: min(280px, 40dvh); overflow-y: auto; scrollbar-width: thin; }
+.pixel-cat-panel form { display: flex; align-items: center; gap: 4px; padding: 4px 4px 4px 10px; border: 1px solid var(--border, #dedbd4); border-radius: 10px; background: var(--entry, #f1efeb); }
+.pixel-cat-panel input { min-width: 0; width: 0; flex: 1; padding: 4px 0; border: 0; color: inherit; background: transparent; font: inherit; font-size: 16px; }
+.pixel-cat-panel input::placeholder { font-size: 13px; color: var(--secondary); }
+.pixel-cat-panel .pixel-cat-send { color: var(--theme, #fff); background: var(--primary, #242329); border-radius: 7px; }
+.pixel-cat-panel .pixel-cat-send:hover { color: var(--theme, #fff); background: var(--primary, #242329); opacity: .8; }
+.pixel-cat-tools { display: flex; align-items: center; gap: 2px; margin: 4px -4px 0; }
+.pixel-cat-panel .pixel-cat-selection { margin-left: auto; font-size: 11px; padding: 4px 6px; }
+.pixel-cat-target { outline: 2px dashed #8199ac !important; outline-offset: 6px; }
+.cat-gallery { max-width: 1080px; margin: 30px auto 80px; }
+.cat-gallery header h1 { font-size: clamp(28px, 5vw, 42px); margin: 0 0 8px; }
+.cat-gallery-kicker { color: var(--secondary); font: 12px/2 monospace; letter-spacing: .12em; }
+.cat-stage { position: relative; display: grid; place-items: center; min-height: 290px; margin: 28px 0 14px; border: 1px solid var(--border); background-color: color-mix(in srgb, #8199ac 8%, var(--theme)); background-image: linear-gradient(color-mix(in srgb, #8199ac 10%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, #8199ac 10%, transparent) 1px, transparent 1px); background-size: 24px 24px; }
+.cat-stage::after { content: ''; position: absolute; width: 200px; height: 2px; background: #8199ac; top: calc(50% + 56px); opacity: .45; }
+.cat-stage-caption { position: absolute; bottom: 16px; left: 18px; font: 12px monospace; color: var(--secondary); }
+.cat-gallery-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0; }
+.cat-gallery button { color: var(--primary); border: 1px solid var(--border); background: transparent; padding: 8px 12px; cursor: pointer; font: inherit; }
+.cat-gallery button[aria-pressed='true'] { background: var(--primary); color: var(--theme); }
+.cat-gallery button:focus-visible { outline: 2px solid #8199ac; outline-offset: 3px; }
+.cat-gallery h2 { font-size: 18px; margin: 28px 0 10px; }
+.cat-action-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+.cat-action-grid button { display: grid; justify-items: center; padding: 4px 8px 12px; }
+.cat-action-grid button[aria-pressed='true'] { background: color-mix(in srgb, #8199ac 15%, var(--theme)); color: var(--primary); border-color: #8199ac; }
+.cat-action-grid small { color: var(--secondary); font: 10px monospace; }
+.cat-settings-links { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+.cat-settings-links a { text-decoration: underline; }
+@media (prefers-reduced-motion: reduce) { .pixel-cat-sprite { animation: none !important; } .pixel-cat-door { animation-duration: .01ms; } }
