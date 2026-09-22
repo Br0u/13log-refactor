@@ -1,6 +1,7 @@
 import { defineConfig } from "vitest/config";
 
 export const DATABASE_INTEGRATION_TESTS = [
+  "tests/lib/pixel-cat-db.test.ts",
   "tests/lib/db.test.js",
   "tests/lib/repositories/comments.test.js",
   "tests/lib/repositories/guestbook.test.js",

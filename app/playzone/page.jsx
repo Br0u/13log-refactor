@@ -36,7 +36,7 @@ export default function PlayzonePage() {
                 key={project.slug}
                 className={`link-essay-entry ${!project.image ? "link-board-card--preview-pending" : ""}`}
                 data-link-card
-                data-preview-enabled="true"
+                data-preview-enabled={project.external ? "true" : "false"}
                 data-preview-url={project.href}
               >
                 <div className="link-essay-entry__layout">
@@ -66,7 +66,9 @@ export default function PlayzonePage() {
                     </span>
                   </div>
 
-                  <div className="link-essay-entry__preview is-empty" data-preview-container />
+                  <div className="link-essay-entry__preview is-empty" data-preview-container>
+                    {project.image ? <img src={project.image} alt="" loading="lazy" style={{ imageRendering: "pixelated", objectFit: "contain" }} /> : null}
+                  </div>
                 </div>
                 <a
                   className="entry-link"

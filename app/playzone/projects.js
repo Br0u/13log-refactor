@@ -1,5 +1,16 @@
 export const projects = [
   {
+    slug: "pixel-cat",
+    title: "小黑的排练室",
+    description: "64 个像素动作、17 组连续行为。回到首页，点击头像，就能叫小猫出门。",
+    href: "/playzone/pixel-cat",
+    image: "/pixel-cat/preview.png",
+    external: false,
+    eyebrow: "Companion",
+    cta: "看看小猫",
+    tags: ["互动实验", "像素动画"],
+  },
+  {
     slug: "dance-text",
     title: "Dance Text",
     description:

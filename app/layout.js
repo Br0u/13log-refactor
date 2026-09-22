@@ -2,6 +2,8 @@
 import Link from "next/link";
 import ClientEnhancements from "./components/ClientEnhancements";
 import HeaderNav from "./components/HeaderNav";
+import PixelCat from "../components/pixel-cat/PixelCat";
+import "../components/pixel-cat/pixel-cat.css";
 
 export const metadata = {
   title: {
@@ -58,7 +60,7 @@ export default function RootLayout({ children }) {
         <header className="header">
           <nav className="nav">
             <div className="logo">
-              <Link href="/" accessKey="h" title="13log (Alt + H)">13log</Link>
+              <Link href="/" accessKey="h" title="13log (Alt + H)" data-cat-logo>13log</Link>
               <div className="logo-switches">
                 <button id="theme-toggle" accessKey="t" title="(Alt + T)" aria-label="Toggle theme">
                   <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -133,6 +135,7 @@ export default function RootLayout({ children }) {
         </a>
 
         <ClientEnhancements />
+        <PixelCat />
       </body>
     </html>
   );

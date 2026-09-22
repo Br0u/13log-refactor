@@ -74,6 +74,7 @@ describe("database test configuration", () => {
     ]);
     expect(config.test.fileParallelism).toBe(false);
     expect(config.test.include).toEqual([
+      "tests/lib/pixel-cat-db.test.ts",
       "tests/lib/db.test.js",
       "tests/lib/repositories/comments.test.js",
       "tests/lib/repositories/guestbook.test.js",

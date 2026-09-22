@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/admin/tags", label: "Tags" },
   { href: "/admin/comments", label: "Comments" },
   { href: "/admin/visits", label: "Visits" },
+  { href: "/admin/cat", label: "小猫设置" },
 ];
 
 export default async function ProtectedAdminLayout({ children }) {
