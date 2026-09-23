@@ -47,8 +47,8 @@ export default function AdminCatSettings() {
         {values.hasKey && <label><span>已保存的密钥</span><select value={String(values.removeKey)} onChange={event => field("removeKey", event.target.value === "true")}><option value="false">保留，或用上方新密钥替换</option><option value="true">删除，改为无密钥调用</option></select></label>}
         <label><span>小猫的性格</span><textarea required maxLength={800} rows={4} value={values.personality} onChange={event => field("personality", event.target.value)} /></label>
         <label><span>主动说话间隔</span><select value={values.proactiveSeconds} onChange={event => field("proactiveSeconds", Number(event.target.value))}><option value={0}>只在用户提问时说话</option><option value={60}>至少 1 分钟</option><option value={120}>至少 2 分钟</option><option value={300}>至少 5 分钟</option><option value={600}>至少 10 分钟</option></select></label>
-        <label><span>全站每日 AI 调用上限（UTC 日界线）</span><input type="number" required min={1} max={10000} value={values.dailyLimit} onChange={event => field("dailyLimit", Number(event.target.value))} /></label>
-        <p className="admin-form-hint">每位访客额外限制每分钟 6 次、每天 40 次。失败调用也计数；连接测试独立于访客额度。密钥加密保存，访客无法读取。</p>
+        <label><span>全站每日 AI 调用上限（UTC 日界线）</span><input type="number" required min={0} max={10000} value={values.dailyLimit} onChange={event => field("dailyLimit", event.target.value === "" ? "" : Number(event.target.value))} /></label>
+        <p className="admin-form-hint">填 0 取消全站每日上限。每位访客仍限制每分钟 6 次、每天 40 次；失败调用也计数。连接测试独立于访客额度。密钥加密保存，访客无法读取。</p>
         <div className="cat-gallery-toolbar"><button className="admin-primary-button" type="submit">保存设置</button><button className="admin-primary-button" type="button" onClick={event => { if (event.currentTarget.form.reportValidity()) void submit("test"); }}>测试连接，不保存</button></div>
       </fieldset>
       {busy && <p role="status">正在处理…</p>}

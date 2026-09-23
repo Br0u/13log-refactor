@@ -9,7 +9,7 @@ export const settingsSchema = z.object({
   removeKey: z.boolean().default(false),
   personality: z.string().trim().min(1).max(800),
   proactiveSeconds: z.number().int().min(0).max(600).refine(n => n === 0 || n >= 60),
-  dailyLimit: z.number().int().min(1).max(10000),
+  dailyLimit: z.number().int().min(0).max(10000),
 });
 
 export const DEFAULT_SETTINGS = {
