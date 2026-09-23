@@ -191,7 +191,8 @@ export async function reserveUsage(identity: string, dailyLimit: number, now = D
         (${visitorKey}, 1, ${new Date((day + 1) * 86400000)}),
         (${minuteKey}, 1, ${new Date((minute + 1) * 60000)})
       ON CONFLICT ("id") DO UPDATE SET "count" = "CatUsage"."count" + 1
-      WHERE "CatUsage"."count" < CASE
+      WHERE ("CatUsage"."id" = ${dayKey} AND ${dailyLimit} = 0)
+        OR "CatUsage"."count" < CASE
         WHEN "CatUsage"."id" = ${dayKey} THEN ${dailyLimit}
         WHEN "CatUsage"."id" = ${visitorKey} THEN 40
         ELSE 6 END

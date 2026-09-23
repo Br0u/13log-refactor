@@ -22,6 +22,8 @@ it("persists only ciphertext, preserves it on a blank edit, and deletes it expli
   expect(decryptKey(first!.encryptedKey!)).toBe(config.apiKey);
   await configureSettings({ ...config, apiKey: "", personality: "喜欢看书的小黑" }, "save");
   expect((await getSettings())?.encryptedKey).toBe(first?.encryptedKey);
+  await configureSettings({ ...config, apiKey: "", dailyLimit: 0 }, "save");
+  expect((await getSettings())?.dailyLimit).toBe(0);
   await configureSettings({ ...config, apiKey: "", removeKey: true }, "save");
   expect((await getSettings())?.encryptedKey).toBeNull();
 });
@@ -44,4 +46,13 @@ it("rolls back global and minute counters when a visitor limit is reached", asyn
   await expect(reserveUsage("same-visitor", 200, testNow + 60000)).rejects.toMatchObject({ status: 429 });
   expect((await db.catUsage.findUnique({ where: { id: `day:${day}` } }))?.count).toBe(6);
   expect(await db.catUsage.count({ where: { id: { startsWith: `minute:${minute + 1}:` } } })).toBe(0);
+});
+
+it("allows unlimited site-wide use at zero while keeping visitor limits", async () => {
+  await db.catUsage.deleteMany({ where: counters });
+  const outcomes = await Promise.allSettled(Array.from({ length: 10 }, (_, index) => reserveUsage(`unlimited-${index}`, 0, testNow)));
+  expect(outcomes.every(result => result.status === "fulfilled")).toBe(true);
+  for (let index = 0; index < 6; index++) await reserveUsage("same-visitor", 0, testNow);
+  await expect(reserveUsage("same-visitor", 0, testNow)).rejects.toMatchObject({ status: 429 });
+  expect((await db.catUsage.findUnique({ where: { id: `day:${day}` } }))?.count).toBe(16);
 });
