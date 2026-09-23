@@ -46,8 +46,23 @@ it("sends bounded context and executes only a validated provider plan using pinn
   const plan = await askCat({ message: "读这段", proactive: false, context, history: [] }, "test-visitor");
   expect(plan.actions[0]).toEqual({ type: "walk_to", target: "cat-target-0" });
   expect(upstream.calls[0].body.response_format).toEqual({ type: "json_object" });
+  expect(upstream.calls[0].body).not.toHaveProperty("chat_template_kwargs");
   const callback = vi.fn(); upstream.calls[0].options.lookup("provider.example", { all: true }, callback);
   expect(callback).toHaveBeenCalledWith(null, [{ address: "1.1.1.1", family: 4 }]);
+});
+it("disables Qwen3.8-27B thinking for both streamed chat and admin connection tests", async () => {
+  const settings = { ...DEFAULT_SETTINGS, enabled: true, model: "Qwen3.8-27B", encryptedKey: null };
+  database.catSettings.findUnique.mockResolvedValue(settings);
+  upstream.stream = true;
+  upstream.body = providerStream('{"say":"你好","actions":[]}');
+  const speech = vi.fn();
+  await expect(askCat({ message: "你好", proactive: false, context, history: [] }, "test", { onSpeech: speech })).resolves.toEqual({ say: "你好", actions: [] });
+  expect(speech).toHaveBeenCalledWith("你好");
+  upstream.stream = false;
+  upstream.body = JSON.stringify({ choices: [{ message: { content: '{"say":"连接成功","actions":[]}' } }] });
+  await configureSettings({ ...settings, model: "Qwen/Qwen3.8-27B" }, "test");
+  expect(upstream.calls).toHaveLength(2);
+  for (const call of upstream.calls) expect(call.body.chat_template_kwargs).toEqual({ enable_thinking: false });
 });
 it("streams speech before returning validated actions and reports timing without leaking provider data", async () => {
   upstream.stream = true;
