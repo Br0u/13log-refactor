@@ -54,7 +54,7 @@ export function normalizeBaseUrl(value: string) {
 
 type ReplyOptions = { signal?: AbortSignal; onSpeech?: (say: string) => void; onTiming?: (timing: { prepareMs: number; firstTextMs: number | null; totalMs: number }) => void };
 
-async function completion(baseUrl: string, apiKey: string | null, payload: unknown, options: ReplyOptions = {}) {
+async function completion(baseUrl: string, apiKey: string | null, payload: { model: string; [key: string]: unknown }, options: ReplyOptions = {}) {
   options.signal?.throwIfAborted();
   const url = new URL(`${normalizeBaseUrl(baseUrl)}/chat/completions`);
   // ponytail: IPv4 upstreams only; add validated IPv6 ranges if a provider needs IPv6-only DNS.
@@ -65,7 +65,10 @@ async function completion(baseUrl: string, apiKey: string | null, payload: unkno
   ]).finally(() => clearTimeout(dnsTimer));
   if (!publicIPv4(resolved.address)) throw new CatError("模型服务解析到了非公网地址。");
   options.signal?.throwIfAborted();
-  const body = JSON.stringify(payload);
+  // The configured Qwen3.8-27B service otherwise spends seconds thinking before
+  // emitting speech. Use its non-thinking mode for this lightweight companion.
+  const body = JSON.stringify({ ...payload, ...(/(?:^|\/)qwen3\.8-27b(?:-|$)/i.test(payload.model)
+    ? { chat_template_kwargs: { enable_thinking: false } } : {}) });
   return new Promise<any>((resolve, reject) => {
     // Pin the checked DNS answer for the actual connection (no DNS rebinding).
     const request = url.protocol === "http:" ? httpRequest : httpsRequest;
