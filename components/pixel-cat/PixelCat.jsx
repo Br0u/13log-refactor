@@ -4,9 +4,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowUp, BookOpen, House, Moon, Square, Volume2, X } from "lucide-react";
 import PixelSprite from "./PixelSprite";
-import { BEHAVIORS, AMBIENT_BEHAVIORS, ACTION_META, localCommand, clampPosition, storageGet, storageSet } from "../../lib/pixel-cat/catalog.mjs";
-import { collectPageContext, waitForCat } from "./page-context";
+import { BEHAVIORS, AMBIENT_BEHAVIORS, ACTION_META, SCENE_IDS, localCommand, clampPosition, storageGet, storageSet } from "../../lib/pixel-cat/catalog.mjs";
+import { collectPageContext, collectCatSurfaces, readCatSurface, pickCatLetter, hideCatLetter, waitForCat } from "./page-context";
 import { readCatReply } from "../../lib/pixel-cat/stream.mjs";
+import { LETTER_FRAME_MS, LETTER_CONTACT_FRAME, letterGrip } from "../../lib/pixel-cat/letter-motion.mjs";
 
 const SIZE = 96;
 const WELCOME = "喵，我出来啦。拖着我走，或点我聊聊。";
@@ -15,6 +16,7 @@ export default function PixelCat() {
   const pathname = usePathname();
   const [phase, setPhase] = useState("hidden");
   const [action, setAction] = useState("idle");
+  const [motionStep, setMotionStep] = useState(0);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [facing, setFacing] = useState(1);
   const [portal, setPortal] = useState(null);
@@ -29,6 +31,14 @@ export default function PixelCat() {
   const [panelHeight, setPanelHeight] = useState(240);
   const [, refreshViewport] = useState(0);
   const [settings, setSettings] = useState({ available: false, proactiveSeconds: 0 });
+  const [letter, setLetter] = useState(null);
+  const [letterFrame, setLetterFrame] = useState(null);
+  const releaseLetter = useRef(null);
+  const surface = useRef(null);
+  const lastSurface = useRef(null);
+  const scrollClimbTimer = useRef(null);
+  const scrollClimbing = useRef(false);
+  const lastScroll = useRef(0);
   const actor = useRef(null);
   const handle = useRef(null);
   const panelElement = useRef(null);
@@ -55,6 +65,8 @@ export default function PixelCat() {
   const panelOpen = useRef(panel);
   const resting = useRef("idle");
   const lastBehavior = useRef("");
+  const lastScene = useRef("");
+  const nextAmbient = useRef(0);
   const replyHidden = useRef(false);
   panelOpen.current = panel;
   const face = value => { facingRef.current = value; setFacing(value); };
@@ -68,8 +80,11 @@ export default function PixelCat() {
   };
   const stop = () => {
     const rect = actor.current?.getBoundingClientRect();
+    clearTimeout(scrollClimbTimer.current); scrollClimbTimer.current = null; scrollClimbing.current = false;
     sequence.current?.abort();
     motion.current?.cancel(); motion.current = null; moving.current = false; performing.current = false;
+    releaseLetter.current?.(); releaseLetter.current = null;
+    setLetter(null); setLetterFrame(null); surface.current = null;
     if (rect) place({ x: rect.left, y: rect.top });
     clearHighlight();
     pending.current = false; setBusy(false); setStreaming(false);
@@ -84,14 +99,19 @@ export default function PixelCat() {
     const origin = { ...pos.current }, target = clampPosition(point, width, height);
     const distance = Math.hypot(target.x - origin.x, target.y - origin.y);
     const cycle = ACTION_META[type]?.cycle || 800;
+    const climbing = ["climb", "climb_down", "climb_side"].includes(type);
     const speed = ["run", "chase"].includes(type) ? 220 : type === "sneak" ? 65 : 130;
-    const time = arc ? 800 : Math.min(3600, Math.max(320, Math.round(distance / speed * 1000 / cycle) * cycle));
-    setAction(type);
+    const time = arc ? 800 : climbing ? Math.min(4, Math.max(1, Math.round(distance / 95 * 1000 / cycle))) * cycle
+      : Math.min(3600, Math.max(320, Math.round(distance / speed * 1000 / cycle) * cycle));
+    setAction(type); setMotionStep(value => value + 1);
     if (Math.abs(target.x - origin.x) > 3) face(target.x > origin.x ? 1 : -1);
     if (reduced.current || !actor.current?.animate) { place(target); return delay(time, signal); }
-    const frameCount = arc ? 25 : 2;
+    const cycles = time / cycle;
+    const frameCount = arc ? 25 : climbing ? cycles * 8 + 1 : 2;
     const keyframes = Array.from({ length: frameCount }, (_, index) => {
-      const t = index / (frameCount - 1);
+      // Reach slowly, then pull while a paw grips; phase matches the eight sprite frames.
+      const stride = [0, .03, .09, .22, .5, .53, .59, .72];
+      const t = climbing ? (Math.floor(index / 8) + stride[index % 8]) / cycles : index / (frameCount - 1);
       return { transform: `translate(${Math.round(origin.x + (target.x - origin.x) * t)}px, ${Math.round(origin.y + (target.y - origin.y) * t - 4 * arc * t * (1 - t))}px)` };
     });
     const animation = actor.current.animate(keyframes, { duration: time, easing: "linear", fill: "forwards" });
@@ -119,6 +139,152 @@ export default function PixelCat() {
     if (!await move({ x: origin.x + direction * (small ? 28 : 64), y: origin.y }, signal, "air", Math.min(origin.y, small ? 28 : 60))) return false;
     setAction("land");
     return delay(ACTION_META.land.cycle, signal);
+  }
+
+  const surfacePoint = (shelf, rect) => ({
+    x: Math.max(0, rect.left) + (Math.min(viewport().width, rect.right) - Math.max(0, rect.left)) * shelf.ratio - SIZE / 2,
+    y: rect.top - 80,
+  });
+
+  async function playLetter(shelf, signal) {
+    const toy = pickCatLetter(shelf, pos.current, facingRef.current);
+    if (!toy || signal.aborted || !globalThis.CSS?.highlights || !globalThis.Highlight) return;
+    const direction = facingRef.current;
+    const grip = letterGrip("letter_reach", LETTER_CONTACT_FRAME, direction);
+    // A short step aligns the front paw with a letter already beneath the feet.
+    if (!await move({ x: toy.rect.left + toy.rect.width / 2 - grip.x, y: pos.current.y }, signal, "sneak")) return;
+    face(direction);
+    if (Math.abs(pos.current.x + grip.x - toy.rect.left - toy.rect.width / 2) > 2) return;
+    let attached = false;
+    try {
+      for (const pose of ["letter_reach", "letter_lift", "letter_play", "letter_play", "letter_return"]) {
+        for (let frame = 0; frame < 8; frame++) {
+          if (signal.aborted || !readCatSurface(shelf)) return;
+          setAction(pose); setLetterFrame(frame);
+          if (pose === "letter_reach" && frame === LETTER_CONTACT_FRAME) {
+            releaseLetter.current = hideCatLetter(toy);
+            if (!releaseLetter.current) return;
+            attached = true;
+          }
+          if (pose === "letter_return" && frame === LETTER_CONTACT_FRAME) {
+            releaseLetter.current?.(); releaseLetter.current = null; attached = false;
+          }
+          const paw = letterGrip(pose, frame, facingRef.current);
+          setLetter(attached ? { ...toy, x: paw.x - toy.rect.width / 2, y: paw.y - 4,
+            angle: pose === "letter_play" ? [0, -12, -24, -12, 0, 12, 24, 12][frame] * facingRef.current : 0 } : null);
+          if (!await delay(LETTER_FRAME_MS, signal)) return;
+        }
+      }
+    } finally {
+      if (!signal.aborted) {
+        releaseLetter.current?.(); releaseLetter.current = null; setLetter(null); setLetterFrame(null);
+      }
+    }
+  }
+
+  function roam(kind) {
+    if (reduced.current) return false;
+    const shelves = collectCatSurfaces().filter(item => !kind || kind === "down" || item.kind === kind);
+    const below = shelves.filter(item => item.rect.top > pos.current.y + 100 && item.rect.top < pos.current.y + 240 && item.rect.right > pos.current.x - 80 && item.rect.left < pos.current.x + 176)
+      .sort((a, b) => a.rect.top - b.rect.top);
+    const underfoot = kind === "text" && shelves.find(item => Math.abs(item.rect.top - pos.current.y - 80) <= 6 && item.rect.left < pos.current.x + 76 && item.rect.right > pos.current.x + 22);
+    const fresh = shelves.filter(item => item.element !== lastSurface.current);
+    const choices = underfoot ? [underfoot] : (kind === "down" || !kind && below.length) ? below.slice(0, 1) : fresh.length ? fresh : shelves;
+    if (!choices.length) {
+      if (kind !== "down" || pos.current.y >= viewport().height - SIZE - 4) return false;
+      const signal = stop(); performing.current = true;
+      void move({ x: pos.current.x, y: pos.current.y + 112 }, signal, "climb_down").then(() => {
+        if (!signal.aborted) { performing.current = false; setAction("idle"); }
+      });
+      return true;
+    }
+    const shelf = { ...choices[Math.floor(Math.random() * choices.length)], ratio: .25 + Math.random() * .5 };
+    const signal = stop();
+    surface.current = shelf; lastSurface.current = shelf.element; performing.current = true;
+    void (async () => {
+      try {
+        if (!underfoot) {
+          const point = surfacePoint(shelf, shelf.rect);
+          let climbingToShelf = false;
+          if (point.y - pos.current.y > 20) {
+            if (!await move({ x: point.x, y: pos.current.y }, signal)) return;
+            if (!await move(point, signal, "climb_down")) return;
+            climbingToShelf = true;
+          } else {
+            if (shelf.kind === "image" && pos.current.y - point.y > 60) {
+              const edge = Math.max(0, shelf.rect.left - SIZE / 2);
+              if (!await move({ x: edge, y: pos.current.y }, signal)) return;
+              setAction("climb_grip");
+              if (!await delay(ACTION_META.climb_grip.cycle, signal)) return;
+              if (!await move({ x: edge, y: point.y }, signal, "climb")) return;
+              if (!await move(point, signal, "climb_side")) return;
+              climbingToShelf = true;
+            } else {
+              setAction("crouch");
+              if (!await delay(400, signal)) return;
+              if (!await move(point, signal, "air", Math.min(40, point.y, pos.current.y))) return;
+            }
+          }
+          const landing = climbingToShelf ? "climb_over" : "land";
+          setAction(landing);
+          if (!await delay(ACTION_META[landing].cycle, signal)) return;
+        }
+        if (kind === "text" || shelf.kind === "text" && Math.random() < .4) await playLetter(shelf, signal);
+        if (!signal.aborted) setAction(Math.random() < .65 ? "perch" : "lie");
+      } finally { if (!signal.aborted) performing.current = false; }
+    })();
+    return true;
+  }
+
+  function syncSurface() {
+    const shelf = surface.current;
+    if (!shelf || document.hidden) return;
+    const rect = readCatSurface(shelf);
+    if (rect && ["left", "top", "width", "height"].every(key => Math.abs(rect[key] - shelf.rect[key]) <= 2)) return;
+    scheduleScrollClimb();
+  }
+
+  function scheduleScrollClimb() {
+    if (phaseRef.current !== "active" || document.hidden || quiet || reduced.current || drag.current || pending.current || panelOpen.current) return;
+    // Leading-edge delay: continuous scroll must not keep postponing or cancelling the climb.
+    if (scrollClimbing.current || scrollClimbTimer.current) return;
+    const signal = stop();
+    setAction("climb_grip");
+    scrollClimbTimer.current = setTimeout(() => {
+      scrollClimbTimer.current = null;
+      void regainFooting(signal);
+    }, ACTION_META.climb_grip.cycle);
+  }
+
+  async function regainFooting(signal) {
+    scrollClimbing.current = true; performing.current = true;
+    try {
+      while (!signal.aborted) {
+        const shelves = collectCatSurfaces();
+        const feet = pos.current.y + 80, center = pos.current.x + SIZE / 2;
+        const below = shelves.filter(item => item.rect.top > feet + 6 && item.rect.top < feet + 160);
+        const distance = item => Math.abs(item.rect.top - feet) + 2 * Math.max(item.rect.left - center, center - item.rect.right, 0);
+        const shelf = (below.length ? below : shelves).sort((a, b) => distance(a) - distance(b))[0];
+        if (!shelf) {
+          if (!await move({ x: pos.current.x, y: viewport().height - SIZE }, signal, "climb_down")) return;
+          setAction("sit"); return;
+        }
+        shelf.ratio = Math.max(.1, Math.min(.9, (center - Math.max(0, shelf.rect.left)) / (Math.min(viewport().width, shelf.rect.right) - Math.max(0, shelf.rect.left))));
+        const point = surfacePoint(shelf, shelf.rect);
+        const sideways = Math.abs(point.x - pos.current.x) > Math.abs(point.y - pos.current.y) * 1.5;
+        if (!await move(point, signal, sideways ? "climb_side" : point.y >= pos.current.y ? "climb_down" : "climb")) return;
+        const rect = readCatSurface(shelf);
+        if (!rect || ["left", "top", "width", "height"].some(key => Math.abs(rect[key] - shelf.rect[key]) > 2) || Date.now() - lastScroll.current < 180) continue;
+        setAction("climb_over");
+        if (!await delay(ACTION_META.climb_over.cycle, signal)) return;
+        const settled = readCatSurface(shelf);
+        if (!settled || ["left", "top", "width", "height"].some(key => Math.abs(settled[key] - rect[key]) > 2)) continue;
+        surface.current = shelf; lastSurface.current = shelf.element;
+        setAction("perch"); return;
+      }
+    } finally {
+      if (!signal.aborted) { scrollClimbing.current = false; performing.current = false; lastInteraction.current = Date.now(); }
+    }
   }
   const entrance = () => {
     const element = document.querySelector(path.current === "/" ? "[data-cat-home]" : "[data-cat-logo]");
@@ -176,6 +342,14 @@ export default function PixelCat() {
   }
 
   async function play(actions, signal, targets = new Map(), stationary = false, rest = "idle") {
+    const scenes = actions.filter(step => SCENE_IDS.includes(typeof step === "string" ? step : step.type));
+    if (scenes.length) {
+      const fresh = scenes.filter(step => (typeof step === "string" ? step : step.type) !== lastScene.current);
+      const choices = fresh.length ? fresh : scenes;
+      const selected = choices[Math.floor(Math.random() * choices.length)];
+      actions = [selected];
+      lastScene.current = typeof selected === "string" ? selected : selected.type;
+    }
     performing.current = true;
     try {
       for (let index = 0; index < actions.length; index++) {
@@ -203,15 +377,28 @@ export default function PixelCat() {
         }
         const pose = type === "walk_to" ? "point" : stationary && ["walk", "run", "sneak", "chase", "jump", "hop"].includes(type) ? "tail" : type;
         setAction(pose);
-        if (!await delay(ACTION_META[pose]?.duration || 1200, signal)) return;
+        const meta = ACTION_META[pose];
+        const duration = (meta?.duration || 1200) + (SCENE_IDS.includes(pose) ? Math.floor(Math.random() * 3) * meta.cycle : 0);
+        if (!await delay(duration, signal)) return;
       }
       if (!signal.aborted) { clearHighlight(); setAction(rest); }
-    } finally { if (!signal.aborted) performing.current = false; }
+    } finally {
+      if (!signal.aborted) {
+        performing.current = false;
+        lastInteraction.current = Date.now();
+        nextAmbient.current = Date.now() + 30000 + Math.random() * 30000;
+      }
+    }
   }
 
   function commandLocally(command) {
     if (command.kind === "home") { void goHome(); return; }
     if (command.kind === "read") { explore(); return; }
+    if (command.kind === "roam") {
+      lastInteraction.current = Date.now(); setPanel(false); setQuiet(false); resting.current = "idle";
+      if (!roam(command.target)) { const signal = stop(); void play(["look", "tilt"], signal); }
+      return;
+    }
     const signal = stop(); lastInteraction.current = Date.now();
     setPanel(false);
     if (command.kind === "quiet") { setQuiet(true); resting.current = "sit"; setAction("sit"); return; }
@@ -268,7 +455,7 @@ export default function PixelCat() {
     void play(visible ? [{ type: "walk_to", target: visible[0] }, "read", "point", "think"] : BEHAVIORS[0].actions, signal, targets);
     setSay("我在这里陪你看。想聊内容，随时叫我。 "); setPanel(false);
   }
-  api.current = { summon, goHome, ask, explore, stop, play };
+  api.current = { summon, goHome, ask, explore, stop, play, roam, syncSurface, scheduleScrollClimb };
 
   useEffect(() => {
     if (panel && followReply.current && conversation.current) conversation.current.scrollTop = conversation.current.scrollHeight;
@@ -285,10 +472,13 @@ export default function PixelCat() {
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const motion = () => { reduced.current = query.matches; };
-    motion(); query.addEventListener("change", motion);
+    const motionPreference = () => {
+      reduced.current = query.matches;
+      if (query.matches && (surface.current || scrollClimbing.current || scrollClimbTimer.current)) { api.current.stop(); setAction("idle"); }
+    };
+    motionPreference(); query.addEventListener("change", motionPreference);
     const onSummon = () => void api.current.summon();
-    const visualResize = () => refreshViewport(value => value + 1);
+    const visualResize = () => { refreshViewport(value => value + 1); api.current.syncSurface(); };
     const resize = () => {
       if (panelOpen.current) { place(pos.current); visualResize(); return; }
       drag.current = null;
@@ -302,9 +492,9 @@ export default function PixelCat() {
     const scroll = () => {
       if (scrollFrame || phaseRef.current === "hidden") return;
       scrollFrame = requestAnimationFrame(() => {
-        scrollFrame = 0; lastInteraction.current = Date.now();
+        scrollFrame = 0; lastInteraction.current = Date.now(); lastScroll.current = Date.now();
         if (["entering", "returning"].includes(phaseRef.current)) resize();
-        else if (!pending.current && highlighted.current) { api.current.stop(); setAction("idle"); }
+        else api.current.scheduleScrollClimb();
       });
     };
     const pointer = event => {
@@ -326,7 +516,8 @@ export default function PixelCat() {
     document.addEventListener("visibilitychange", visibility);
     document.addEventListener("selectionchange", selectionChanged);
     return () => {
-      sequence.current?.abort(); motion.current?.cancel(); clearHighlight(); query.removeEventListener("change", motion);
+      sequence.current?.abort(); motion.current?.cancel(); releaseLetter.current?.(); clearHighlight(); query.removeEventListener("change", motionPreference);
+      clearTimeout(scrollClimbTimer.current);
       window.removeEventListener("pixel-cat:summon", onSummon); window.removeEventListener("resize", resize);
       window.removeEventListener("scroll", scroll); cancelAnimationFrame(scrollFrame);
       window.visualViewport?.removeEventListener("resize", visualResize);
@@ -349,20 +540,22 @@ export default function PixelCat() {
 
   useEffect(() => {
     if (phase !== "active") return;
+    const layoutTimer = setInterval(() => api.current.syncSurface(), 400);
     const timer = setInterval(() => {
-      if (document.hidden || drag.current || pending.current || performing.current || panel || Date.now() - lastInteraction.current < 16000) return;
+      if (document.hidden || drag.current || pending.current || performing.current || moving.current || panel || Date.now() - lastInteraction.current < 16000 || Date.now() < nextAmbient.current) return;
       if (!quiet && settings.available && settings.proactiveSeconds && Date.now() - lastProactive.current > settings.proactiveSeconds * 1000) {
         lastProactive.current = Date.now(); void api.current.ask("", true); return;
       }
       if (!quiet && !reduced.current) {
         lastInteraction.current = Date.now();
+        if (Math.random() < .8 && (api.current.roam() || api.current.roam("down"))) return;
         const candidates = AMBIENT_BEHAVIORS.filter(item => item.id !== lastBehavior.current);
         const behavior = candidates[Math.floor(Math.random() * candidates.length)];
         lastBehavior.current = behavior.id;
         void api.current.play(behavior.actions, api.current.stop());
       }
     }, 8000);
-    return () => clearInterval(timer);
+    return () => { clearInterval(timer); clearInterval(layoutTimer); };
   }, [phase, panel, quiet, settings]);
 
   useEffect(() => {
@@ -408,14 +601,15 @@ export default function PixelCat() {
   const panelWidth = Math.min(304, width - 24);
   const panelX = Math.max(viewportLeft + 12, Math.min(viewportLeft + width - panelWidth - 12, position.x + SIZE / 2 - panelWidth / 2));
   const panelY = Math.max(viewportTop + 12, Math.min(viewportTop + height - panelHeight - 12, position.y > viewportTop + panelHeight + 12 ? position.y - panelHeight - 12 : position.y + SIZE));
-  return <div className="pixel-cat-layer" data-phase={phase} data-action={action}>
+  return <div className="pixel-cat-layer" data-phase={phase} data-action={action} data-surface={surface.current?.kind}>
     {portal && <div aria-hidden="true" className="pixel-cat-door" data-closing={portal.closing} style={{ left: portal.x, top: portal.y }} />}
     <div ref={actor} className="pixel-cat-actor" style={{ transform: `translate(${position.x}px, ${position.y}px)` }}>
       <button ref={handle} type="button" className="pixel-cat-handle" aria-label="黑色小猫，点击聊天或拖动" aria-expanded={panel} disabled={phase !== "active"}
         onPointerDown={dragStart} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={dragEnd}
-        onClick={() => { if (suppressClick.current) { suppressClick.current = false; return; } lastInteraction.current = Date.now(); setPanel(value => { replyHidden.current = value; return !value; }); }}>
-        <PixelSprite action={action} facing={facing} paused={paused} />
+        onClick={() => { if (suppressClick.current) { suppressClick.current = false; return; } lastInteraction.current = Date.now(); if (!panel && !pending.current) { stop(); setAction("idle"); } setPanel(value => { replyHidden.current = value; return !value; }); }}>
+        <PixelSprite key={motionStep} action={action} facing={facing} paused={paused} frame={letterFrame} />
       </button>
+      {letter && <span className="pixel-cat-letter" aria-hidden="true" style={{ ...letter.style, transformOrigin: `${letter.rect.width / 2}px 4px`, transform: `translate(${letter.x}px, ${letter.y}px) rotate(${letter.angle}deg)` }}>{letter.text}</span>}
     </div>
     {panel && phase === "active" && <section ref={panelElement} className="pixel-cat-panel" aria-label="和小猫聊天" style={{ left: panelX, top: panelY, width: panelWidth, maxHeight: Math.max(0, height - 24) }} onKeyDown={event => { if (event.key === "Escape" && !event.nativeEvent.isComposing) closePanel(); }}>
       <button className="pixel-cat-close" type="button" onClick={closePanel} aria-label="收起聊天" title="收起聊天"><X size={14} aria-hidden="true" /></button>

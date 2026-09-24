@@ -110,7 +110,9 @@ it.each([["玩手机", "phone"], ["吃面条", "noodles"], ["玩毛线球", "yar
   fireEvent.change(screen.getByRole("textbox", { name: "对小猫说" }), { target: { value: message } });
   fireEvent.click(screen.getByRole("button", { name: "发送" }));
   expect(container.querySelector(".pixel-cat-layer").dataset.action).toBe(id);
-  await advance(ACTION_META[id].duration + 10);
+  await advance(8000);
+  expect(container.querySelector(".pixel-cat-layer").dataset.action).toBe(id);
+  await advance(ACTION_META[id].duration + ACTION_META[id].cycle * 2 - 8000 + 10);
   expect(container.querySelector(".pixel-cat-layer").dataset.action).toBe("idle");
   expect(fetch.mock.calls.every(([, options]) => options?.method !== "POST")).toBe(true);
 });
@@ -124,8 +126,8 @@ it("previews the new scenes, steps their frames, and still exposes the original 
   fireEvent.click(screen.getByRole("button", { name: "逐帧查看" }));
   fireEvent.click(screen.getByRole("button", { name: "逐帧查看" }));
   expect(sprite().style.backgroundPositionX).toBe("-192px");
-  fireEvent.click(screen.getByRole("button", { name: "全部素材 · 88" }));
-  expect(container.querySelectorAll(".cat-action-grid button")).toHaveLength(88);
+  fireEvent.click(screen.getByRole("button", { name: "全部素材 · 96" }));
+  expect(container.querySelectorAll(".cat-action-grid button")).toHaveLength(96);
   expect(screen.getByRole("button", { name: "呼吸 idle" })).toBeTruthy();
 });
 

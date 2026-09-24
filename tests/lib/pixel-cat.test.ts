@@ -29,7 +29,8 @@ describe("pixel cat artwork and command boundary", () => {
     for (const id of SCENE_IDS) {
       expect(localCommand(`小猫${ACTION_META[id].label}！`)).toEqual({ kind: "play", actions: [id], rest: "idle" });
       expect(validatePlan({ say: "喵", actions: [{ type: id }] }, context).actions[0].type).toBe(id);
-      expect(ACTION_META[id].duration).toBe(ACTION_META[id].cycle * 2);
+      expect(ACTION_META[id].duration).toBeGreaterThanOrEqual(12000);
+      expect(ACTION_META[id].duration % ACTION_META[id].cycle).toBe(0);
     }
   });
   it("keeps usable speech from wrapped JSON, long replies and imperfect action lists", () => {
@@ -44,8 +45,8 @@ describe("pixel cat artwork and command boundary", () => {
   it("does not display malformed JSON, empty content or incomplete reasoning as speech", () => {
     for (const content of [null, "", '{"say":"未完成', '<think>unfinished', '{"actions":[]}', '[{"say":"喵"}]']) expect(() => parseModelPlan(content, context)).toThrow();
   });
-  it("ships 88 distinct animated strips matching the generated sprite sheet pixel for pixel", async () => {
-    expect(ACTIONS).toHaveLength(88);
+  it("ships 96 distinct animated strips matching the generated sprite sheet pixel for pixel", async () => {
+    expect(ACTIONS).toHaveLength(96);
     const { data, info } = await sharp("public/pixel-cat/cat.png").raw().toBuffer({ resolveWithObject: true });
     expect([info.width, info.height, info.channels]).toEqual([384, 48 * ACTIONS.length, 4]);
     const signatures = ACTIONS.map(({ id, cycle }, row) => {
