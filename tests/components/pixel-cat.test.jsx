@@ -3,6 +3,8 @@ import React from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import PixelCat from "../../components/pixel-cat/PixelCat";
+import CatGallery from "../../components/pixel-cat/CatGallery";
+import { ACTION_META, ACTIONS } from "../../lib/pixel-cat/catalog.mjs";
 import HomeAvatar from "../../app/components/HomeAvatar";
 import { collectPageContext } from "../../components/pixel-cat/page-context";
 
@@ -67,6 +69,28 @@ it("keeps local companionship usable without AI", async () => {
   expect(fetch.mock.calls.every(([, options]) => options?.method !== "POST")).toBe(true);
 });
 
+it("supports multiline drafts and IME composition without accidental sends", async () => {
+  sessionStorage.setItem("13log-cat", "awake");
+  render(scene()); await advance(10);
+  fireEvent.click(screen.getByRole("button", { name: /黑色小猫/ }));
+  const input = screen.getByRole("textbox", { name: "对小猫说" });
+  expect(input.tagName).toBe("TEXTAREA");
+  fireEvent.change(input, { target: { value: "今天\n想聊点什么" } });
+  fireEvent.keyDown(input, { key: "Enter", shiftKey: true });
+  fireEvent.keyDown(input, { key: "Enter", isComposing: true });
+  fireEvent.keyDown(input, { key: "Enter", keyCode: 229 });
+  expect(screen.getByRole("status").textContent).toContain("喵，我出来啦");
+  expect(input.value).toBe("今天\n想聊点什么");
+  fireEvent.keyDown(input, { key: "Enter" });
+  expect(input.value).toBe("");
+  expect(screen.getByRole("status").textContent).toContain("我先陪你逛逛");
+  expect(screen.queryByText("今天\n想聊点什么")).toBeNull();
+  expect(screen.getAllByRole("region", { name: "和小猫聊天" })).toHaveLength(1);
+  fireEvent.keyDown(input, { key: "Escape" });
+  expect(screen.queryByRole("region", { name: "和小猫聊天" })).toBeNull();
+  expect(document.activeElement).toBe(screen.getByRole("button", { name: /黑色小猫/ }));
+});
+
 it("executes a jump command immediately without an AI request", async () => {
   sessionStorage.setItem("13log-cat", "awake");
   const { container } = render(scene()); await advance(10);
@@ -79,8 +103,36 @@ it("executes a jump command immediately without an AI request", async () => {
   expect(fetch.mock.calls.every(([, options]) => options?.method !== "POST")).toBe(true);
 });
 
+it.each([["玩手机", "phone"], ["吃面条", "noodles"], ["玩毛线球", "yarn"]])("plays the %s scene locally and returns to idle", async (message, id) => {
+  sessionStorage.setItem("13log-cat", "awake");
+  const { container } = render(scene()); await advance(10);
+  fireEvent.click(screen.getByRole("button", { name: /黑色小猫/ }));
+  fireEvent.change(screen.getByRole("textbox", { name: "对小猫说" }), { target: { value: message } });
+  fireEvent.click(screen.getByRole("button", { name: "发送" }));
+  expect(container.querySelector(".pixel-cat-layer").dataset.action).toBe(id);
+  await advance(ACTION_META[id].duration + 10);
+  expect(container.querySelector(".pixel-cat-layer").dataset.action).toBe("idle");
+  expect(fetch.mock.calls.every(([, options]) => options?.method !== "POST")).toBe(true);
+});
+
+it("previews the new scenes, steps their frames, and still exposes the original actions", () => {
+  const { container } = render(<CatGallery />);
+  expect(container.querySelectorAll(".cat-action-grid button")).toHaveLength(24);
+  fireEvent.click(screen.getByRole("button", { name: "吃面条 noodles" }));
+  const sprite = () => container.querySelector(".cat-stage .pixel-cat-sprite");
+  expect(sprite().style.getPropertyValue("--sprite-row")).toBe(String(ACTIONS.findIndex(item => item.id === "noodles")));
+  fireEvent.click(screen.getByRole("button", { name: "逐帧查看" }));
+  fireEvent.click(screen.getByRole("button", { name: "逐帧查看" }));
+  expect(sprite().style.backgroundPositionX).toBe("-192px");
+  fireEvent.click(screen.getByRole("button", { name: "全部素材 · 88" }));
+  expect(container.querySelectorAll(".cat-action-grid button")).toHaveLength(88);
+  expect(screen.getByRole("button", { name: "呼吸 idle" })).toBeTruthy();
+});
+
 it("displays streamed speech early, keeps casual context small, and can stop generation", async () => {
   sessionStorage.setItem("13log-cat", "awake");
+  const visualViewport = Object.assign(new EventTarget(), { width: 390, height: 844, offsetTop: 0, offsetLeft: 0 });
+  vi.stubGlobal("visualViewport", visualViewport);
   let controller, signal;
   fetch.mockImplementation(async (_url, options) => {
     if (options?.method !== "POST") return { ok: true, json: async () => ({ available: true, proactiveSeconds: 0 }) };
@@ -95,6 +147,11 @@ it("displays streamed speech early, keeps casual context small, and can stop gen
   await advance(1);
   await act(async () => { controller.enqueue(new TextEncoder().encode('data: {"type":"text","say":"喵，你好"}\n\n')); });
   expect(screen.getByRole("status").textContent).toBe("喵，你好");
+  expect(screen.getByRole("button", { name: "停止回答" })).toBeTruthy();
+  act(() => { visualViewport.height = 360; visualViewport.offsetTop = 50; visualViewport.dispatchEvent(new Event("resize")); });
+  fireEvent.resize(window);
+  expect(signal.aborted).toBe(false);
+  expect(screen.getByRole("region", { name: "和小猫聊天" }).style.maxHeight).toBe("336px");
   fireEvent.click(screen.getByRole("button", { name: "收起聊天" }));
   await act(async () => { controller.enqueue(new TextEncoder().encode('data: {"type":"text","say":"喵，你好呀"}\n\n')); });
   expect(screen.queryByRole("region", { name: "和小猫聊天" })).toBeNull();

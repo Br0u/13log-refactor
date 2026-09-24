@@ -2,9 +2,10 @@
 import sharp from "sharp";
 import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { ACTIONS, FRAME_SIZE as S, FRAME_COUNT as N } from "../lib/pixel-cat/catalog.mjs";
+import { ACTIONS, SCENE_IDS, FRAME_SIZE as S, FRAME_COUNT as N } from "../lib/pixel-cat/catalog.mjs";
 
 const C = { ink: [23, 23, 29, 255], edge: [72, 68, 83, 255], shade: [35, 34, 43, 255], eye: [247, 199, 57, 255], gleam: [255, 239, 164, 255], red: [226, 76, 91, 255], blue: [129, 153, 172, 255], paper: [222, 212, 185, 255] };
+Object.assign(C, { wood: [156, 101, 66, 255], crust: [193, 131, 76, 255], cream: [255, 236, 194, 255], mint: [120, 187, 159, 255], leaf: [65, 125, 103, 255], sky: [159, 204, 222, 255], violet: [175, 144, 199, 255], pink: [240, 173, 181, 255] });
 
 function canvas() {
   const pixels = Buffer.alloc(S * S * 4);
@@ -30,6 +31,7 @@ function canvas() {
 }
 
 export function drawCat(action, frame) {
+  if (SCENE_IDS.includes(action)) return drawScene(action, frame);
   const g = canvas();
   const { rect, line, poly, dot, oval } = g;
   const wave = Math.round(Math.sin(frame * Math.PI / 4) * 2);
@@ -196,6 +198,182 @@ export function drawCat(action, frame) {
         : action === "logo_in" ? x > 46 - frame * 5
         : y > 23 + frame * 2;
       if (hide) g.pixels.fill(0, (y * S + x) * 4, (y * S + x) * 4 + 4);
+    }
+  }
+  return g.pixels;
+}
+
+// Scenes share the original cat poses; props are drawn behind/in front on the
+// same 48px grid. Nearest-neighbour sampling keeps transparent pixels crisp.
+function drawScene(action, frame) {
+  const g = canvas(), { rect, line, poly, dot, oval } = g;
+  const wave = Math.round(Math.sin(frame * Math.PI / 4) * 2), beat = frame % 4 < 2 ? 0 : 1;
+  const cat = (pose, x = -2, y = 9, scale = .75) => {
+    const source = drawCat(pose, frame), size = Math.round(S * scale);
+    for (let dy = 0; dy < size; dy++) for (let dx = 0; dx < size; dx++) {
+      const src = (Math.floor(dy / scale) * S + Math.floor(dx / scale)) * 4;
+      const xx = x + dx, yy = y + dy;
+      if (source[src + 3] && xx >= 0 && xx < S && yy >= 0 && yy < S) source.copy(g.pixels, (yy * S + xx) * 4, src, src + 4);
+    }
+  };
+  const paw = (x, y, xx, yy) => { line(x, y, xx, yy, "edge", 3); line(x, y, xx, yy, "ink", 2); };
+  const table = () => { rect(8, 35, 36, 3, "wood"); rect(10, 38, 2, 7, "wood"); rect(40, 38, 2, 7, "wood"); line(9, 35, 43, 35, "crust"); };
+  const star = (x, y, c = "gleam") => { line(x - 2, y, x + 2, y, c); line(x, y - 2, x, y + 2, c); };
+  const steam = (x, y) => { for (let i = 0; i < 2; i++) line(x + i * 5, y - (frame + i * 2) % 5, x + i * 5 + beat, y - 3 - (frame + i * 2) % 5, "paper"); };
+  const ball = (x, y) => { oval(x, y, 10, 10, "red"); line(x + 2, y + 2, x + 7, y + 6, "pink"); line(x + 2, y + 6, x + 6, y + 1, "pink"); line(x + 3, y + 8, x + 8, y + 4, "pink"); };
+  switch (action) {
+    case "phone": {
+      rect(5, 35, 28, 8, "violet"); rect(7, 33, 24, 3, "pink"); cat("think", 0, 7);
+      rect(23, 25, 10, 15, "edge"); rect(25, 27, 6, 10, "sky");
+      rect(26, 28 + frame % 3, 4, 2, "cream"); rect(26, 33 + frame % 2, 3, 2, "mint"); dot(28, 38, "paper");
+      paw(17, 33, 24 + beat, 31 - beat); paw(20, 36, 23, 37);
+      if (frame > 3) { rect(35, 16 - beat, 8, 6, "mint"); dot(36, 22 - beat, "mint"); rect(37, 18 - beat, 4, 1, "cream"); }
+      break;
+    }
+    case "noodles": {
+      cat("talk", -4, 6); table();
+      const lift = [0, 1, 3, 5, 6, 4, 2, 0][frame];
+      poly([[25, 31], [42, 31], [39, 39], [28, 39]], "red"); oval(24, 29, 19, 5, "cream");
+      line(28, 31, 38, 31, "crust"); dot(29, 30, "leaf"); dot(36, 32, "leaf");
+      line(29, 29 - lift, 37, 26 - lift, "wood"); line(29, 31 - lift, 38, 28 - lift, "wood");
+      for (let i = 0; i < 3; i++) line(30 + i * 2, 29 - lift, 31 + i, 31, "eye");
+      if (frame === 4 || frame === 5) line(13, 27, 30, 29 - lift, "eye");
+      paw(17, 29, 29, 29 - lift); steam(37, 25); break;
+    }
+    case "tea": {
+      cat("purr", -4, 4); table();
+      rect(33, 28, 7, 7, "mint"); oval(31, 29, 3, 4, "mint"); line(34, 27, 38, 27, "leaf");
+      const lift = [0, 1, 3, 4, 4, 3, 1, 0][frame];
+      oval(19, 35, 11, 2, "paper"); rect(21, 29 - lift, 7, 6, "cream"); rect(27, 30 - lift, 3, 3, "crust");
+      line(22, 29 - lift, 26, 29 - lift, "wood"); paw(15, 30, 21, 32 - lift); steam(23, 26 - lift); break;
+    }
+    case "toast": {
+      cat(frame === 3 || frame === 4 ? "surprise" : "sniff", -6, 5); table();
+      const pop = [0, 0, 2, 10, 8, 4, 0, 0][frame];
+      rect(28, 25 - pop, 10, 10, "crust"); oval(27, 22 - pop, 12, 7, "crust"); rect(30, 25 - pop, 6, 7, "cream");
+      rect(26, 30, 16, 8, "sky"); line(28, 30, 39, 30, "edge"); rect(40, 33, 3, 2, "wood"); dot(38, 35, "red");
+      if (pop > 4) { star(24, 18, "eye"); line(41, 20, 42, 17, "eye"); } break;
+    }
+    case "laptop": {
+      cat("idle", -3, 4); table(); rect(23, 24, 19, 12, "blue"); rect(25, 26, 15, 8, "shade");
+      for (let i = 0; i < 3; i++) rect(27, 27 + i * 2, 4 + (frame + i) % 6, 1, i === 1 ? "sky" : "mint");
+      rect(17, 35, 25, 2, "paper"); paw(12, 30, 20, 34 + beat); paw(20, 31, 26, 35 - beat);
+      rect(6, 33, 5, 3, "red"); break;
+    }
+    case "paint": {
+      line(32, 15, 25, 44, "wood", 2); line(33, 15, 42, 44, "wood", 2);
+      rect(25, 13, 18, 23, "crust"); rect(27, 15, 14, 18, "cream");
+      oval(34, 18, 4, 4, "eye"); poly([[27, 32], [32, 23], [37, 32]], "mint"); poly([[32, 32], [38, 26], [41, 32]], "leaf");
+      cat("idle", -5, 9); const y = 25 + wave;
+      paw(15, 31, 24, y + 2); line(24, y + 2, 32, y, "wood"); dot(32, y, "red");
+      oval(8, 36, 11, 5, "paper"); dot(11, 37, "red"); dot(14, 38, "sky"); dot(16, 37, "eye"); break;
+    }
+    case "piano": {
+      cat("happy", -1, 5); rect(9, 31, 35, 8, "wood"); rect(10, 32, 33, 4, "cream");
+      for (let x = 13; x < 42; x += 4) rect(x, 32, 2, 2, "ink");
+      rect(11, 39, 2, 6, "wood"); rect(40, 39, 2, 6, "wood"); paw(13, 29, 19 + beat * 3, 34); paw(22, 29, 28 - beat * 3, 34);
+      line(37, 15 - wave, 37, 21 - wave, "violet"); oval(34, 20 - wave, 4, 3, "violet"); line(37, 15 - wave, 41, 17 - wave, "violet"); break;
+    }
+    case "knit": {
+      rect(7, 38, 25, 5, "paper"); cat("idle", -1, 8);
+      rect(19, 32, 12, 11, "red"); for (let y = 34; y < 43; y += 3) line(20, y, 29, y, "pink");
+      line(18, 28 + beat * 3, 31, 36 - beat * 3, "paper"); line(31, 28 + beat * 3, 18, 36 - beat * 3, "blue");
+      paw(13, 31, 19, 32 + beat); paw(24, 31, 29, 33 - beat); ball(36, 34); line(30, 41, 38, 43, "red"); break;
+    }
+    case "yarn": {
+      cat("paw_tap", -4, 8); const x = 29 + wave * 2;
+      line(18, 44, 25, 41, "pink"); line(25, 41, x + 4, 43, "pink"); ball(x, 34);
+      paw(19, 31, x - 2, 35 + beat); line(3, 45, 43, 45, "paper"); break;
+    }
+    case "box": {
+      const rise = [7, 5, 2, 0, 0, 2, 5, 7][frame]; cat("look", 5, 4 + rise);
+      rect(8, 31, 33, 14, "wood"); rect(10, 32, 29, 12, "crust"); line(24, 33, 24, 44, "wood");
+      poly([[8, 31], [3, 26 + beat], [18, 28], [24, 33]], "paper"); poly([[24, 33], [30, 28], [45, 27 - beat], [41, 32]], "paper");
+      rect(28, 36, 8, 5, "cream"); line(30, 38, 34, 38, "wood"); break;
+    }
+    case "bubbles": {
+      cat("talk", -4, 9); line(21, 30, 28, 25, "wood"); oval(27, 21, 6, 6, "sky"); oval(28, 22, 4, 4, "cream"); paw(15, 32, 22, 29);
+      for (let i = 0; i < 3; i++) { const t = (frame + i * 3) % 8, x = 30 + i * 3, y = 21 - t * 2; oval(x, y, 5 + i, 5 + i, "sky"); oval(x + 1, y + 1, 3 + i, 3 + i, "violet"); dot(x + 2, y + 1, "cream"); }
+      rect(7, 38, 5, 6, "mint"); break;
+    }
+    case "toy_train": {
+      oval(2, 33, 44, 13, "wood"); oval(4, 35, 40, 9, "paper"); cat("look", 3, -1);
+      const x = 14 + wave * 5; rect(x, 35, 13, 7, "red"); rect(x + 8, 32, 5, 5, "red"); rect(x + 9, 33, 3, 2, "sky"); rect(x + 1, 33, 2, 3, "wood");
+      oval(x + 1, 41, 4, 4, "edge"); oval(x + 9, 41, 4, 4, "edge"); dot(x + 2 + beat, 42, "paper"); dot(x + 10 - beat, 42, "paper"); steam(x + 1, 31); break;
+    }
+    case "garden": {
+      cat("idle", -5, 9); rect(32, 37, 10, 7, "wood"); rect(30, 35, 14, 3, "crust"); line(37, 24, 37, 35, "leaf");
+      oval(31, 28, 6, 3, "mint"); oval(37, 30, 6, 3, "leaf"); oval(33, 19, 8, 8, "pink"); rect(36, 22, 2, 2, "eye");
+      rect(22, 29 + beat, 8, 7, "sky"); line(28, 31 + beat, 33, 28 + beat, "sky", 2); line(23, 28 + beat, 27, 28 + beat, "blue"); paw(16, 32, 23, 31 + beat);
+      for (let i = 0; i < 3; i++) dot(33 + i, 29 + (frame + i * 2) % 6, "sky"); break;
+    }
+    case "rain": {
+      oval(7, 42, 35, 4, "sky"); cat("idle", 0, 11, .65);
+      line(26, 15, 26, 34, "wood"); line(26, 34, 23, 36, "wood");
+      poly([[3, 18], [6, 12], [15, 7], [26, 5], [37, 9], [43, 18]], "red");
+      poly([[16, 18], [19, 8], [26, 5], [31, 18]], "pink"); line(4, 18, 42, 18, "wood"); paw(17, 31, 25, 31);
+      for (let i = 0; i < 7; i++) { const x = 2 + i * 7, y = (frame * 5 + i * 9) % 39; if (y < 6 || x < 5 || x > 39 || y > 36) line(x, y, x - 1, y + 3, "blue"); }
+      line(29 - beat, 43, 34 + beat, 43, "cream"); break;
+    }
+    case "kite": {
+      cat("wave", -4, 12, .65); const x = 34 + wave, y = 8 + beat;
+      line(23, 30, x, y + 6, "paper"); poly([[x, y - 5], [x + 7, y], [x, y + 7], [x - 6, y]], "red"); poly([[x, y - 5], [x, y + 7], [x - 6, y]], "eye");
+      line(x, y + 7, x + 2, y + 12, "wood"); line(x + 2, y + 12, x - wave, y + 17, "wood"); rect(x, y + 11, 4, 2, "sky");
+      line(5, 44, 42, 44, "mint"); break;
+    }
+    case "skateboard": {
+      cat("dance", 4, 6, .8); rect(9, 38, 32, 3, "violet"); rect(7, 36, 3, 3, "violet"); rect(40, 36, 3, 3, "violet");
+      oval(12, 41, 5, 5, "edge"); oval(34, 41, 5, 5, "edge"); dot(14 + beat, 43, "cream"); dot(36 - beat, 43, "cream");
+      line(1, 31 + beat * 2, 6, 31 + beat * 2, "blue"); line(2 + frame % 3, 44, 8 + frame % 3, 44, "blue"); break;
+    }
+    case "fishing": {
+      rect(0, 40, 23, 3, "wood"); rect(4, 43, 2, 4, "wood"); rect(23, 42, 24, 5, "sky"); cat("idle", -6, 7);
+      line(20, 30, 32, 10, "wood"); line(32, 10, 40, 14, "paper"); line(40, 14, 40, 38 + beat, "paper");
+      rect(39, 37 + beat, 3, 3, "red"); line(36 - beat, 42, 44 + beat, 42, "cream"); paw(16, 32, 22, 27);
+      const x = 26 + wave * 2; oval(x, 44, 6, 3, "blue"); dot(x + 4, 44, "ink"); break;
+    }
+    case "camp": {
+      poly([[1, 35], [13, 12], [29, 35]], "mint"); poly([[9, 35], [13, 17], [20, 35]], "leaf");
+      cat("purr", -3, 9); line(31, 43, 43, 40, "wood", 2); line(32, 40, 42, 44, "wood", 2);
+      poly([[30, 40], [33, 31 - beat * 2], [36, 35], [39, 27 + wave], [43, 40]], "red"); poly([[34, 40], [37, 33 - beat], [40, 40]], "eye");
+      line(19, 31, 36, 28 + beat, "wood"); rect(33, 25 + beat, 5, 4, "cream"); paw(16, 32, 22, 31); star(35, 8, "paper"); break;
+    }
+    case "telescope": {
+      oval(4, 3, 7, 7, "cream"); oval(7, 2, 6, 6, "blue"); star(33, 5 + beat, "eye"); star(18, 8, "paper"); dot(43, 13, "paper");
+      cat("look", -4, 11); line(32, 30, 25, 44, "wood", 2); line(32, 30, 40, 44, "wood", 2);
+      line(25, 28, 39, 18, "edge", 5); line(26, 27, 38, 19, "sky", 3); line(38, 16, 42, 21, "blue", 2); paw(19, 33, 29, 30);
+      if (frame > 4) line(30 + frame, 10, 33 + frame, 8, "cream"); break;
+    }
+    case "astronaut": {
+      star(5, 8, "sky"); star(41, 20 + beat, "eye"); oval(31, 35, 15, 9, "violet"); line(28, 41, 46, 36, "pink");
+      const y = 2 + wave; oval(8, 9 + y, 24, 24, "sky"); oval(10, 11 + y, 20, 20, "blue");
+      cat("air", 3, 10 + y, .7); rect(17, 32 + y, 10, 5, "paper"); rect(20, 33 + y, 3, 2, "red");
+      line(10, 18 + y, 10, 23 + y, "cream"); line(13, 12 + y, 18, 12 + y, "cream"); line(27, 36 + y, 35, 31 + y, "paper"); line(35, 31 + y, 44, 33, "paper"); break;
+    }
+    case "magic": {
+      cat("wave", -4, 9); rect(28, 35, 15, 9, "shade"); rect(25, 34, 21, 3, "edge"); rect(29, 37, 13, 2, "violet");
+      line(22, 26, 32, 20 + wave, "paper"); line(29, 22 + wave, 32, 20 + wave, "eye");
+      if (frame >= 2 && frame <= 6) { const y = 31 - [0, 0, 0, 5, 8, 5, 0, 0][frame]; oval(32, y, 8, 6, "cream"); rect(33, y - 6, 2, 7, "cream"); rect(37, y - 7, 2, 8, "cream"); dot(37, y + 2, "red"); }
+      star(39, 17 + beat, "eye"); star(26, 11 - beat, "violet"); break;
+    }
+    case "dj": {
+      cat("happy", 2, 4); line(12, 17, 12, 23, "violet", 3); line(29, 17, 29, 23, "violet", 3); line(12, 17, 17, 12, "violet", 2); line(17, 12, 25, 12, "violet", 2);
+      rect(5, 32, 39, 12, "shade"); oval(8, 34, 12, 8, "blue"); oval(29, 34, 12, 8, "blue"); oval(11, 36, 6, 4, "ink"); oval(32, 36, 6, 4, "ink");
+      dot(14 + wave, 37 + beat, "cream"); dot(35 - wave, 37 - beat, "cream"); rect(23, 35, 2, 6, "paper"); rect(22, 36 + beat * 2, 4, 1, "red");
+      paw(15, 29, 15 + wave, 36); paw(26, 29, 34 - wave, 36); star(39, 10 + beat, "pink"); break;
+    }
+    case "hammock": {
+      line(4, 12, 4, 45, "wood", 2); line(43, 12, 43, 45, "wood", 2); oval(0, 6, 13, 9, "mint"); oval(36, 5, 12, 10, "leaf");
+      const sway = wave; line(5, 22, 11, 34 + sway, "paper"); line(43, 22, 38, 34 + sway, "paper");
+      cat("sleep", 7, 7 + sway, .75); poly([[7, 30 + sway], [22, 38 + sway], [40, 30 + sway], [34, 41 + sway], [17, 41 + sway]], "mint");
+      line(13, 35 + sway, 22, 39 + sway, "cream"); line(22, 39 + sway, 35, 35 + sway, "cream"); break;
+    }
+    case "snowglobe": {
+      cat("idle", -5, 9); const x = 27 + wave;
+      oval(x, 22, 17, 17, "sky"); oval(x + 2, 24, 13, 13, "blue");
+      poly([[x + 4, 35], [x + 8, 27], [x + 12, 35]], "leaf"); rect(x + 7, 34, 2, 3, "wood");
+      for (let i = 0; i < 5; i++) dot(x + 3 + i * 2, 25 + (frame + i * 3) % 10, "cream");
+      line(x + 3, 26, x + 3, 29, "cream"); rect(x + 1, 38, 15, 5, "wood"); line(x + 3, 39, x + 14, 39, "crust"); paw(16, 32, x, 35); break;
     }
   }
   return g.pixels;

@@ -3,10 +3,11 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import PixelSprite from "./PixelSprite";
-import { ACTION_GROUPS, ACTIONS, ACTION_META, BEHAVIORS } from "../../lib/pixel-cat/catalog.mjs";
+import { ACTION_GROUPS, ACTIONS, ACTION_META, BEHAVIORS, SCENE_GROUPS, SCENE_IDS } from "../../lib/pixel-cat/catalog.mjs";
 
 export default function CatGallery() {
-  const [action, setAction] = useState("idle");
+  const [action, setAction] = useState("phone");
+  const [scenesOnly, setScenesOnly] = useState(true);
   const [behavior, setBehavior] = useState(null);
   const [step, setStep] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -22,8 +23,8 @@ export default function CatGallery() {
   }, [behavior, step, paused, frame]);
   const label = ACTIONS.find(item => item.id === action)?.label;
   return <div className="cat-gallery">
-    <header><p className="cat-gallery-kicker">A SMALL COMPANION</p><h1>小猫的排练室</h1><p>黄眼睛，红嘴巴。{ACTIONS.length} 个动作，{ACTIONS.length * 8} 帧像素，{BEHAVIORS.length} 组连续行为。</p></header>
-    <div className="cat-stage" style={night ? { backgroundColor: "#20232a" } : {}}>
+    <header><p className="cat-gallery-kicker">A SMALL COMPANION</p><h1>小猫的排练室</h1><p>黄眼睛，红嘴巴。{ACTIONS.length} 个动作与场景，{ACTIONS.length * 8} 帧像素，{BEHAVIORS.length} 组连续行为。</p><p>新添 {SCENE_IDS.length} 个小场景，从一碗热面到一趟太空旅行。对小猫说「玩手机」「吃面条」「玩毛线球」，它就会演给你看。</p></header>
+    <div className="cat-stage" data-scene={SCENE_IDS.includes(action)} style={night ? { backgroundColor: "#20232a", "--secondary": "#b4bdc9" } : {}}>
       <PixelSprite key={`${replay}-${step}`} action={action} size={192} facing={facing} paused={paused} frame={frame} />
       <span className="cat-stage-caption">{behavior ? `${behavior.label} · ` : ""}{label} / {frame === null ? "48 × 48 → 4×" : `FRAME ${frame + 1} / 8`}</span>
     </div>
@@ -37,7 +38,11 @@ export default function CatGallery() {
     </div>
     <h2>连续行为</h2>
     <div className="cat-gallery-toolbar">{BEHAVIORS.map(item => <button key={item.id} type="button" aria-pressed={behavior?.id === item.id} onClick={() => { setBehavior(item); setStep(0); setPaused(false); setFrame(null); }}>{item.label}</button>)}</div>
-    {ACTION_GROUPS.map(([group, entries]) => <section key={group}>
+    <div className="cat-gallery-toolbar" role="group" aria-label="素材分类">
+      <button type="button" aria-pressed={scenesOnly} onClick={() => setScenesOnly(true)}>场景剧场 · {SCENE_IDS.length}</button>
+      <button type="button" aria-pressed={!scenesOnly} onClick={() => setScenesOnly(false)}>全部素材 · {ACTIONS.length}</button>
+    </div>
+    {(scenesOnly ? SCENE_GROUPS : ACTION_GROUPS).map(([group, entries]) => <section key={group}>
       <h2>{group} <small className="cat-gallery-kicker">/ {entries.length}</small></h2>
       <div className="cat-action-grid">{entries.map(([id, name]) => <button key={id} type="button" aria-pressed={action === id} onClick={() => { setBehavior(null); setAction(id); setReplay(value => value + 1); setFrame(null); }}>
         <PixelSprite action={id} paused={paused} /><span>{name}</span><small>{id}</small>
