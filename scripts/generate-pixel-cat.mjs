@@ -38,7 +38,7 @@ export function drawCat(action, frame) {
   const wave = Math.round(Math.sin(frame * Math.PI / 4) * 2);
   const beat = frame % 4 < 2 ? 0 : 1;
   const climbing = ["climb", "climb_down", "climb_side", "climb_grip", "climb_over"].includes(action);
-  const pull = [1, 0, -1, -2, 1, 0, -1, -2][frame];
+  const pull = [0, 0, -1, -1, 0, 0, -1, -1][frame];
   let hx = 21, hy = 19, bw = 12, bh = 14, by = 25, feet = 0, paw = "down", face = "normal", tilt = 0, tail = wave, side = false;
   switch (action) {
     case "idle": hy += beat; bh -= beat; break;
@@ -86,7 +86,7 @@ export function drawCat(action, frame) {
     case "enter": side = true; hx = 26; hy = 25; by = 29; bh = 10; paw = "forward"; tail = -6 + beat; break;
     case "tail_in": hy = 32; by = 34; bw = 15; bh = 7; tail = -9 + frame; break;
     case "logo_in": side = true; hx = 28; hy = 27; by = 29; bw = 19; bh = 9; feet = wave; tail = -9; break;
-    case "climb": hx = 23 + (frame < 4 ? 1 : -1); hy = 21 + pull; by = 26 + pull; bh = 15; bw = 13; paw = "clamber"; tail = wave * 2; face = "narrow"; break;
+    case "climb": side = true; hx = 24; hy = 21 + pull; by = 27 + pull; bh = 13; bw = 15; paw = "clamber"; tail = 3 + beat; break;
     case "fall": hy = 13 + frame; by = 21 + frame; bh = 12; paw = "spread"; feet = 3; tail = -7; break;
     case "talk": hy = 21 + beat; face = "talk"; paw = frame < 4 ? "down" : "point"; break;
     case "sniff": hx = 25 + beat; hy = 26 + wave; by = 28; bw = 16; bh = 11; side = true; tail = 4; break;
@@ -105,10 +105,10 @@ export function drawCat(action, frame) {
     case "chase_tail": hx = 21 - wave * 2; hy = 24 + beat; bw = 19; bh = 11; by = 28; side = frame % 4 < 2; feet = -wave; tail = -wave * 3; paw = "forward"; break;
     case "butterfly": hx = 24 + beat; hy = 23 - beat * 2; paw = "wave"; face = "wide"; tail = -5 + wave; break;
     case "heart": hy = 23 + beat; face = "happy"; paw = "chin"; tail = 4; break;
-    case "climb_down": hx = 23 + (frame < 4 ? -1 : 1); hy = 28 - pull; by = 19 - pull; bh = 17; bw = 13; paw = "clamber"; tail = -9 + wave * 2; face = "narrow"; break;
-    case "climb_side": side = true; hx = 27 + beat; hy = 25 + beat; by = 29 + beat; bh = 9; bw = 20; paw = "clamber"; tail = -3 + wave * 2; face = "narrow"; break;
-    case "climb_grip": hx = 23; hy = 26 - Math.min(frame, 5); by = 28; bh = 12; bw = 15; paw = "clamber"; tail = 6 - frame; face = frame < 3 ? "normal" : "narrow"; break;
-    case "climb_over": hx = 23; hy = [24, 24, 25, 26, 27, 28, 29, 29][frame]; by = 31; bh = [15, 14, 13, 11, 10, 9, 8, 8][frame]; bw = 15 + frame; paw = "clamber"; tail = frame + 1; face = frame < 5 ? "narrow" : "happy"; break;
+    case "climb_down": side = true; hx = 25; hy = 23 - pull; by = 28 - pull; bh = 12; bw = 16; paw = "clamber"; tail = 4 + beat; break;
+    case "climb_side": side = true; hx = 26; hy = 26 + pull; by = 30 + pull; bh = 9; bw = 20; paw = "clamber"; tail = 3 + beat; break;
+    case "climb_grip": side = true; hx = 24; hy = 23 - [0, 0, 0, 1, 1, 2, 2, 2][frame]; by = 28; bh = 12; bw = 16; paw = "clamber"; tail = 4; break;
+    case "climb_over": side = true; hx = 24; hy = [23, 23, 24, 25, 27, 28, 29, 29][frame]; by = [28, 28, 28, 29, 30, 31, 31, 31][frame]; bh = [12, 12, 11, 10, 9, 8, 8, 8][frame]; bw = [16, 16, 17, 18, 20, 21, 22, 22][frame]; paw = "clamber"; tail = 4; face = frame < 5 ? "normal" : "narrow"; break;
   }
   if (LETTER_PAWS[action]) {
     hx = 23; hy = 24 + (action === "letter_reach" ? Math.min(3, frame / 2 | 0) : action === "letter_play" ? beat : 1);
@@ -124,19 +124,18 @@ export function drawCat(action, frame) {
   oval(bx - 1, by, bw + 2, bh + 1, "edge");
   oval(bx, by, bw, bh);
   oval(bx + 2, by + 2, Math.max(3, bw - 5), Math.max(3, bh - 5), "shade");
-  const limb = (x, y, kneeX, kneeY, toeX, toeY, claws = false) => {
-    line(x, y, kneeX, kneeY, "edge", 4); line(kneeX, kneeY, toeX, toeY, "edge", 4);
-    line(x, y, kneeX, kneeY, "ink", 3); line(kneeX, kneeY, toeX, toeY, "ink", 3);
-    oval(toeX - 1, toeY - 1, 5, 4, "ink"); line(toeX, toeY + 2, toeX + 2, toeY + 2, "shade");
-    if (claws) { dot(toeX, toeY - 1, "paper"); dot(toeX + 2, toeY - 1, "paper"); }
+  // Compact paws stay beneath the shoulders/hips; the torso never inverts.
+  const limb = (x, y, toeX, toeY) => {
+    line(x, y, toeX, toeY, "ink", 4);
+    oval(toeX - 2, toeY - 1, 6, 4, "ink");
+    line(toeX, toeY + 2, toeX + 2, toeY + 2, "edge");
   };
   if (climbing) {
-    for (let side = 0; side < 2; side++) {
-      const step = (frame + side * 4) % 8, x = side ? 27 : 14;
-      const y = action === "climb_down" ? 16 + [0, -2, -3, -2, 0, 2, 3, 2][step]
-        : action === "climb_over" ? [44, 44, 42, 41, 40, 39, 39, 39][frame]
-        : 40 + [1, 0, -2, -3, -1, 1, 2, 2][step];
-      limb(x, action === "climb_down" ? by + 3 : by + bh - 4, x + (side ? 5 : -4), y - 3, x + (step < 4 ? 1 : -1), y, step === 2 || step === 3);
+    for (let leg = 0; leg < 2; leg++) {
+      const step = (frame + leg * 4) % 8, x = leg ? 23 : 16;
+      const lift = [0, -1, -2, -1, 0, 0, 0, 0][step];
+      const y = action === "climb_over" ? 40 : 40 + lift;
+      limb(x, by + bh - 3, x + (step < 4 ? 1 : -1), y);
     }
   } else {
     oval(bx - feet, by + bh - 3, 7, 5);
@@ -183,14 +182,15 @@ export function drawCat(action, frame) {
       break;
     }
     case "clamber":
-      for (let side = 0; side < 2; side++) {
-        const step = (frame + side * 4) % 8;
-        const x = action === "climb_side" ? (side ? 36 : 28) + [0, 1, 3, 3, 1, 0, -1, -1][step] : side ? 35 : 10;
-        const y = action === "climb_down" ? [36, 39, 42, 42, 40, 38, 36, 35][step]
-          : action === "climb_side" ? 37 + [0, -2, -3, -2, 0, 1, 1, 0][step]
-          : action === "climb_grip" ? (side ? [34, 34, 32, 29, 25, 21, 19, 19] : [34, 31, 26, 22, 19, 18, 18, 19])[frame]
-          : action === "climb_over" ? 39 : [19, 15, 12, 13, 16, 18, 20, 20][step];
-        limb(side ? 27 : 15, by + 4, x + (side ? -3 : 3), (by + 4 + y) / 2, x, y, action === "climb_over" || step === 2 || step === 3);
+      for (let foreleg = 0; foreleg < 2; foreleg++) {
+        const step = (frame + foreleg * 4) % 8;
+        const x = foreleg ? 31 : 26;
+        const y = action === "climb_side" ? 38 + [0, -1, -2, -1, 0, 0, 0, 0][step]
+          : action === "climb_grip" ? [37, 37, 36, 35, 34, 33, 33, 33][frame] + foreleg
+          : action === "climb_over" ? [34, 34, 35, 36, 37, 38, 38, 38][frame]
+          : action === "climb_down" ? [34, 35, 36, 36, 35, 34, 33, 33][step]
+          : [34, 33, 31, 31, 32, 33, 34, 34][step];
+        limb(x - 2, by + 4, x, y);
       }
       break;
     case "up": arm(15, by + 5, 12, hy - 1); arm(26, by + 5, 32, hy); break;

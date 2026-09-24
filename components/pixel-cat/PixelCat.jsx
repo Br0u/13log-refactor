@@ -101,7 +101,7 @@ export default function PixelCat() {
     const cycle = ACTION_META[type]?.cycle || 800;
     const climbing = ["climb", "climb_down", "climb_side"].includes(type);
     const speed = ["run", "chase"].includes(type) ? 220 : type === "sneak" ? 65 : 130;
-    const time = arc ? 800 : climbing ? Math.min(4, Math.max(1, Math.round(distance / 95 * 1000 / cycle))) * cycle
+    const time = arc ? 800 : climbing ? Math.max(1, Math.ceil(distance / 80)) * cycle
       : Math.min(3600, Math.max(320, Math.round(distance / speed * 1000 / cycle) * cycle));
     setAction(type); setMotionStep(value => value + 1);
     if (Math.abs(target.x - origin.x) > 3) face(target.x > origin.x ? 1 : -1);
@@ -110,7 +110,7 @@ export default function PixelCat() {
     const frameCount = arc ? 25 : climbing ? cycles * 8 + 1 : 2;
     const keyframes = Array.from({ length: frameCount }, (_, index) => {
       // Reach slowly, then pull while a paw grips; phase matches the eight sprite frames.
-      const stride = [0, .03, .09, .22, .5, .53, .59, .72];
+      const stride = [0, .08, .2, .35, .5, .58, .7, .85];
       const t = climbing ? (Math.floor(index / 8) + stride[index % 8]) / cycles : index / (frameCount - 1);
       return { transform: `translate(${Math.round(origin.x + (target.x - origin.x) * t)}px, ${Math.round(origin.y + (target.y - origin.y) * t - 4 * arc * t * (1 - t))}px)` };
     });

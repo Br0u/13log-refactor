@@ -177,7 +177,14 @@ it("moves in grip-and-pull strides for whole sprite cycles and cancels the anima
   expect(frames.length).toBeGreaterThan(8);
   const y = frames.map(frame => Number(frame.transform.match(/, ([-\d.]+)px/)[1]));
   const steps = y.slice(1).map((value, index) => Math.abs(value - y[index]));
-  expect(Math.max(...steps)).toBeGreaterThan(Math.min(...steps) * 2);
+  // A gentle pull must not turn into the old stop-and-lurch motion.
+  const average = steps.reduce((sum, value) => sum + value, 0) / steps.length;
+  expect(Math.max(...steps)).toBeGreaterThan(Math.min(...steps));
+  expect(Math.max(...steps)).toBeLessThanOrEqual(average * 1.5 + 1);
+  expect(Math.min(...steps)).toBeGreaterThanOrEqual(average * .4 - 1);
+  const x = frames.map(frame => Number(frame.transform.match(/translate\(([-\d.]+)px/)[1]));
+  const distance = Math.hypot(x.at(-1) - x[0], y.at(-1) - y[0]);
+  expect(distance / (options.duration / ACTION_META[action].cycle)).toBeLessThanOrEqual(80);
   expect(y.every((value, index) => index === 0 || value <= y[index - 1])).toBe(true);
   expect(actor.querySelector(".pixel-cat-sprite")).not.toBe(grip);
   fireEvent.click(screen.getByRole("button", { name: /黑色小猫/ })); await advance(0);
