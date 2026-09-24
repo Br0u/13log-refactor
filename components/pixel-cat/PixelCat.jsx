@@ -4,10 +4,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowUp, BookOpen, House, Moon, Square, Volume2, X } from "lucide-react";
 import PixelSprite from "./PixelSprite";
-import { BEHAVIORS, AMBIENT_BEHAVIORS, ACTION_META, SCENE_IDS, localCommand, clampPosition, storageGet, storageSet } from "../../lib/pixel-cat/catalog.mjs";
+import { BEHAVIORS, ACTION_META, SCENE_IDS, localCommand, clampPosition, storageGet, storageSet } from "../../lib/pixel-cat/catalog.mjs";
 import { collectPageContext, collectCatSurfaces, readCatSurface, pickCatLetter, hideCatLetter, waitForCat } from "./page-context";
 import { readCatReply } from "../../lib/pixel-cat/stream.mjs";
 import { LETTER_FRAME_MS, LETTER_CONTACT_FRAME, letterGrip } from "../../lib/pixel-cat/letter-motion.mjs";
+
+import { loadLife, saveLife, advanceLife, beginLife, finishLife, chooseHabit, lifeSnapshot, describeLife, activityKind, canSpeakAboutLife, routineAt } from "../../lib/pixel-cat/life.mjs";
 
 const SIZE = 96;
 const WELCOME = "喵，我出来啦。拖着我走，或点我聊聊。";
@@ -53,7 +55,7 @@ export default function PixelCat() {
   const suppressClick = useRef(false);
   const history = useRef([]);
   const lastInteraction = useRef(Date.now());
-  const lastProactive = useRef(Date.now());
+  const life = useRef(null);
   const pending = useRef(false);
   const reduced = useRef(false);
   const pointerPosition = useRef(null);
@@ -64,9 +66,7 @@ export default function PixelCat() {
   const facingRef = useRef(1);
   const panelOpen = useRef(panel);
   const resting = useRef("idle");
-  const lastBehavior = useRef("");
   const lastScene = useRef("");
-  const nextAmbient = useRef(0);
   const replyHidden = useRef(false);
   panelOpen.current = panel;
   const face = value => { facingRef.current = value; setFacing(value); };
@@ -78,13 +78,24 @@ export default function PixelCat() {
     const target = clampPosition(point, width, height);
     pos.current = target; setPosition(target);
   };
-  const stop = () => {
+  const beginActivity = (pose, duration = 60000) => {
+    if (!life.current) return;
+    life.current = beginLife(life.current, pose, duration); saveLife(life.current);
+  };
+  const finishActivity = completed => {
+    if (!life.current) return;
+    life.current = finishLife(life.current, completed); saveLife(life.current);
+  };
+  const readingOrTyping = () => Boolean(document.activeElement?.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])")
+    || window.getSelection()?.toString().trim());
+  const stop = (preserveRest = false) => {
     const rect = actor.current?.getBoundingClientRect();
+    if (!preserveRest || !life.current || !["rest", "sleep", "read"].includes(activityKind(life.current.activity.action))) finishActivity(false);
     clearTimeout(scrollClimbTimer.current); scrollClimbTimer.current = null; scrollClimbing.current = false;
     sequence.current?.abort();
     motion.current?.cancel(); motion.current = null; moving.current = false; performing.current = false;
     releaseLetter.current?.(); releaseLetter.current = null;
-    setLetter(null); setLetterFrame(null); surface.current = null;
+    setLetter(null); setLetterFrame(null); if (!preserveRest) surface.current = null;
     if (rect) place({ x: rect.left, y: rect.top });
     clearHighlight();
     pending.current = false; setBusy(false); setStreaming(false);
@@ -155,6 +166,7 @@ export default function PixelCat() {
     if (!await move({ x: toy.rect.left + toy.rect.width / 2 - grip.x, y: pos.current.y }, signal, "sneak")) return;
     face(direction);
     if (Math.abs(pos.current.x + grip.x - toy.rect.left - toy.rect.width / 2) > 2) return;
+    beginActivity("letter_play");
     let attached = false;
     try {
       for (const pose of ["letter_reach", "letter_lift", "letter_play", "letter_play", "letter_return"]) {
@@ -182,25 +194,29 @@ export default function PixelCat() {
     }
   }
 
-  function roam(kind) {
+  function roam(kind, settle = null) {
     if (reduced.current) return false;
-    const shelves = collectCatSurfaces().filter(item => !kind || kind === "down" || item.kind === kind);
+    const shelves = collectCatSurfaces().filter(item => !kind || kind === "rest" || kind === "down" || item.kind === kind);
     const below = shelves.filter(item => item.rect.top > pos.current.y + 100 && item.rect.top < pos.current.y + 240 && item.rect.right > pos.current.x - 80 && item.rect.left < pos.current.x + 176)
       .sort((a, b) => a.rect.top - b.rect.top);
     const underfoot = kind === "text" && shelves.find(item => Math.abs(item.rect.top - pos.current.y - 80) <= 6 && item.rect.left < pos.current.x + 76 && item.rect.right > pos.current.x + 22);
     const fresh = shelves.filter(item => item.element !== lastSurface.current);
-    const choices = underfoot ? [underfoot] : (kind === "down" || !kind && below.length) ? below.slice(0, 1) : fresh.length ? fresh : shelves;
+    const center = pos.current.x + SIZE / 2;
+    const distance = item => Math.abs(item.rect.top - pos.current.y - 80) + 2 * Math.max(item.rect.left - center, center - item.rect.right, 0);
+    const nearby = shelves.filter(item => distance(item) < 180).sort((a, b) => distance(a) - distance(b));
+    const choices = kind === "rest" ? nearby.slice(0, 1) : underfoot ? [underfoot] : (kind === "down" || !kind && below.length) ? below.slice(0, 1) : fresh.length ? fresh : shelves;
     if (!choices.length) {
       if (kind !== "down" || pos.current.y >= viewport().height - SIZE - 4) return false;
-      const signal = stop(); performing.current = true;
+      const signal = stop(); performing.current = true; beginActivity("climb_down");
       void move({ x: pos.current.x, y: pos.current.y + 112 }, signal, "climb_down").then(() => {
-        if (!signal.aborted) { performing.current = false; setAction("idle"); }
+        if (!signal.aborted) { performing.current = false; finishActivity(true); setAction("idle"); }
       });
       return true;
     }
     const shelf = { ...choices[Math.floor(Math.random() * choices.length)], ratio: .25 + Math.random() * .5 };
+    if (settle) shelf.ratio = Math.max(.1, Math.min(.9, (center - Math.max(0, shelf.rect.left)) / (Math.min(viewport().width, shelf.rect.right) - Math.max(0, shelf.rect.left))));
     const signal = stop();
-    surface.current = shelf; lastSurface.current = shelf.element; performing.current = true;
+    surface.current = shelf; lastSurface.current = shelf.element; performing.current = true; beginActivity("walk");
     void (async () => {
       try {
         if (!underfoot) {
@@ -229,9 +245,16 @@ export default function PixelCat() {
           setAction(landing);
           if (!await delay(ACTION_META[landing].cycle, signal)) return;
         }
-        if (kind === "text" || shelf.kind === "text" && Math.random() < .4) await playLetter(shelf, signal);
+        if (!settle && (kind === "text" || shelf.kind === "text" && Math.random() < .4)) {
+          await playLetter(shelf, signal);
+        }
         if (!signal.aborted) setAction(Math.random() < .65 ? "perch" : "lie");
-      } finally { if (!signal.aborted) performing.current = false; }
+      } finally {
+        if (!signal.aborted) {
+          performing.current = false; finishActivity(true); lastInteraction.current = Date.now();
+          if (settle) { beginActivity(settle.action, settle.duration); setAction(settle.action); }
+        }
+      }
     })();
     return true;
   }
@@ -245,18 +268,20 @@ export default function PixelCat() {
   }
 
   function scheduleScrollClimb() {
-    if (phaseRef.current !== "active" || document.hidden || quiet || reduced.current || drag.current || pending.current || panelOpen.current) return;
+    if (phaseRef.current !== "active" || document.hidden || quiet || reduced.current || drag.current || pending.current || panelOpen.current || readingOrTyping()) return;
     // Leading-edge delay: continuous scroll must not keep postponing or cancelling the climb.
     if (scrollClimbing.current || scrollClimbTimer.current) return;
-    const signal = stop();
+    const sleeping = life.current && ["rest", "sleep", "read"].includes(activityKind(life.current.activity.action))
+      && life.current.activity.until > Date.now() ? { ...life.current.activity } : null;
+    const signal = stop(Boolean(sleeping));
     setAction("climb_grip");
     scrollClimbTimer.current = setTimeout(() => {
       scrollClimbTimer.current = null;
-      void regainFooting(signal);
+      void regainFooting(signal, sleeping);
     }, ACTION_META.climb_grip.cycle);
   }
 
-  async function regainFooting(signal) {
+  async function regainFooting(signal, sleeping) {
     scrollClimbing.current = true; performing.current = true;
     try {
       while (!signal.aborted) {
@@ -283,7 +308,10 @@ export default function PixelCat() {
         setAction("perch"); return;
       }
     } finally {
-      if (!signal.aborted) { scrollClimbing.current = false; performing.current = false; lastInteraction.current = Date.now(); }
+      if (!signal.aborted) {
+        scrollClimbing.current = false; performing.current = false; lastInteraction.current = Date.now();
+        if (sleeping && sleeping.until > Date.now()) setAction(sleeping.action);
+      }
     }
   }
   const entrance = () => {
@@ -350,6 +378,8 @@ export default function PixelCat() {
       actions = [selected];
       lastScene.current = typeof selected === "string" ? selected : selected.type;
     }
+    const lifeAction = actions.map(step => typeof step === "string" ? step : step.type).filter(type => type !== "walk_to");
+    beginActivity(lifeAction.includes("sleep") ? "sleep" : lifeAction[0] || "idle");
     performing.current = true;
     try {
       for (let index = 0; index < actions.length; index++) {
@@ -386,12 +416,17 @@ export default function PixelCat() {
       if (!signal.aborted) {
         performing.current = false;
         lastInteraction.current = Date.now();
-        nextAmbient.current = Date.now() + 30000 + Math.random() * 30000;
+        finishActivity(true);
+        if (["sleep", "rest"].includes(activityKind(rest))) beginActivity(rest, 5 * 60000);
       }
     }
   }
 
   function commandLocally(command) {
+    if (command.kind === "status") {
+      const description = life.current ? describeLife(life.current) : "我在这里陪着你。";
+      stop(); setSay(description); setAction("look"); setPanel(true); return;
+    }
     if (command.kind === "home") { void goHome(); return; }
     if (command.kind === "read") { explore(); return; }
     if (command.kind === "roam") {
@@ -418,18 +453,20 @@ export default function PixelCat() {
       stop();
       setSay("我先陪你逛逛。走走、玩耍，或一起看看这页。 "); setAction("tilt"); setPanel(true); return;
     }
+    const living = life.current ? lifeSnapshot(life.current) : undefined;
     const signal = stop();
     replyHidden.current = false;
     pending.current = true; setBusy(true); setAction("think");
     if (!proactive) { setPanel(true); setSay("让我想一想……"); }
     const { context, targets } = collectPageContext(path.current);
     context.selection = selectedText || context.selection;
-    const reading = proactive || context.selection || /文章|这页|页面|内容|选中|解释|总结|这里|链接|照片|图片|这段|刚才|继续/.test(message);
+    const reading = !proactive && (context.selection || /文章|这页|页面|内容|选中|解释|总结|这里|链接|照片|图片|这段|刚才|继续/.test(message));
+    if (proactive) context.selection = "";
     if (!reading) { context.excerpt = ""; context.anchors = []; }
     else { context.excerpt = context.excerpt.slice(0, 3000); context.anchors = context.anchors.slice(0, 6); }
     let partial = "";
     try {
-      const response = await fetch("/api/cat", { method: "POST", headers: { "content-type": "application/json", accept: "text/event-stream" }, signal, body: JSON.stringify({ message, proactive, context, history: history.current.slice(-6) }) });
+      const response = await fetch("/api/cat", { method: "POST", headers: { "content-type": "application/json", accept: "text/event-stream" }, signal, body: JSON.stringify({ message, proactive, context, life: living, history: history.current.slice(-6) }) });
       const result = await readCatReply(response, text => {
         if (signal.aborted) return;
         partial = text; setSay(text); setStreaming(true); if (!replyHidden.current) setPanel(true); setAction("talk");
@@ -440,7 +477,9 @@ export default function PixelCat() {
         if (!proactive) history.current = [...history.current, { role: "user", content: message }, { role: "assistant", content: result.say }].slice(-6);
       } else if (!proactive) { setSay(""); setPanel(false); }
       pending.current = false; setBusy(false); setStreaming(false);
-      await play(result.actions, signal, targets, Boolean(result.say), resting.current);
+      const expressions = result.actions.filter(step => !SCENE_IDS.includes(step.type)
+        && !["sleep", "curl", "walk_to", "walk", "run", "sneak", "chase", "jump", "hop", "climb_down", "climb_side"].includes(step.type));
+      await play(expressions, signal, targets, Boolean(result.say), resting.current);
     } catch (error) {
       if (!signal.aborted) { setAction("tilt"); if (!proactive) setSay(partial ? `${partial}\n\n刚才断了一下，可以接着问我。` : error.message); }
     } finally {
@@ -455,7 +494,45 @@ export default function PixelCat() {
     void play(visible ? [{ type: "walk_to", target: visible[0] }, "read", "point", "think"] : BEHAVIORS[0].actions, signal, targets);
     setSay("我在这里陪你看。想聊内容，随时叫我。 "); setPanel(false);
   }
-  api.current = { summon, goHome, ask, explore, stop, play, roam, syncSurface, scheduleScrollClimb };
+  function habitTick() {
+    if (!life.current || document.hidden || phaseRef.current !== "active") return;
+    life.current = advanceLife(life.current);
+    if (quiet && life.current.activity.action === "sleep" && life.current.activity.until <= Date.now()) beginActivity("sleep", 5 * 60000);
+    if (drag.current || pending.current || performing.current || moving.current || panelOpen.current || readingOrTyping() || quiet || reduced.current) return;
+    if (Date.now() - lastInteraction.current < 16000 || Date.now() < life.current.nextDecision) return;
+    const previous = life.current.activity.action;
+    if (["rest", "sleep", "read"].includes(activityKind(previous))) {
+      finishActivity(true);
+      if (activityKind(previous) === "sleep") {
+        if (routineAt(Date.now(), life.current.seed).period === "night") { beginActivity("sleep", (3 + Math.random() * 2) * 60000); return; }
+        void play(["wake", "stretch"], stop()); return;
+      }
+      setAction("idle"); return;
+    }
+    if (settings.available && canSpeakAboutLife(life.current, Date.now(), settings.proactiveSeconds)) {
+      life.current.lastSpoke = Date.now(); saveLife(life.current); void ask("", true); return;
+    }
+    const shelves = collectCatSurfaces();
+    const decision = chooseHabit(life.current, { reading: Boolean(document.querySelector(".post-content")),
+      surfaces: shelves.length > 0, images: shelves.some(item => item.kind === "image") });
+    if (!decision) return;
+    lastInteraction.current = Date.now();
+    if (decision.settle) {
+      if (surface.current || !roam("rest", decision)) {
+        stop(true); beginActivity(decision.action, decision.duration); setAction(decision.action);
+      }
+    } else if (decision.action === "walk") {
+      if (!roam(decision.roam)) { stop(); beginActivity("perch", 120000); setAction("perch"); }
+    } else void play([decision.action], stop());
+  }
+  api.current = { summon, goHome, ask, explore, stop, play, roam, syncSurface, scheduleScrollClimb, habitTick };
+
+  useEffect(() => {
+    life.current = loadLife();
+    const save = () => { if (life.current) { life.current = advanceLife(life.current); saveLife(life.current); } };
+    window.addEventListener("pagehide", save);
+    return () => { save(); window.removeEventListener("pagehide", save); };
+  }, []);
 
   useEffect(() => {
     if (panel && followReply.current && conversation.current) conversation.current.scrollTop = conversation.current.scrollHeight;
@@ -474,7 +551,7 @@ export default function PixelCat() {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
     const motionPreference = () => {
       reduced.current = query.matches;
-      if (query.matches && (surface.current || scrollClimbing.current || scrollClimbTimer.current)) { api.current.stop(); setAction("idle"); }
+      if (query.matches && (life.current?.activity.action !== "idle" || surface.current || scrollClimbing.current || scrollClimbTimer.current)) { api.current.stop(); setAction("idle"); }
     };
     motionPreference(); query.addEventListener("change", motionPreference);
     const onSummon = () => void api.current.summon();
@@ -487,7 +564,15 @@ export default function PixelCat() {
       if (wasTransition) changePhase(storageGet() ? "active" : "hidden");
       place(pos.current); setAction("idle");
     };
-    const visibility = () => { setPaused(document.hidden); if (document.hidden && phaseRef.current === "active") { api.current.stop(); setAction("idle"); } };
+    const visibility = () => {
+      setPaused(document.hidden);
+      if (document.hidden && phaseRef.current === "active") { api.current.stop(true); if (life.current) saveLife(life.current); }
+      else if (life.current) {
+        life.current = advanceLife(life.current);
+        if (["rest", "sleep", "read"].includes(activityKind(life.current.activity.action))) setAction(life.current.activity.action);
+        else setAction("idle");
+      }
+    };
     let scrollFrame = 0;
     const scroll = () => {
       if (scrollFrame || phaseRef.current === "hidden") return;
@@ -505,8 +590,15 @@ export default function PixelCat() {
     const selectionChanged = () => {
       if (phaseRef.current !== "active" || path.current.startsWith("/admin")) return;
       const { context } = collectPageContext(path.current);
-      if (context.selection) setSelectedText(context.selection);
+      setSelectedText(context.selection);
+      if (context.selection && !panelOpen.current && !pending.current) { api.current.stop(); setAction("perch"); }
     };
+    const focusInput = event => {
+      if (!event.target.closest?.(".pixel-cat-layer") && event.target.closest?.("input, textarea, select, [contenteditable]:not([contenteditable='false'])")) {
+        api.current.stop(); setAction("idle");
+      }
+    };
+    document.addEventListener("focusin", focusInput);
     window.addEventListener("pixel-cat:summon", onSummon);
     window.addEventListener("resize", resize);
     window.addEventListener("scroll", scroll, { passive: true });
@@ -518,6 +610,7 @@ export default function PixelCat() {
     return () => {
       sequence.current?.abort(); motion.current?.cancel(); releaseLetter.current?.(); clearHighlight(); query.removeEventListener("change", motionPreference);
       clearTimeout(scrollClimbTimer.current);
+      document.removeEventListener("focusin", focusInput);
       window.removeEventListener("pixel-cat:summon", onSummon); window.removeEventListener("resize", resize);
       window.removeEventListener("scroll", scroll); cancelAnimationFrame(scrollFrame);
       window.visualViewport?.removeEventListener("resize", visualResize);
@@ -528,8 +621,8 @@ export default function PixelCat() {
   }, []);
 
   useEffect(() => {
-    path.current = pathname;
-    api.current.stop(); setPortal(null); setPanel(false); setAction("idle"); setSelectedText(""); history.current = []; drag.current = null;
+    path.current = pathname; surface.current = null;
+    api.current.stop(true); setPortal(null); setPanel(false); setAction(life.current && life.current.activity.until > Date.now() && ["rest", "sleep", "read"].includes(activityKind(life.current.activity.action)) ? life.current.activity.action : "idle"); setSelectedText(""); history.current = []; drag.current = null;
     if (pathname.startsWith("/admin")) { changePhase("hidden"); return; }
     if (storageGet()) { changePhase("active"); place({ x: window.innerWidth - 130, y: window.innerHeight - 160 }); }
     else changePhase("hidden");
@@ -541,20 +634,7 @@ export default function PixelCat() {
   useEffect(() => {
     if (phase !== "active") return;
     const layoutTimer = setInterval(() => api.current.syncSurface(), 400);
-    const timer = setInterval(() => {
-      if (document.hidden || drag.current || pending.current || performing.current || moving.current || panel || Date.now() - lastInteraction.current < 16000 || Date.now() < nextAmbient.current) return;
-      if (!quiet && settings.available && settings.proactiveSeconds && Date.now() - lastProactive.current > settings.proactiveSeconds * 1000) {
-        lastProactive.current = Date.now(); void api.current.ask("", true); return;
-      }
-      if (!quiet && !reduced.current) {
-        lastInteraction.current = Date.now();
-        if (Math.random() < .8 && (api.current.roam() || api.current.roam("down"))) return;
-        const candidates = AMBIENT_BEHAVIORS.filter(item => item.id !== lastBehavior.current);
-        const behavior = candidates[Math.floor(Math.random() * candidates.length)];
-        lastBehavior.current = behavior.id;
-        void api.current.play(behavior.actions, api.current.stop());
-      }
-    }, 8000);
+    const timer = setInterval(() => api.current.habitTick(), 8000);
     return () => { clearInterval(timer); clearInterval(layoutTimer); };
   }, [phase, panel, quiet, settings]);
 
@@ -593,6 +673,11 @@ export default function PixelCat() {
     const signal = stop();
     void play(["land", "happy"], signal);
   }
+  const attend = () => {
+    const recent = life.current?.recent.at(-1);
+    const wasSleeping = life.current?.activity.action === "sleep" || recent?.action === "sleep" && !recent.completed && Date.now() - recent.at < 2000;
+    stop(); setAction(wasSleeping ? "yawn" : "idle");
+  };
   const closePanel = () => { replyHidden.current = true; setPanel(false); handle.current?.focus({ preventScroll: true }); };
   if (pathname.startsWith("/admin") || phase === "hidden") return null;
   const { width, height } = typeof window === "undefined" ? { width: 1000, height: 800 } : viewport();
@@ -601,12 +686,12 @@ export default function PixelCat() {
   const panelWidth = Math.min(304, width - 24);
   const panelX = Math.max(viewportLeft + 12, Math.min(viewportLeft + width - panelWidth - 12, position.x + SIZE / 2 - panelWidth / 2));
   const panelY = Math.max(viewportTop + 12, Math.min(viewportTop + height - panelHeight - 12, position.y > viewportTop + panelHeight + 12 ? position.y - panelHeight - 12 : position.y + SIZE));
-  return <div className="pixel-cat-layer" data-phase={phase} data-action={action} data-surface={surface.current?.kind}>
+  return <div className="pixel-cat-layer" data-phase={phase} data-action={action} data-surface={surface.current?.kind} data-activity={life.current ? activityKind(life.current.activity.action) : "idle"}>
     {portal && <div aria-hidden="true" className="pixel-cat-door" data-closing={portal.closing} style={{ left: portal.x, top: portal.y }} />}
     <div ref={actor} className="pixel-cat-actor" style={{ transform: `translate(${position.x}px, ${position.y}px)` }}>
       <button ref={handle} type="button" className="pixel-cat-handle" aria-label="黑色小猫，点击聊天或拖动" aria-expanded={panel} disabled={phase !== "active"}
         onPointerDown={dragStart} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={dragEnd}
-        onClick={() => { if (suppressClick.current) { suppressClick.current = false; return; } lastInteraction.current = Date.now(); if (!panel && !pending.current) { stop(); setAction("idle"); } setPanel(value => { replyHidden.current = value; return !value; }); }}>
+        onClick={() => { if (suppressClick.current) { suppressClick.current = false; return; } lastInteraction.current = Date.now(); if (!panel && !pending.current) attend(); setPanel(value => { replyHidden.current = value; return !value; }); }}>
         <PixelSprite key={motionStep} action={action} facing={facing} paused={paused} frame={letterFrame} />
       </button>
       {letter && <span className="pixel-cat-letter" aria-hidden="true" style={{ ...letter.style, transformOrigin: `${letter.rect.width / 2}px 4px`, transform: `translate(${letter.x}px, ${letter.y}px) rotate(${letter.angle}deg)` }}>{letter.text}</span>}

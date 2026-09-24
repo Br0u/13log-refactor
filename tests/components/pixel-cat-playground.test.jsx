@@ -3,6 +3,7 @@ import React from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import PixelCat from "../../components/pixel-cat/PixelCat";
+import { LIFE_KEY, createLife, beginLife } from "../../lib/pixel-cat/life.mjs";
 import { ACTION_META } from "../../lib/pixel-cat/catalog.mjs";
 import { collectCatSurfaces, readCatSurface, pickCatLetter, hideCatLetter } from "../../components/pixel-cat/page-context";
 
@@ -10,7 +11,7 @@ vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 const rect = (left = 100, top = 300, width = 200, height = 24) => ({ left, top, right: left + width, bottom: top + height, width, height });
 let layout;
 beforeEach(() => {
-  vi.useFakeTimers(); sessionStorage.setItem("13log-cat", "awake"); layout = rect();
+  vi.useFakeTimers(); vi.setSystemTime(new Date(2026, 8, 24, 16, 0)); localStorage.clear(); sessionStorage.setItem("13log-cat", "awake"); layout = rect();
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ json: async () => ({ available: false, proactiveSeconds: 0 }) }));
   vi.stubGlobal("matchMedia", vi.fn(() => ({ matches: false, addEventListener() {}, removeEventListener() {} })));
   vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
@@ -33,7 +34,7 @@ beforeEach(() => {
     };
   });
 });
-afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers(); sessionStorage.clear(); });
+afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers(); sessionStorage.clear(); localStorage.clear(); });
 const advance = async ms => { await act(async () => { await vi.advanceTimersByTimeAsync(ms); }); };
 const until = async predicate => {
   for (let time = 0; time < 10000 && !predicate(); time += 70) await advance(70);
@@ -45,6 +46,93 @@ const send = text => {
   fireEvent.click(screen.getByRole("button", { name: "发送" }));
 };
 const scene = () => <><main id="main-content"><p>公开文字</p></main><PixelCat /></>;
+
+it("spends sustained quiet periods during ten minutes instead of chaining scenes", async () => {
+  const { container } = render(scene());
+  let restingSeconds = 0;
+  const poses = new Set();
+  for (let second = 0; second < 600; second += 8) {
+    await advance(8000);
+    const pose = container.querySelector(".pixel-cat-layer").dataset.action;
+    poses.add(pose);
+    if (["perch", "read", "lie", "sleep"].includes(pose)) restingSeconds += 8;
+  }
+  expect(restingSeconds).toBeGreaterThan(300);
+  expect(poses.size).toBeGreaterThan(1);
+  expect(fetch.mock.calls.every(([, options]) => options?.method !== "POST")).toBe(true);
+});
+
+it("keeps nighttime sleep across reload and responds immediately when called", async () => {
+  vi.setSystemTime(new Date(2026, 8, 24, 23, 0));
+  const first = render(scene());
+  await advance(17000);
+  expect(first.container.querySelector(".pixel-cat-layer").dataset.action).toBe("sleep");
+  const untilTime = JSON.parse(localStorage.getItem(LIFE_KEY)).activity.until;
+  await advance(40000); cleanup();
+  const resumed = render(scene()); await advance(10);
+  expect(resumed.container.querySelector(".pixel-cat-layer").dataset.action).toBe("sleep");
+  expect(JSON.parse(localStorage.getItem(LIFE_KEY)).activity.until).toBe(untilTime);
+  fireEvent.click(screen.getByRole("button", { name: /黑色小猫/ }));
+  expect(resumed.container.querySelector(".pixel-cat-layer").dataset.action).toBe("yawn");
+  expect(screen.getByRole("textbox")).toBeTruthy();
+  fireEvent.change(screen.getByRole("textbox"), { target: { value: "你在干什么" } });
+  fireEvent.click(screen.getByRole("button", { name: "发送" }));
+  expect(screen.getByRole("status").textContent).toContain("睡觉");
+  expect(fetch.mock.calls.every(([, options]) => options?.method !== "POST")).toBe(true);
+});
+
+it("remembers a completed meal after reload without storing page text or replaying it", async () => {
+  const first = render(scene());
+  send("吃面条"); await advance(13000);
+  expect(first.container.querySelector(".pixel-cat-layer").dataset.action).toBe("idle");
+  const saved = JSON.parse(localStorage.getItem(LIFE_KEY));
+  expect(saved.lastMeal).toBeGreaterThan(0);
+  expect(localStorage.getItem(LIFE_KEY)).not.toContain("公开文字");
+  cleanup(); const resumed = render(scene()); await advance(17000);
+  expect(resumed.container.querySelector(".pixel-cat-layer").dataset.action).toBe("idle");
+  expect(JSON.parse(localStorage.getItem(LIFE_KEY)).lastMeal).toBe(saved.lastMeal);
+});
+
+it("holds a stable resting intention through scrolling and pauses exploration while typing", async () => {
+  localStorage.setItem(LIFE_KEY, JSON.stringify(beginLife(createLife(), "read", 180000)));
+  const { container } = render(<><main id="main-content"><p>公开文字</p><input aria-label="草稿" /></main><PixelCat /></>);
+  const deadline = JSON.parse(localStorage.getItem(LIFE_KEY)).activity.until;
+  fireEvent.scroll(window); await advance(15000);
+  expect(container.querySelector(".pixel-cat-layer").dataset.action).toBe("read");
+  expect(JSON.parse(localStorage.getItem(LIFE_KEY)).activity.until).toBe(deadline);
+  act(() => screen.getByRole("textbox", { name: "草稿" }).focus());
+  const position = container.querySelector(".pixel-cat-actor").style.transform;
+  fireEvent.scroll(window); await advance(120000);
+  expect(container.querySelector(".pixel-cat-actor").style.transform).toBe(position);
+  expect(container.querySelector(".pixel-cat-layer").dataset.action).toBe("idle");
+});
+
+it("includes remembered life facts in chat, while AI cannot take over meals or movement", async () => {
+  fetch.mockImplementation(async (_url, options) => ({ ok: true, json: async () => options?.method === "POST"
+    ? { say: "刚吃过面，现在陪你。", actions: [{ type: "toast" }, { type: "walk_to", target: "cat-target-0" }] }
+    : { available: true, proactiveSeconds: 0 } }));
+  const { container } = render(scene()); await advance(1);
+  send("吃面条"); await advance(13000);
+  send("今天怎么样？"); await advance(1);
+  const request = JSON.parse(fetch.mock.calls.find(([, options]) => options?.method === "POST")[1].body);
+  expect(request.life).toMatchObject({ hunger: "full", recent: { action: "noodles", completed: true } });
+  expect(container.querySelector(".pixel-cat-layer").dataset.action).toBe("idle");
+  expect(screen.getByRole("status").textContent).toBe("刚吃过面，现在陪你。");
+});
+
+it("shares a completed life event once without sending article text", async () => {
+  fetch.mockImplementation(async (_url, options) => ({ ok: true, json: async () => options?.method === "POST"
+    ? { say: "吃饱啦。", actions: [] } : { available: true, proactiveSeconds: 60 } }));
+  render(scene()); await advance(1);
+  send("吃面条"); await advance(50000);
+  const posts = fetch.mock.calls.filter(([, options]) => options?.method === "POST");
+  expect(posts).toHaveLength(1);
+  expect(JSON.parse(posts[0][1].body)).toMatchObject({ proactive: true,
+    context: { excerpt: "", selection: "", anchors: [] }, life: { recent: { action: "noodles", completed: true } } });
+  expect(screen.getByRole("status").textContent).toBe("吃饱啦。");
+  fireEvent.click(screen.getByRole("button", { name: "收起聊天" })); await advance(120000);
+  expect(fetch.mock.calls.filter(([, options]) => options?.method === "POST")).toHaveLength(1);
+});
 
 it("uses rendered public lines and images, excludes private/covered content, and only picks letters beneath the feet", () => {
   const { container } = render(<main id="main-content"><p>公开文字</p><img alt="窗台" /><img alt="" /><form><p>草稿</p></form><p data-cat-private>秘密</p><p contentEditable suppressContentEditableWarning>输入</p><p hidden>隐藏</p><section className="post-interactions"><p>评论</p></section></main>);
@@ -74,20 +162,21 @@ it("keeps grapheme clusters intact", () => {
   expect(pickCatLetter(collectCatSurfaces()[0], { x: 52, y: 220 }).text).toBe("é");
 });
 
-it("picks one scene from a behavior, lingers, then rests before choosing a different scene", async () => {
+it("chooses one afternoon scene, lingers, and rests before a different kind of activity", async () => {
   Math.random.mockReturnValue(.99);
   const { container } = render(scene());
   const action = () => container.querySelector(".pixel-cat-layer").dataset.action;
   await advance(16010);
-  expect(action()).toBe("magic");
+  expect(action()).toBe("snowglobe");
   await advance(8000);
-  expect(action()).toBe("magic");
+  expect(action()).toBe("snowglobe");
   await advance(9000);
   expect(action()).toBe("idle");
   await advance(45000);
   expect(action()).toBe("idle");
   await advance(20000);
-  expect(action()).toBe("astronaut");
+  expect(action()).not.toBe("snowglobe");
+  expect(JSON.parse(localStorage.getItem(LIFE_KEY)).recent.at(-1).action).toBe("lick");
   fireEvent.click(screen.getByRole("button", { name: /黑色小猫/ }));
   expect(action()).toBe("idle");
 });
@@ -95,7 +184,7 @@ it("picks one scene from a behavior, lingers, then rests before choosing a diffe
 it("hides exactly one glyph at paw contact, carries it through the hand poses, and restores it at release", async () => {
   const { container } = render(scene());
   const cat = () => container.querySelector(".pixel-cat-layer");
-  await advance(16100);
+  send("抓个字");
   await until(() => cat().dataset.action === "letter_reach");
   expect(CSS.highlights.size).toBe(0);
   expect(container.querySelector(".pixel-cat-letter")).toBeNull();

@@ -29,11 +29,25 @@ export const contextSchema = z.object({
   selection: z.string().max(1200).default(""),
   anchors: z.array(z.object({ id: z.string().regex(/^cat-target-\d+$/), text: z.string().max(100) })).max(12),
 });
+const lifeSchema = z.object({
+  period: z.enum(["night", "morning", "day", "nap", "play", "evening"]),
+  activity: z.enum(["idle", "meal", "sleep", "rest", "read", "groom", "explore", "play"]),
+  action: z.string().max(32).refine(id => ACTION_IDS.includes(id)),
+  energy: z.enum(["tired", "energetic", "calm"]),
+  hunger: z.enum(["hungry", "full", "comfortable"]),
+  minutesSinceMeal: z.number().int().min(0).max(10080).nullable(),
+  minutesSinceRest: z.number().int().min(0).max(10080).nullable(),
+  recent: z.object({
+    action: z.string().max(32).refine(id => ACTION_IDS.includes(id)),
+    minutesAgo: z.number().int().min(0).max(10080), completed: z.boolean(),
+  }).strict().nullable(),
+}).strict();
 export const chatSchema = z.object({
   message: z.string().trim().max(800),
   proactive: z.boolean().default(false),
   context: contextSchema,
   history: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(800) })).max(6).default([]),
+  life: lifeSchema.optional(),
 });
 // Portal, drag and contact-synchronised letter states belong to the controller.
 export const AI_ACTIONS = ACTION_IDS.filter(id => !id.startsWith("letter_") && !["door_peek", "emerge", "enter", "tail_in", "logo_in", "climb", "climb_grip", "climb_over", "held", "struggle", "fall"].includes(id));

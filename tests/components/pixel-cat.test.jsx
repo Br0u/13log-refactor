@@ -11,7 +11,7 @@ import { collectPageContext } from "../../components/pixel-cat/page-context";
 const route = vi.hoisted(() => ({ path: "/" }));
 vi.mock("next/navigation", () => ({ usePathname: () => route.path }));
 beforeEach(() => {
-  route.path = "/"; sessionStorage.clear(); vi.useFakeTimers();
+  route.path = "/"; sessionStorage.clear(); localStorage.clear(); vi.useFakeTimers(); vi.setSystemTime(new Date(2026, 8, 24, 16, 0));
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ available: false, proactiveSeconds: 0 }) }));
   window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() });
   vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
