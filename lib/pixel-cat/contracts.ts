@@ -35,8 +35,8 @@ export const chatSchema = z.object({
   context: contextSchema,
   history: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(800) })).max(6).default([]),
 });
-// Portal/drag states belong to the controller, not to AI plans.
-export const AI_ACTIONS = ACTION_IDS.filter(id => !["door_peek", "emerge", "enter", "tail_in", "logo_in", "climb", "held", "struggle", "fall"].includes(id));
+// Portal, drag and contact-synchronised letter states belong to the controller.
+export const AI_ACTIONS = ACTION_IDS.filter(id => !id.startsWith("letter_") && !["door_peek", "emerge", "enter", "tail_in", "logo_in", "climb", "climb_grip", "climb_over", "held", "struggle", "fall"].includes(id));
 export const planSchema = z.object({
   say: z.string().max(240),
   actions: z.array(z.object({

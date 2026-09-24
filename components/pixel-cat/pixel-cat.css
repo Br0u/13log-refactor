@@ -2,11 +2,13 @@
 .pixel-cat-summon:focus-visible { outline: 2px dashed #8199ac; outline-offset: -24px; }
 .pixel-cat-summon::after { content: '点击，叫小猫出门'; position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); color: var(--secondary); font-size: 12px; white-space: nowrap; opacity: 0; transition: opacity .2s; }
 .pixel-cat-summon:hover::after, .pixel-cat-summon:focus-visible::after { opacity: 1; }
-.pixel-cat-sprite { display: block; width: var(--sprite-size, 96px); height: var(--sprite-size, 96px); background-image: url('/pixel-cat/cat.png?v=4'); background-size: calc(var(--sprite-size, 96px) * 8) calc(var(--sprite-size, 96px) * var(--sprite-rows, 88)); background-position-y: calc(var(--sprite-row, 0) * var(--sprite-size, 96px) * -1); image-rendering: pixelated; animation: cat-frames .96s steps(8) infinite; animation-fill-mode: forwards; pointer-events: none; }
+.pixel-cat-sprite { display: block; width: var(--sprite-size, 96px); height: var(--sprite-size, 96px); background-image: url('/pixel-cat/cat.png?v=7'); background-size: calc(var(--sprite-size, 96px) * 8) calc(var(--sprite-size, 96px) * var(--sprite-rows, 96)); background-position-y: calc(var(--sprite-row, 0) * var(--sprite-size, 96px) * -1); image-rendering: pixelated; animation: cat-frames .96s steps(8) infinite; animation-fill-mode: forwards; pointer-events: none; }
 @keyframes cat-frames { to { background-position-x: calc(var(--sprite-size, 96px) * -8); } }
 @keyframes cat-once { to { background-position-x: calc(var(--sprite-size, 96px) * -7); } }
 .pixel-cat-layer { position: fixed; inset: 0; pointer-events: none; z-index: 1200; }
 .pixel-cat-actor { position: absolute; top: 0; left: 0; width: 96px; height: 96px; will-change: transform; }
+.pixel-cat-letter { position: absolute; top: 0; left: 0; pointer-events: none; user-select: none; white-space: pre; text-shadow: -1px 0 var(--theme, #fff), 1px 0 var(--theme, #fff), 0 -1px var(--theme, #fff), 0 1px var(--theme, #fff); }
+::highlight(pixel-cat-held-letter) { color: transparent; text-shadow: none; }
 .pixel-cat-handle { appearance: none; display: block; border: 0; padding: 0; background: transparent; width: 96px; height: 96px; pointer-events: auto; touch-action: none; cursor: grab; border-radius: 12px; }
 .pixel-cat-handle:active { cursor: grabbing; }
 .pixel-cat-handle:focus-visible { outline: 2px dashed #8199ac; outline-offset: -8px; }

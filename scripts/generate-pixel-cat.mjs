@@ -3,6 +3,7 @@ import sharp from "sharp";
 import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { ACTIONS, SCENE_IDS, FRAME_SIZE as S, FRAME_COUNT as N } from "../lib/pixel-cat/catalog.mjs";
+import { LETTER_PAWS } from "../lib/pixel-cat/letter-motion.mjs";
 
 const C = { ink: [23, 23, 29, 255], edge: [72, 68, 83, 255], shade: [35, 34, 43, 255], eye: [247, 199, 57, 255], gleam: [255, 239, 164, 255], red: [226, 76, 91, 255], blue: [129, 153, 172, 255], paper: [222, 212, 185, 255] };
 Object.assign(C, { wood: [156, 101, 66, 255], crust: [193, 131, 76, 255], cream: [255, 236, 194, 255], mint: [120, 187, 159, 255], leaf: [65, 125, 103, 255], sky: [159, 204, 222, 255], violet: [175, 144, 199, 255], pink: [240, 173, 181, 255] });
@@ -36,6 +37,8 @@ export function drawCat(action, frame) {
   const { rect, line, poly, dot, oval } = g;
   const wave = Math.round(Math.sin(frame * Math.PI / 4) * 2);
   const beat = frame % 4 < 2 ? 0 : 1;
+  const climbing = ["climb", "climb_down", "climb_side", "climb_grip", "climb_over"].includes(action);
+  const pull = [1, 0, -1, -2, 1, 0, -1, -2][frame];
   let hx = 21, hy = 19, bw = 12, bh = 14, by = 25, feet = 0, paw = "down", face = "normal", tilt = 0, tail = wave, side = false;
   switch (action) {
     case "idle": hy += beat; bh -= beat; break;
@@ -83,7 +86,7 @@ export function drawCat(action, frame) {
     case "enter": side = true; hx = 26; hy = 25; by = 29; bh = 10; paw = "forward"; tail = -6 + beat; break;
     case "tail_in": hy = 32; by = 34; bw = 15; bh = 7; tail = -9 + frame; break;
     case "logo_in": side = true; hx = 28; hy = 27; by = 29; bw = 19; bh = 9; feet = wave; tail = -9; break;
-    case "climb": side = true; hx = 25; hy = 16 + beat; by = 25; bh = 16; paw = "up"; feet = wave * 2; tail = 6; break;
+    case "climb": hx = 23 + (frame < 4 ? 1 : -1); hy = 21 + pull; by = 26 + pull; bh = 15; bw = 13; paw = "clamber"; tail = wave * 2; face = "narrow"; break;
     case "fall": hy = 13 + frame; by = 21 + frame; bh = 12; paw = "spread"; feet = 3; tail = -7; break;
     case "talk": hy = 21 + beat; face = "talk"; paw = frame < 4 ? "down" : "point"; break;
     case "sniff": hx = 25 + beat; hy = 26 + wave; by = 28; bw = 16; bh = 11; side = true; tail = 4; break;
@@ -102,6 +105,14 @@ export function drawCat(action, frame) {
     case "chase_tail": hx = 21 - wave * 2; hy = 24 + beat; bw = 19; bh = 11; by = 28; side = frame % 4 < 2; feet = -wave; tail = -wave * 3; paw = "forward"; break;
     case "butterfly": hx = 24 + beat; hy = 23 - beat * 2; paw = "wave"; face = "wide"; tail = -5 + wave; break;
     case "heart": hy = 23 + beat; face = "happy"; paw = "chin"; tail = 4; break;
+    case "climb_down": hx = 23 + (frame < 4 ? -1 : 1); hy = 28 - pull; by = 19 - pull; bh = 17; bw = 13; paw = "clamber"; tail = -9 + wave * 2; face = "narrow"; break;
+    case "climb_side": side = true; hx = 27 + beat; hy = 25 + beat; by = 29 + beat; bh = 9; bw = 20; paw = "clamber"; tail = -3 + wave * 2; face = "narrow"; break;
+    case "climb_grip": hx = 23; hy = 26 - Math.min(frame, 5); by = 28; bh = 12; bw = 15; paw = "clamber"; tail = 6 - frame; face = frame < 3 ? "normal" : "narrow"; break;
+    case "climb_over": hx = 23; hy = [24, 24, 25, 26, 27, 28, 29, 29][frame]; by = 31; bh = [15, 14, 13, 11, 10, 9, 8, 8][frame]; bw = 15 + frame; paw = "clamber"; tail = frame + 1; face = frame < 5 ? "narrow" : "happy"; break;
+  }
+  if (LETTER_PAWS[action]) {
+    hx = 23; hy = 24 + (action === "letter_reach" ? Math.min(3, frame / 2 | 0) : action === "letter_play" ? beat : 1);
+    by = 28; bh = 11; bw = 16; paw = "letter"; face = action === "letter_play" ? "happy" : "narrow"; tail = wave;
   }
   const bx = 21 - Math.floor(bw / 2);
   // Tail behind the body, with a stepped hooked tip.
@@ -113,10 +124,26 @@ export function drawCat(action, frame) {
   oval(bx - 1, by, bw + 2, bh + 1, "edge");
   oval(bx, by, bw, bh);
   oval(bx + 2, by + 2, Math.max(3, bw - 5), Math.max(3, bh - 5), "shade");
-  oval(bx - feet, by + bh - 3, 7, 5);
-  oval(bx + bw - 6 + feet, by + bh - 3, 7, 5);
-  rect(bx + 2 - feet, by + bh, 2, 1, "shade");
-  rect(bx + bw - 4 + feet, by + bh, 2, 1, "shade");
+  const limb = (x, y, kneeX, kneeY, toeX, toeY, claws = false) => {
+    line(x, y, kneeX, kneeY, "edge", 4); line(kneeX, kneeY, toeX, toeY, "edge", 4);
+    line(x, y, kneeX, kneeY, "ink", 3); line(kneeX, kneeY, toeX, toeY, "ink", 3);
+    oval(toeX - 1, toeY - 1, 5, 4, "ink"); line(toeX, toeY + 2, toeX + 2, toeY + 2, "shade");
+    if (claws) { dot(toeX, toeY - 1, "paper"); dot(toeX + 2, toeY - 1, "paper"); }
+  };
+  if (climbing) {
+    for (let side = 0; side < 2; side++) {
+      const step = (frame + side * 4) % 8, x = side ? 27 : 14;
+      const y = action === "climb_down" ? 16 + [0, -2, -3, -2, 0, 2, 3, 2][step]
+        : action === "climb_over" ? [44, 44, 42, 41, 40, 39, 39, 39][frame]
+        : 40 + [1, 0, -2, -3, -1, 1, 2, 2][step];
+      limb(x, action === "climb_down" ? by + 3 : by + bh - 4, x + (side ? 5 : -4), y - 3, x + (step < 4 ? 1 : -1), y, step === 2 || step === 3);
+    }
+  } else {
+    oval(bx - feet, by + bh - 3, 7, 5);
+    oval(bx + bw - 6 + feet, by + bh - 3, 7, 5);
+    rect(bx + 2 - feet, by + bh, 2, 1, "shade");
+    rect(bx + bw - 4 + feet, by + bh, 2, 1, "shade");
+  }
   if (action === "angry") for (let i = 0; i < 5; i++) poly([[bx - 3, by + i * 3], [bx + 3, by + i * 3], [bx + 1, by + i * 3 + 4]], "edge");
   // Rounded cheeks and short ears; all curves stay on the integer pixel grid.
   poly([[hx - 11, hy - 13 + tilt], [hx - 3, hy - 6], [hx - 11, hy + 1]], "edge");
@@ -147,6 +174,25 @@ export function drawCat(action, frame) {
   dot(hx - 10, hy + 3, "shade"); dot(hx + 9, hy + 3, "shade");
   const arm = (x, y, xx, yy) => { line(x, y, xx, yy, "ink", 4); rect(xx + 1, yy + 2, 2, 1, "shade"); };
   switch (paw) {
+    case "letter": {
+      const [x, y] = LETTER_PAWS[action][frame];
+      arm(15, by + 3, action === "letter_play" ? x - 5 : 15, action === "letter_play" ? y : 38);
+      // The endpoint is the centre of a 4px paw, matching letterGrip exactly.
+      arm(27, by + 3, x - 2, y - 2); rect(x - 1, y + 1, 2, 1, "edge");
+      if (action === "letter_reach" && frame < 6 || action === "letter_return" && frame >= 5) { dot(x - 2, y + 2, "paper"); dot(x + 1, y + 2, "paper"); }
+      break;
+    }
+    case "clamber":
+      for (let side = 0; side < 2; side++) {
+        const step = (frame + side * 4) % 8;
+        const x = action === "climb_side" ? (side ? 36 : 28) + [0, 1, 3, 3, 1, 0, -1, -1][step] : side ? 35 : 10;
+        const y = action === "climb_down" ? [36, 39, 42, 42, 40, 38, 36, 35][step]
+          : action === "climb_side" ? 37 + [0, -2, -3, -2, 0, 1, 1, 0][step]
+          : action === "climb_grip" ? (side ? [34, 34, 32, 29, 25, 21, 19, 19] : [34, 31, 26, 22, 19, 18, 18, 19])[frame]
+          : action === "climb_over" ? 39 : [19, 15, 12, 13, 16, 18, 20, 20][step];
+        limb(side ? 27 : 15, by + 4, x + (side ? -3 : 3), (by + 4 + y) / 2, x, y, action === "climb_over" || step === 2 || step === 3);
+      }
+      break;
     case "up": arm(15, by + 5, 12, hy - 1); arm(26, by + 5, 32, hy); break;
     case "spread": arm(15, by + 5, 8 - beat, by); arm(27, by + 5, 35 + beat, by - 2); break;
     case "forward": arm(24, by + 5, 35 + beat, by + bh - 1); break;
