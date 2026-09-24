@@ -1,8 +1,10 @@
+import { ACTIONS, BEHAVIORS } from "../../lib/pixel-cat/catalog.mjs";
+
 export const projects = [
   {
     slug: "pixel-cat",
     title: "小黑的排练室",
-    description: "64 个像素动作、17 组连续行为。回到首页，点击头像，就能叫小猫出门。",
+    description: `${ACTIONS.length} 个像素动作与场景、${BEHAVIORS.length} 组连续行为。玩手机、吃面条、露营观星，回到首页叫小猫演给你看。`,
     href: "/playzone/pixel-cat",
     image: "/pixel-cat/preview.png",
     external: false,

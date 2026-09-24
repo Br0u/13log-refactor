@@ -2,7 +2,7 @@
 .pixel-cat-summon:focus-visible { outline: 2px dashed #8199ac; outline-offset: -24px; }
 .pixel-cat-summon::after { content: '点击，叫小猫出门'; position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); color: var(--secondary); font-size: 12px; white-space: nowrap; opacity: 0; transition: opacity .2s; }
 .pixel-cat-summon:hover::after, .pixel-cat-summon:focus-visible::after { opacity: 1; }
-.pixel-cat-sprite { display: block; width: var(--sprite-size, 96px); height: var(--sprite-size, 96px); background-image: url('/pixel-cat/cat.png?v=3'); background-size: calc(var(--sprite-size, 96px) * 8) calc(var(--sprite-size, 96px) * var(--sprite-rows, 64)); background-position-y: calc(var(--sprite-row, 0) * var(--sprite-size, 96px) * -1); image-rendering: pixelated; animation: cat-frames .96s steps(8) infinite; animation-fill-mode: forwards; pointer-events: none; }
+.pixel-cat-sprite { display: block; width: var(--sprite-size, 96px); height: var(--sprite-size, 96px); background-image: url('/pixel-cat/cat.png?v=4'); background-size: calc(var(--sprite-size, 96px) * 8) calc(var(--sprite-size, 96px) * var(--sprite-rows, 88)); background-position-y: calc(var(--sprite-row, 0) * var(--sprite-size, 96px) * -1); image-rendering: pixelated; animation: cat-frames .96s steps(8) infinite; animation-fill-mode: forwards; pointer-events: none; }
 @keyframes cat-frames { to { background-position-x: calc(var(--sprite-size, 96px) * -8); } }
 @keyframes cat-once { to { background-position-x: calc(var(--sprite-size, 96px) * -7); } }
 .pixel-cat-layer { position: fixed; inset: 0; pointer-events: none; z-index: 1200; }
@@ -15,26 +15,37 @@
 .pixel-cat-door[data-closing='true'] { animation: cat-door-close .56s steps(7) forwards; }
 @keyframes cat-door { to { background-position-x: -672px; } }
 @keyframes cat-door-close { from { background-position-x: -672px; } to { background-position-x: 0; } }
-.pixel-cat-panel { box-sizing: border-box; pointer-events: auto; position: absolute; width: min(304px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto; padding: 18px 16px 8px; border: 1px solid var(--border, #dedbd4); border-radius: 16px; background: var(--theme, #fff); color: var(--primary, #242329); box-shadow: 0 4px 18px #17171d0d, 0 1px 3px #17171d0a; font-family: inherit; font-size: 14px; line-height: 1.8; }
-.pixel-cat-panel button { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 6px; min-width: 32px; min-height: 32px; border: 0; border-radius: 8px; background: transparent; color: var(--secondary, #706b65); font: inherit; transition: background .15s, color .15s; }
-.pixel-cat-panel button:hover, .pixel-cat-panel button[aria-pressed='true'] { background: var(--entry, #f1efeb); color: var(--primary, #242329); }
-.pixel-cat-panel .pixel-cat-close { position: absolute; right: 5px; top: 5px; min-width: 28px; min-height: 28px; }
-.pixel-cat-panel button:disabled { opacity: .35; cursor: default; }
-.pixel-cat-panel button:focus-visible, .pixel-cat-panel input:focus-visible { outline: 2px solid #8199ac; outline-offset: 2px; }
-.pixel-cat-panel .pixel-cat-speech { margin: 0 10px 16px 0; padding-right: 5px; overflow-wrap: anywhere; white-space: pre-wrap; max-height: min(280px, 40dvh); overflow-y: auto; scrollbar-width: thin; }
-.pixel-cat-panel form { display: flex; align-items: center; gap: 4px; padding: 4px 4px 4px 10px; border: 1px solid var(--border, #dedbd4); border-radius: 10px; background: var(--entry, #f1efeb); }
-.pixel-cat-panel input { min-width: 0; width: 0; flex: 1; padding: 4px 0; border: 0; color: inherit; background: transparent; font: inherit; font-size: 16px; }
-.pixel-cat-panel input::placeholder { font-size: 13px; color: var(--secondary); }
-.pixel-cat-panel .pixel-cat-send { color: var(--theme, #fff); background: var(--primary, #242329); border-radius: 7px; }
-.pixel-cat-panel .pixel-cat-send:hover { color: var(--theme, #fff); background: var(--primary, #242329); opacity: .8; }
-.pixel-cat-tools { display: flex; align-items: center; gap: 2px; margin: 4px -4px 0; }
-.pixel-cat-panel .pixel-cat-selection { margin-left: auto; font-size: 11px; padding: 4px 6px; }
+/* Chat stays compact; only the conversation scrolls on short viewports. */
+.pixel-cat-panel { box-sizing: border-box; pointer-events: auto; position: absolute; display: flex; flex-direction: column; gap: 8px; overflow: auto; padding: 14px; border: 1px solid var(--border, #dedbd4); border-radius: 16px; background: var(--theme, #fff); color: var(--primary, #242329); box-shadow: 0 6px 24px #17171d14, 0 2px 6px #17171d0a; font: 14px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.pixel-cat-panel button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex-shrink: 0; cursor: pointer; padding: 6px 10px; min-width: 36px; min-height: 36px; border: 0; border-radius: 10px; background: transparent; color: var(--secondary, #706b65); font: inherit; transition: background-color .15s, color .15s; }
+.pixel-cat-panel button[aria-pressed='true'] { background: var(--entry, #f1efeb); color: var(--primary, #242329); }
+.pixel-cat-panel button:disabled { opacity: .4; cursor: default; }
+.pixel-cat-panel button:focus-visible, .pixel-cat-panel textarea:focus-visible { outline: 2px solid #8199ac; outline-offset: 3px; }
+.pixel-cat-panel .pixel-cat-close { position: absolute; top: 4px; right: 4px; padding: 8px; }
+.pixel-cat-conversation { min-height: 0; max-height: 240px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; overflow-wrap: anywhere; white-space: pre-wrap; flex: 0 1 auto; }
+.pixel-cat-panel .pixel-cat-speech { margin: 0; padding: 4px 28px 6px 0; line-height: 1.85; }
+.pixel-cat-panel form { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin: 0; padding: 8px 0 0; border: 0; border-top: 1px solid var(--border, #dedbd4); background: transparent; transition: border-color .15s; }
+.pixel-cat-panel form:focus-within { border-color: #8199ac; }
+.pixel-cat-panel textarea { box-sizing: border-box; display: block; min-width: 0; width: 0; flex: 1; resize: none; padding: 2px; border: 0; border-radius: 3px; color: inherit; background: transparent; font: inherit; font-size: 16px; line-height: 1.6; }
+.pixel-cat-panel textarea::placeholder { color: var(--secondary); font-size: 13px; }
+.pixel-cat-panel .pixel-cat-send { color: var(--theme, #fff); background: var(--primary, #242329); border-radius: 9px; padding: 8px; }
+.pixel-cat-tools { display: flex; align-items: center; justify-content: flex-start; gap: 2px; flex-wrap: wrap; flex-shrink: 0; margin: -2px -8px -6px; }
+.pixel-cat-tools button { font-size: 12px; }
+.pixel-cat-tools svg { stroke-width: 1.5; }
+@media (hover: hover) and (pointer: fine) {
+  .pixel-cat-panel button:not(:disabled):hover { background: var(--entry, #f1efeb); color: var(--primary, #242329); }
+  .pixel-cat-panel .pixel-cat-send:not(:disabled):hover { background: var(--primary, #242329); color: var(--theme, #fff); opacity: .85; }
+}
+@media (pointer: coarse) {
+  .pixel-cat-panel button { min-height: 44px; min-width: 44px; }
+}
 .pixel-cat-target { outline: 2px dashed #8199ac !important; outline-offset: 6px; }
 .cat-gallery { max-width: 1080px; margin: 30px auto 80px; }
 .cat-gallery header h1 { font-size: clamp(28px, 5vw, 42px); margin: 0 0 8px; }
 .cat-gallery-kicker { color: var(--secondary); font: 12px/2 monospace; letter-spacing: .12em; }
 .cat-stage { position: relative; display: grid; place-items: center; min-height: 290px; margin: 28px 0 14px; border: 1px solid var(--border); background-color: color-mix(in srgb, #8199ac 8%, var(--theme)); background-image: linear-gradient(color-mix(in srgb, #8199ac 10%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, #8199ac 10%, transparent) 1px, transparent 1px); background-size: 24px 24px; }
 .cat-stage::after { content: ''; position: absolute; width: 200px; height: 2px; background: #8199ac; top: calc(50% + 56px); opacity: .45; }
+.cat-stage[data-scene='true']::after { display: none; }
 .cat-stage-caption { position: absolute; bottom: 16px; left: 18px; font: 12px monospace; color: var(--secondary); }
 .cat-gallery-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0; }
 .cat-gallery button { color: var(--primary); border: 1px solid var(--border); background: transparent; padding: 8px 12px; cursor: pointer; font: inherit; }

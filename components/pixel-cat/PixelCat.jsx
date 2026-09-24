@@ -27,10 +27,13 @@ export default function PixelCat() {
   const [paused, setPaused] = useState(false);
   const [selectedText, setSelectedText] = useState("");
   const [panelHeight, setPanelHeight] = useState(240);
+  const [, refreshViewport] = useState(0);
   const [settings, setSettings] = useState({ available: false, proactiveSeconds: 0 });
   const actor = useRef(null);
   const handle = useRef(null);
   const panelElement = useRef(null);
+  const conversation = useRef(null);
+  const followReply = useRef(true);
   const phaseRef = useRef("hidden");
   const pos = useRef(position);
   const path = useRef(pathname);
@@ -222,6 +225,7 @@ export default function PixelCat() {
     const command = !proactive && localCommand(message);
     if (command) { commandLocally(command); return; }
     if (proactive && pending.current) return;
+    followReply.current = true;
     if (!proactive) lastInteraction.current = Date.now();
     if (!settings.available) {
       stop();
@@ -230,7 +234,7 @@ export default function PixelCat() {
     const signal = stop();
     replyHidden.current = false;
     pending.current = true; setBusy(true); setAction("think");
-    if (!proactive) { setPanel(true); setSay("让我读一读……"); }
+    if (!proactive) { setPanel(true); setSay("让我想一想……"); }
     const { context, targets } = collectPageContext(path.current);
     context.selection = selectedText || context.selection;
     const reading = proactive || context.selection || /文章|这页|页面|内容|选中|解释|总结|这里|链接|照片|图片|这段|刚才|继续/.test(message);
@@ -267,6 +271,10 @@ export default function PixelCat() {
   api.current = { summon, goHome, ask, explore, stop, play };
 
   useEffect(() => {
+    if (panel && followReply.current && conversation.current) conversation.current.scrollTop = conversation.current.scrollHeight;
+  }, [panel, say]);
+
+  useEffect(() => {
     if (!panel || !panelElement.current) return;
     const measure = () => setPanelHeight(panelElement.current?.offsetHeight || 240);
     measure();
@@ -280,7 +288,9 @@ export default function PixelCat() {
     const motion = () => { reduced.current = query.matches; };
     motion(); query.addEventListener("change", motion);
     const onSummon = () => void api.current.summon();
+    const visualResize = () => refreshViewport(value => value + 1);
     const resize = () => {
+      if (panelOpen.current) { place(pos.current); visualResize(); return; }
       drag.current = null;
       const wasTransition = ["entering", "returning"].includes(phaseRef.current);
       api.current.stop(); setPortal(null);
@@ -310,7 +320,8 @@ export default function PixelCat() {
     window.addEventListener("pixel-cat:summon", onSummon);
     window.addEventListener("resize", resize);
     window.addEventListener("scroll", scroll, { passive: true });
-    window.visualViewport?.addEventListener("resize", resize);
+    window.visualViewport?.addEventListener("resize", visualResize);
+    window.visualViewport?.addEventListener("scroll", visualResize);
     window.addEventListener("pointermove", pointer, { passive: true });
     document.addEventListener("visibilitychange", visibility);
     document.addEventListener("selectionchange", selectionChanged);
@@ -318,7 +329,8 @@ export default function PixelCat() {
       sequence.current?.abort(); motion.current?.cancel(); clearHighlight(); query.removeEventListener("change", motion);
       window.removeEventListener("pixel-cat:summon", onSummon); window.removeEventListener("resize", resize);
       window.removeEventListener("scroll", scroll); cancelAnimationFrame(scrollFrame);
-      window.visualViewport?.removeEventListener("resize", resize);
+      window.visualViewport?.removeEventListener("resize", visualResize);
+      window.visualViewport?.removeEventListener("scroll", visualResize);
       window.removeEventListener("pointermove", pointer); document.removeEventListener("visibilitychange", visibility);
       document.removeEventListener("selectionchange", selectionChanged);
     };
@@ -391,9 +403,11 @@ export default function PixelCat() {
   const closePanel = () => { replyHidden.current = true; setPanel(false); handle.current?.focus({ preventScroll: true }); };
   if (pathname.startsWith("/admin") || phase === "hidden") return null;
   const { width, height } = typeof window === "undefined" ? { width: 1000, height: 800 } : viewport();
+  const viewportLeft = typeof window === "undefined" ? 0 : window.visualViewport?.offsetLeft || 0;
+  const viewportTop = typeof window === "undefined" ? 0 : window.visualViewport?.offsetTop || 0;
   const panelWidth = Math.min(304, width - 24);
-  const panelX = Math.max(12, Math.min(width - panelWidth - 12, position.x - 100));
-  const panelY = Math.max(12, Math.min(height - panelHeight - 12, position.y > panelHeight + 12 ? position.y - panelHeight - 4 : position.y + SIZE));
+  const panelX = Math.max(viewportLeft + 12, Math.min(viewportLeft + width - panelWidth - 12, position.x + SIZE / 2 - panelWidth / 2));
+  const panelY = Math.max(viewportTop + 12, Math.min(viewportTop + height - panelHeight - 12, position.y > viewportTop + panelHeight + 12 ? position.y - panelHeight - 12 : position.y + SIZE));
   return <div className="pixel-cat-layer" data-phase={phase} data-action={action}>
     {portal && <div aria-hidden="true" className="pixel-cat-door" data-closing={portal.closing} style={{ left: portal.x, top: portal.y }} />}
     <div ref={actor} className="pixel-cat-actor" style={{ transform: `translate(${position.x}px, ${position.y}px)` }}>
@@ -403,18 +417,25 @@ export default function PixelCat() {
         <PixelSprite action={action} facing={facing} paused={paused} />
       </button>
     </div>
-    {panel && phase === "active" && <section ref={panelElement} className="pixel-cat-panel" aria-label="和小猫聊天" aria-busy={busy} style={{ left: panelX, top: panelY }} onKeyDown={event => { if (event.key === "Escape") closePanel(); }}>
+    {panel && phase === "active" && <section ref={panelElement} className="pixel-cat-panel" aria-label="和小猫聊天" style={{ left: panelX, top: panelY, width: panelWidth, maxHeight: Math.max(0, height - 24) }} onKeyDown={event => { if (event.key === "Escape" && !event.nativeEvent.isComposing) closePanel(); }}>
       <button className="pixel-cat-close" type="button" onClick={closePanel} aria-label="收起聊天" title="收起聊天"><X size={14} aria-hidden="true" /></button>
-      <p className="pixel-cat-speech" role="status" aria-live="polite">{say}</p>
+      <div ref={conversation} className="pixel-cat-conversation" onScroll={event => { const el = event.currentTarget; followReply.current = el.scrollHeight - el.scrollTop - el.clientHeight < 24; }}>
+        <p className="pixel-cat-speech" role="status" aria-live="polite">{say}</p>
+      </div>
       <form onSubmit={event => { event.preventDefault(); if (input.trim()) { void ask(input.trim()); setInput(""); } }}>
-        <input aria-label="对小猫说" placeholder="说点什么…" value={input} onChange={event => setInput(event.target.value)} maxLength={800} />
+        <textarea aria-label="对小猫说" placeholder="说点什么…" rows={1} value={input} onChange={event => setInput(event.target.value)} maxLength={800} onKeyDown={event => {
+          if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing && event.keyCode !== 229) {
+            event.preventDefault();
+            if (input.trim()) event.currentTarget.form.requestSubmit();
+          }
+        }} />
         <button className="pixel-cat-send" aria-label={busy && !input.trim() ? "停止回答" : "发送"} title={busy && !input.trim() ? "停止回答" : "发送"} disabled={!busy && !input.trim()} type={busy && !input.trim() ? "button" : "submit"} onClick={() => { if (busy && !input.trim()) { stop(); setAction("idle"); if (!streaming) setSay("先歇一会儿。"); } }}>{busy && !input.trim() ? <Square size={12} aria-hidden="true" /> : <ArrowUp size={16} aria-hidden="true" />}</button>
       </form>
-      <div className="pixel-cat-tools">
-        <button type="button" aria-label="陪我看这页" title="陪我看这页" onClick={explore}><BookOpen size={15} aria-hidden="true" /></button>
-        <button type="button" aria-label={quiet ? "可以玩啦" : "安静一会儿"} title={quiet ? "可以玩啦" : "安静一会儿"} onClick={() => { const next = !quiet; setQuiet(next); if (next) { stop(); setAction("sit"); } }} aria-pressed={quiet}>{quiet ? <Volume2 size={15} aria-hidden="true" /> : <Moon size={15} aria-hidden="true" />}</button>
-        <button type="button" aria-label="回家" title="回家" onClick={() => void goHome()}><House size={15} aria-hidden="true" /></button>
-        {selectedText && <button className="pixel-cat-selection" type="button" disabled={busy} onClick={() => void ask("请解释我选中的这段文字。")}>解释选中文字</button>}
+      <div className="pixel-cat-tools" role="group" aria-label="小猫操作">
+        <button type="button" aria-label="陪我看这页" title="陪我看这页" onClick={explore}><BookOpen size={15} aria-hidden="true" />读这页</button>
+        <button type="button" aria-label={quiet ? "可以玩啦" : "安静一会儿"} title={quiet ? "可以玩啦" : "安静一会儿"} onClick={() => { const next = !quiet; setQuiet(next); if (next) { stop(); setAction("sit"); } }} aria-pressed={quiet}>{quiet ? <Volume2 size={15} aria-hidden="true" /> : <Moon size={15} aria-hidden="true" />}{quiet ? "继续" : "安静"}</button>
+        {selectedText && <button type="button" aria-label="解释选中文字" disabled={busy} onClick={() => void ask("请解释我选中的这段文字。")}>解释选中</button>}
+        <button type="button" aria-label="回家" title="回家" onClick={() => void goHome()}><House size={15} aria-hidden="true" />回家</button>
       </div>
     </section>}
   </div>;

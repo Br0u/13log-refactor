@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
-import { ACTIONS, ACTION_META, BEHAVIORS, AMBIENT_BEHAVIORS, localCommand, clampPosition } from "../../lib/pixel-cat/catalog.mjs";
+import sharp from "sharp";
+import { ACTIONS, ACTION_META, BEHAVIORS, AMBIENT_BEHAVIORS, SCENE_IDS, localCommand, clampPosition } from "../../lib/pixel-cat/catalog.mjs";
 import { drawCat } from "../../scripts/generate-pixel-cat.mjs";
 import { chatSchema, validatePlan, parseModelPlan, DEFAULT_SETTINGS } from "../../lib/pixel-cat/contracts";
 
@@ -17,12 +18,19 @@ describe("pixel cat artwork and command boundary", () => {
     expect(ACTION_META.run.cycle).toBeLessThan(ACTION_META.walk.cycle);
     expect(ACTION_META.blink.loop).toBe(false);
     expect(ACTION_META.sleep.loop).toBe(true);
-    expect(BEHAVIORS).toHaveLength(17);
+    expect(BEHAVIORS).toHaveLength(25);
+    for (const behavior of BEHAVIORS) for (const action of behavior.actions) expect(ACTION_META[action], behavior.id).toBeDefined();
     expect(AMBIENT_BEHAVIORS.some(item => item.actions.includes("enter"))).toBe(false);
     expect(localCommand("请跳一下！")).toMatchObject({ kind: "play", actions: ["jump", "happy"] });
     expect(localCommand("睡觉")).toMatchObject({ kind: "play", rest: "sleep" });
     expect(localCommand("回家")).toEqual({ kind: "home" });
-    for (const message of ["不要跳", "小猫为什么会跳", "讲一个跳舞的故事"]) expect(localCommand(message)).toBeNull();
+    for (const message of ["不要跳", "小猫为什么会跳", "讲一个跳舞的故事", "不要玩手机", "小猫能吃面条吗", "讲一个钓鱼的故事"]) expect(localCommand(message)).toBeNull();
+    expect(SCENE_IDS).toHaveLength(24);
+    for (const id of SCENE_IDS) {
+      expect(localCommand(`小猫${ACTION_META[id].label}！`)).toEqual({ kind: "play", actions: [id], rest: "idle" });
+      expect(validatePlan({ say: "喵", actions: [{ type: id }] }, context).actions[0].type).toBe(id);
+      expect(ACTION_META[id].duration).toBe(ACTION_META[id].cycle * 2);
+    }
   });
   it("keeps usable speech from wrapped JSON, long replies and imperfect action lists", () => {
     const say = "这是可读的回复。".repeat(40);
@@ -36,17 +44,24 @@ describe("pixel cat artwork and command boundary", () => {
   it("does not display malformed JSON, empty content or incomplete reasoning as speech", () => {
     for (const content of [null, "", '{"say":"未完成', '<think>unfinished', '{"actions":[]}', '[{"say":"喵"}]']) expect(() => parseModelPlan(content, context)).toThrow();
   });
-  it("has 64 genuinely distinct animation strips with opaque integer pixels", () => {
-    expect(ACTIONS).toHaveLength(64);
-    const signatures = ACTIONS.map(({ id }) => {
+  it("ships 88 distinct animated strips matching the generated sprite sheet pixel for pixel", async () => {
+    expect(ACTIONS).toHaveLength(88);
+    const { data, info } = await sharp("public/pixel-cat/cat.png").raw().toBuffer({ resolveWithObject: true });
+    expect([info.width, info.height, info.channels]).toEqual([384, 48 * ACTIONS.length, 4]);
+    const signatures = ACTIONS.map(({ id, cycle }, row) => {
+      expect(cycle, id).toBeGreaterThan(0);
       const frames = Array.from({ length: 8 }, (_, frame) => drawCat(id, frame));
       expect(new Set(frames.map(frame => createHash("sha256").update(frame).digest("hex"))).size, id).toBeGreaterThan(1);
       const alpha = new Set();
       for (const frame of frames) for (let index = 3; index < frame.length; index += 4) alpha.add(frame[index]);
       expect([...alpha].every(value => value === 0 || value === 255)).toBe(true);
+      for (let f = 0; f < 8; f++) for (let y = 0; y < 48; y++) {
+        const start = ((row * 48 + y) * info.width + f * 48) * 4;
+        expect(data.subarray(start, start + 48 * 4).equals(frames[f].subarray(y * 48 * 4, (y + 1) * 48 * 4)), `${id} frame ${f}, y ${y}`).toBe(true);
+      }
       return createHash("sha256").update(Buffer.concat(frames)).digest("hex");
     });
-    expect(new Set(signatures).size).toBe(64);
+    expect(new Set(signatures).size).toBe(ACTIONS.length);
   });
   it("clamps the cat into small viewports", () => {
     expect(clampPosition({ x: 900, y: -1 }, 390, 600)).toEqual({ x: 294, y: 0 });
