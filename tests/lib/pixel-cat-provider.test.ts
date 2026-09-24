@@ -1,6 +1,7 @@
 import { EventEmitter } from "node:events";
 import { beforeEach, expect, it, vi } from "vitest";
-import { DEFAULT_SETTINGS } from "../../lib/pixel-cat/contracts";
+import { DEFAULT_SETTINGS, chatSchema } from "../../lib/pixel-cat/contracts";
+import { createLife, lifeSnapshot } from "../../lib/pixel-cat/life.mjs";
 
 const upstream = vi.hoisted(() => ({ status: 200, body: "", calls: [] as any[], address: "1.1.1.1", stream: false, chunks: null as Buffer[] | null, hold: false, requests: [] as any[] }));
 const database = vi.hoisted(() => ({ catSettings: { findUnique: vi.fn(), upsert: vi.fn() }, $transaction: vi.fn() }));
@@ -43,10 +44,13 @@ beforeEach(() => {
 });
 
 it("sends bounded context and executes only a validated provider plan using pinned DNS", async () => {
-  const plan = await askCat({ message: "读这段", proactive: false, context, history: [] }, "test-visitor");
+  const life = lifeSnapshot(createLife());
+  const plan = await askCat(chatSchema.parse({ message: "读这段", proactive: false, context, life, history: [] }), "test-visitor");
   expect(plan.actions[0]).toEqual({ type: "walk_to", target: "cat-target-0" });
   expect(upstream.calls[0].body.response_format).toEqual({ type: "json_object" });
   expect(upstream.calls[0].body).not.toHaveProperty("chat_template_kwargs");
+  expect(JSON.parse(upstream.calls[0].body.messages.at(-1).content).life).toEqual(life);
+  expect(upstream.calls[0].body.messages[0].content).toContain("不虚构生活经历");
   const callback = vi.fn(); upstream.calls[0].options.lookup("provider.example", { all: true }, callback);
   expect(callback).toHaveBeenCalledWith(null, [{ address: "1.1.1.1", family: 4 }]);
 });

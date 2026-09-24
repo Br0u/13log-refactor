@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
 import sharp from "sharp";
-import { ACTIONS, ACTION_META, BEHAVIORS, AMBIENT_BEHAVIORS, SCENE_IDS, localCommand, clampPosition } from "../../lib/pixel-cat/catalog.mjs";
+import { ACTIONS, ACTION_META, BEHAVIORS, SCENE_IDS, localCommand, clampPosition } from "../../lib/pixel-cat/catalog.mjs";
 import { drawCat } from "../../scripts/generate-pixel-cat.mjs";
 import { chatSchema, validatePlan, parseModelPlan, DEFAULT_SETTINGS } from "../../lib/pixel-cat/contracts";
 
@@ -20,7 +20,6 @@ describe("pixel cat artwork and command boundary", () => {
     expect(ACTION_META.sleep.loop).toBe(true);
     expect(BEHAVIORS).toHaveLength(25);
     for (const behavior of BEHAVIORS) for (const action of behavior.actions) expect(ACTION_META[action], behavior.id).toBeDefined();
-    expect(AMBIENT_BEHAVIORS.some(item => item.actions.includes("enter"))).toBe(false);
     expect(localCommand("请跳一下！")).toMatchObject({ kind: "play", actions: ["jump", "happy"] });
     expect(localCommand("睡觉")).toMatchObject({ kind: "play", rest: "sleep" });
     expect(localCommand("回家")).toEqual({ kind: "home" });
